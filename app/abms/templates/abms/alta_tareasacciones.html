@@ -1,0 +1,20 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Alta de relación entre acciones y tareas.
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="offset-md-3 col-md-6">
+        <form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+                       
+            {{ render_input(form.tarea,'', id= "tarea" , class="form-control" ) }}
+            {{ render_input(form.accion,'', id= "accion" , class="form-control" ) }}
+            
+            <button type="submmit" class="btn btn-primary" >Guardar</button>
+    </div>
+</div>
+{% endblock %}

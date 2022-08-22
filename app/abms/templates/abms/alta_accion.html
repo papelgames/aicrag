@@ -1,0 +1,23 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Alta acciones que ejecutan las tareas.
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="offset-md-3 col-md-6">
+        <form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+            
+            {{ render_input(form.descripcion,'', id= "descripcion" , class="form-control", placeholder="Descripcion de la tarea" ) }}
+            {{ render_input(form.estado_recupero,'', id= "estado_recupero" , class="form-control" ) }}
+            {{ render_input(form.envia_correo,'', id= "envia_correo" , class="form-control" ) }}
+            {{ render_input(form.id_tarea_siguiente,'', id= "id_tarea_siguiente" , class="form-control" ) }}
+            {{ render_input(form.programa,'', id= "programa" , class="form-control", placeholder="¿que programa ejecuta?" ) }}
+            {{ render_input(form.finaliza,'', id= "finaliza" , class="form-control" ) }}
+            <button type="submmit" class="btn btn-primary" >Guardar</button>
+    </div>
+</div>
+{% endblock %}

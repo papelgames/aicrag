@@ -1,0 +1,50 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+    Miniblog | Admin
+{% endblock %}
+{% block content %}
+<div class="row"></div>
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Descrpcion de tarea</th>
+                    <th scope="col">Vencimiento</th>
+                    <th scope="col">Siniestro</th>
+                    <th scope="col">ABM</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for pendiente in capsula_pendientes %}
+                {% for campo in pendiente %}
+                      <!-- <Tareas 1>
+                             <TareasPendientes 1>
+                             <Recuperos 2> -->
+                                    
+                        <tr>
+                            <th scope="row">{{ campo[0].id }}</th>
+                            <td> {{ campo[0].id_tarea }}</td>
+                            <td> {{ campo[0].fe_vencimiento }}</td>
+                            <td> {{ campo[1].siniestro }}</td>
+                            <td>
+                                <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Acción
+                                </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+       
+    </div>
+</div>
+{% endblock %}

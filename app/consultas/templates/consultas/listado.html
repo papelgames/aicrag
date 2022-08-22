@@ -1,0 +1,48 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+    Compulsas Historicas
+{% endblock %}
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Siniestro</th>
+                <th scope="col">Bien</th>
+                <th scope="col">Tipo de bien</th>
+                <th scope="col">Es para empleados</th>
+                <th scope="col">Accion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for compulsa in compulsas_historicas %}
+                <tr>
+                    <th scope="row">{{ compulsa.Compulsas.id }}</th>
+                    <td> {{ compulsa.Compulsas.siniestro }}</td>
+                    <td> {{ compulsa.Compulsas.bien }}</td>
+                    <td> {{ compulsa.TipoBienes.tipo_bien }}</td>
+                    {% if compulsa.Compulsas.para_empleados == 0 %}
+                        <td>NO</td>
+                    {% else %}
+                        <td>SI</td>  
+                    {% endif %} 
+                    <td>
+                        <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Acción
+                        </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="#">Nuevo cobro</a>
+                                <a class="dropdown-item" href="#">Another action</a>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

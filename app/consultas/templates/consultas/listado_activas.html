@@ -1,0 +1,27 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+    Compulsas Historicas
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    {% for compulsa in compulsas_activas %}
+        
+            <div class="col-sm-3">
+                <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title"> {{ compulsa.Compulsas.bien }}</h3>
+                    <h6 class="card-title"> Tipo de bien: {{ compulsa.TipoBienes.tipo_bien }}</h6>
+                    <p class="card-text"> Inicio: {{ compulsa.Compulsas.fecha_inicio.strftime('%d-%m-%Y') }} <br> 
+                                        Vencimiento: {{ compulsa.Compulsas.fecha_vencimiento.strftime('%d-%m-%Y') }} <br>
+                                        Importe Base: ${{ compulsa.Compulsas.importe_base }}                      
+                    </p>
+                    <a href="{{ url_for('ofrecimiento.iniciar', id_compulsa = compulsa.Compulsas.id ) }}" class="btn btn-primary">Ver</a>
+                </div>
+                </div>
+            </div>
+         
+    {% endfor %}
+</div>
+{% endblock %}

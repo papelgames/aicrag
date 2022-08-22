@@ -1,0 +1,46 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+    Abm de tareas 
+{% endblock %}
+
+{% block content %}
+<div class="row"></div>
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Descrpcion de tarea</th>
+                    <th scope="col">Dias de vencimiento</th>
+                    <th scope="col">Módulo inicial</th>
+                    <th scope="col">ABM</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarea in tareas %}
+                    <tr>
+                        <th scope="row">{{ tarea.id }}</th>
+                        <td> {{ tarea.descripcion }}</td>
+                        <td> {{ tarea.vencimiento }}</td>
+                        <td> {{ tarea.modulo_inicial }}</td>
+                        <td>
+                            <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Acción
+                            </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="{{ url_for('abms.modificacion_tareas', id_tarea = tarea.id) }}">Modificar</a>
+                                    <a class="dropdown-item" href="{{ url_for('abms.eliminar_tareas', id_tarea = tarea.id) }}">Eliminar</a>
+                                    
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a class="btn btn-primary" href="{{ url_for('abms.alta_tareas') }}">+</a>
+    </div>
+</div>
+{% endblock %}

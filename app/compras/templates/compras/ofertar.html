@@ -1,0 +1,69 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Detalle de oferta
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-body">
+                {% for compulsa in detalle %}
+
+                <h3 class="card-title" align = "center"> {{ compulsa.Compulsas.bien }}</h3>
+                <h6 class="card-title" align = "center"> Tipo de bien: {{ compulsa.TipoBienes.tipo_bien }}</h6>
+                <p class="card-text" align = "center"> Inicio: {{ compulsa.Compulsas.fecha_inicio.strftime('%d-%m-%Y') }} <br> 
+                                    Vencimiento: {{ compulsa.Compulsas.fecha_vencimiento.strftime('%d-%m-%Y') }} <br>
+                                    Importe Base: ${{ compulsa.Compulsas.importe_base }}                      
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="card">
+            <div class="card-body">
+                <p>
+                
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="card">
+            <div class="card-body">
+                <form action="" method="post" enctype="multipart/form-data" novalidate>	
+                    {{ form.hidden_tag() }}
+                    
+                    {{ render_input(form.dni,'', id= "dni" , class="form-control", placeholder="DNI o CUIT" ) }}
+                    {{ render_input(form.correo_electronico, '',id= "correo_electronico" , class="form-control", placeholder="Su correo electrónico" ) }}
+                    {{ render_input(form.importe_a_ofertar,'', id= "importe_a_ofertar" , class="form-control", placeholder="$00.00" ) }}
+                    {{ render_input(form.pin_temporal,'', id= "pin_temporal" , class="form-control", placeholder="Indique una contraseña" ) }}
+                
+                    <button type="submmit" class="btn btn-primary" > Enviar</button>
+
+                
+                </form>
+            </div>
+        </div>
+    </div>
+   
+</div>
+<div class="row">
+    {% for imagen in imagenes %}
+        
+            <div class="col-sm-3">
+                <div class="card">
+                <div class="card-body">
+
+                    <img  src= "{{ url_for('media_posts', filename=imagen.imagen) }}" class="img-thumbnail"/>
+                </div>
+                </div>
+            </div>
+         
+    {% endfor %}
+</div>
+
+{% endblock %}

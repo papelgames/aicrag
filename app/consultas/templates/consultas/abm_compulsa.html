@@ -1,0 +1,31 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Alta de compulsas
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+	<div class="offset-md-3 col-md-6">
+		<h1>Alta de compulsas</h1>
+
+		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+			{{ render_input(form.bien,'', id= "bien" , class="form-control", placeholder="Descripción del bien" ) }}
+			{{ render_input(form.siniestro,'', id= "siniestro" , class="form-control", placeholder="Número de siniestro" ) }}
+			{{ render_input(form.patente,'', id= "patente" , class="form-control", placeholder="Patente del vehículo" ) }}
+			{{ render_input(form.fecha_inicio,'', id= "fecha_inicio" , class="form-control", placeholder="Inicio de la compulsa" ) }}
+			{{ render_input(form.fecha_vencimiento,'', id= "fecha_vencimiento" , class="form-control", placeholder="Fin de la compulsa" ) }}
+			{{ render_input(form.ubicacion,'', id= "ubicacion" , class="form-control", placeholder="Ubicacion del bien" ) }}
+            {{ render_input(form.condiciones_generales,'', id= "condiciones_generales" , class="form-control", placeholder="Condiciones generales" ) }}
+			{{ render_input(form.importe_base,'', id= "importe_base" , class="form-control", placeholder="Importe Base" ) }}
+            {{ render_input(form.para_empleados,'', id= "para_empleados" , class="form-control") }}
+            {{ render_input(form.tipo_bien,'', id= "tipo_bien" , class="form-control", placeholder="Tipo de bien" ) }}
+			{{ render_input(form.submit ) }}
+			
+		</form>
+	</div>
+</div>
+
+{% endblock %}

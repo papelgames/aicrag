@@ -1,0 +1,51 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+    Abm de tareas 
+{% endblock %}
+
+{% block content %}
+<div class="row"></div>
+    <div class="offset-md-3 col-md-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Descrpcion de accion</th>
+                    <th scope="col">Estado recupero</th>
+                    <th scope="col">Envia correo</th>
+                    <th scope="col">Siguiente tarea</th>
+                    <th scope="col">Programa</th>
+                    <th scope="col">Finaliza</th>
+                    <th scope="col">ABM</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for accion in acciones %}
+                    <tr>
+                        <th scope="row">{{ accion.id }}</th>
+                        <td> {{ accion.descripcion }}</td>
+                        <td> {{ accion.estado_recupero }}</td>
+                        <td> {{ accion.envia_correo }}</td>
+                        <td> {{ accion.id_tarea_siguiente }}</td>
+                        <td> {{ accion.programa }}</td>
+                        <td> {{ accion.finaliza }}</td>
+                        <td>
+                            <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Acción
+                            </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="{{ url_for('abms.modificacion_acciones', id_accion = accion.id) }}">Modificar</a>
+                                    <a class="dropdown-item" href="{{ url_for('abms.eliminar_acciones', id_accion = accion.id) }}">Eliminar</a>    
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a class="btn btn-primary" href="{{ url_for('abms.alta_acciones') }}">+</a>
+    </div>
+</div>
+{% endblock %}
