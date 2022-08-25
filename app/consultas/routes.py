@@ -10,32 +10,16 @@ from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required
 from app.auth.models import User
-#from app.models import Recuperos, Tareas, TareasPendientes
+from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
 from . import consultas_bp 
 from .forms import AltaCompulsaForm, ImagenesBienesForm
 
 logger = logging.getLogger(__name__)
 
-@consultas_bp.route("/gestion/")
+@consultas_bp.route("/consultaproductos/")
 @login_required
 #@admin_required
-def gestion():
-    pendientes = Tareas.get_all()
-    
-    capsula_pendientes = [zip( tablas.tareas_pendientes, tablas.recuperos) for tablas in pendientes]
-    # capsula_pendientes = [] pendientes,
-    # for tablas in lista_tablas:
-    #     for i in tablas:
-    #         capsula_pendientes.append(i)
-    # # print(capsula_pendientes)
-    # # for t in capsula_pendientes:
-    # #     # print(t[0])
-    # #     for g in t:
-    # #          print(g)
-    # for oo in lista_tablas:
-    #     print(oo)
-    #     for x in oo:
-    #         print (x[0])
+def consulta_productos():
 
-    return render_template("gestion/gestion.html", pendientes=pendientes, capsula_pendientes = capsula_pendientes)
+    return render_template("consultas/consulta_productos.html")
 
