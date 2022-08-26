@@ -1,9 +1,31 @@
 {% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
 
 {% block title %}
     aicrag | Alta de proveedores
 {% endblock %}
-
 {% block content %}
+<div class="row">
+	<div class="offset-md-3 col-md-6">
+		<h1>Alta de proveedores</h1>
+
+		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+			{{ render_input(form.nombre,'', id= "nombre" , class="form-control", placeholder="Nombre del proveedor" ) }}
+			{{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electrónico del proveedor" ) }}
+			{{ render_input(form.archivo_si_no,'', id= "archivo_si_no" , class="form-control", placeholder="¿Tiene alta por archivo?" ) }}
+			{{ render_input(form.formato_id,'', id= "formato_id" , class="form-control", placeholder="Ingrese el formato del ID del proveedor" ) }}
+			{{ render_input(form.columna_id_lista_proveedor,'', id= "columna_id_lista_proveedor" , class="form-control", placeholder="Posición de la columna ID en archivo del proveedor" ) }}
+			{{ render_input(form.columna_codigo_de_barras,'', id= "columna_codigo_de_barras" , class="form-control", placeholder="Posición de la columna codigo de barras en archivo del proveedor" ) }}
+            {{ render_input(form.columna_descripcion,'', id= "columna_descripcion" , class="form-control", placeholder="Posición de la columna descripción en archivo del proveedor" ) }}
+			{{ render_input(form.columna_importe,'', id= "columna_importe" , class="form-control", placeholder="Posición de la columna importe en archivo del proveedor" ) }}
+            {{ render_input(form.incluye_iva,'', id= "incluye_iva" , class="form-control") }}
+            <button type="submmit" class="btn btn-primary" >Crear proveedor</button>
+			
+		</form>
+	</div>
+</div>
+
+
 
 {% endblock %}

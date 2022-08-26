@@ -30,7 +30,16 @@ class Proveedores (Base):
     columna_descripcion = db.Column(db.Integer)
     columna_importe = db.Column(db.Integer)
     incluye_iva = db.Column(db.Boolean, default=False)
-  
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+    
+    @staticmethod
+    def get_all():
+        return Proveedores.query.all()
+    
 class Productos (Base):
     codigo_de_barras = db.Column(db.String(256))
     id_proveedor = db.Column(db.Integer)
@@ -38,7 +47,13 @@ class Productos (Base):
     descripcion = db.Column(db.String(256))
     importe = db.Column(db.Float)
     cantidad_presentacion = db.Column(db.Integer, default=1)
-    id_ingreso = db.Column(db.Integer)
+    id_ingreso = db.Column(db.String(256))
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
 
 class CabecerasPresupuestos (Base):
     fecha_vencimiento = db.Column(db.DateTime, nullable = False)

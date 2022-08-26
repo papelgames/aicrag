@@ -17,23 +17,22 @@ def show_signup_form():
     if current_user.is_authenticated:
         return redirect(url_for('public.index'))
     form = SignupForm()
-    form.perfil.choices = [('Analista','Analista'),('Supervisor','Supervisor')]
+    
 
     if form.validate_on_submit():
         name = form.name.data
         email = form.email.data
         password = form.password.data
-        perfil = form.perfil.data
+        
         # Comprobamos que no hay ya un usuario con ese email
         user = User.get_by_email(email)
         if user is not None:
             flash ("Has mandado fruta con los datos.","alert-warning")
         else:
             # Creamos el usuario y lo guardamos
-            print(perfil)
+            
             user = User(name=name, 
                         email=email, 
-                        perfil= perfil, 
                         activo=True
                         )
             user.set_password(password)

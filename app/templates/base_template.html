@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}
+        {% endblock %}</title>
     {% block styles %}
         <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}">
         <link rel="stylesheet" href={{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}>
@@ -39,6 +40,26 @@
                         <a class="nav-link" href="{{ url_for('admin.index') }}">Admin <span class="sr-only">(current)</span></a>
                     </li>
                 {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        ABM
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        
+                        <a class="dropdown-item" href="{{ url_for('abms.alta_individual') }}">Alta individual de productos</a>
+                        <a class="dropdown-item" href="#">Alta masiva de productos</a>
+                        <a class="dropdown-item" href='#'>Modificación de productos</a>
+                        <a class="dropdown-item" href='#'>Baja de productos</a>
+                        <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('abms.alta_proveedor') }}">Alta de proveedores</a>
+                            <a class="dropdown-item" href='#'>Modificación de proveedores</a>
+                        <div class="dropdown-divider"></div>    
+                            <a class="dropdown-item" href='#'>Manual del modulo</a>
+                       
+                      </div>
+                      
+                      
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('auth.logout') }}">Salir <span class="sr-only">(current)</span></a>            
                 </li>
