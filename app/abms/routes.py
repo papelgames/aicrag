@@ -12,16 +12,17 @@ from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, Proveedores
 from . import abms_bp
-from .forms import ProductosForm, ProveedoresForm
+from .forms import ProductosForm, ProveedoresForm, ProductosMasivosForm
 
 from app.common.mail import send_email
 from time import strftime, gmtime
 
 logger = logging.getLogger(__name__)
 
+
 def proveedores_select():
     proveedores = Proveedores.get_all()
-    select_proveedor =[( '','Seleccionar tipo de bien')]
+    select_proveedor =[( '','Seleccionar proveedor')]
     for rs in proveedores:
         sub_select_proveedor = (str(rs.id), rs.nombre)
         select_proveedor.append(sub_select_proveedor)
@@ -52,7 +53,9 @@ def alta_individual():
                               descripcion=descripcion,
                               importe=importe,
                               cantidad_presentacion=cantidad_presentacion,
-                              id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
+                              id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime())),
+                              usuario_alta = current_user.email,
+                              usuario_modificacion = current_user.email
                               )
         print (strftime('%d%m%y%H%m%s', gmtime()))
         producto.save()
@@ -88,7 +91,9 @@ def alta_proveedor():
                                 columna_codigo_de_barras=columna_codigo_de_barras,
                                 columna_descripcion=columna_descripcion,
                                 columna_importe=columna_importe,
-                                incluye_iva=int(incluye_iva)
+                                incluye_iva=int(incluye_iva),
+                                usuario_alta = current_user.email,
+                                usuario_modificacion = current_user.email
                                 )
             
         proveedor.save()
@@ -96,3 +101,63 @@ def alta_proveedor():
         return redirect(url_for("public.index"))
 
     return render_template("abms/alta_proveedor.html", form = form)
+
+
+@abms_bp.route("/abms/altamasiva", methods = ['GET', 'POST'])
+@login_required
+def alta_masiva():
+    form = ProductosMasivosForm()
+    form.id_proveedor.choices = proveedores_select()
+
+    if form.validate_on_submit():
+        archivo = form.archivo.data
+        if archivo:
+            archivo_name = secure_filename(archivo.filename)
+            archivo_dir = current_app.config['ARCHIVOS_DIR']
+            os.makedirs(archivo_dir, exist_ok=True)
+            file_path = os.path.join(archivo_dir, archivo_name)
+            archivo.save(file_path)
+        
+        proveedor = Proveedores.get_by_id(form.id_proveedor.data)
+
+        import openpyxl 
+        documento = openpyxl.load_workbook(os.path.abspath(file_path))
+        
+        ws = documento.active
+        filas = (ws.rows)
+        
+        id_proveedor = proveedor.formato_id
+        registros_nuevos = 0
+        registros_repetidos = 0
+        registros_total = 0
+        '''falta comprobar si el archivo corresponde al proveedor con el id_proveedor
+        luego falta grabar si no existe el registro en la base de datos y actualizar si existe y hay cambios
+        '''
+        for campo in filas:
+
+            if campo[1].value != None and campo[1].value != id_proveedor:
+                print(campo[1].value)
+        '''
+           registros_total +=1
+            if Recuperos.query.filter_by (rama = campo[0].value).first() and \
+                Recuperos.query.filter_by (siniestro = campo[1].value).first():
+                registros_repetidos += 1
+                continue
+            rama = campo[0].value 
+            siniestro = campo[1].value
+            desc_siniestro = campo[2].value
+            fe_ocurrencia = campo[3].value
+            importe_pagado = campo[4].value
+            estado = 1
+            
+            registro_recupero = Recuperos(rama = rama,\
+                                            siniestro = siniestro,\
+                                            desc_siniestro = desc_siniestro,\
+                                            fe_ocurrencia = fe_ocurrencia,\
+                                            importe_pagado =importe_pagado,\
+                                            estado = estado)
+            db.session.add(registro_recupero)
+            registros_nuevos += 1
+        db.session.commit()
+        '''
+    return render_template("abms/alta_masiva.html", form=form)

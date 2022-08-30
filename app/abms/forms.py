@@ -25,4 +25,10 @@ class ProductosForm(FlaskForm):
     descripcion = StringField('Descripcion del producto',validators=[DataRequired('Complete la descripcion del producto' )])
     importe = FloatField('Importe del producto', validators=[DataRequired('Ingrese el importe del producto sin iva' )] )
     cantidad_presentacion = IntegerField('Cantidad de productos por presentación')
-    
+
+class ProductosMasivosForm(FlaskForm):
+    id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar un proveedor')])
+    archivo = FileField('Archivo de alta', validators=[
+              DataRequired('Debe seleccionar un archivo' ),
+              FileAllowed(['xls', 'xlsx', 'xltm'], 'No es un archivo permitido')
+              ])
