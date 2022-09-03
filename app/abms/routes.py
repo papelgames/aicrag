@@ -1,6 +1,8 @@
 import logging
 from math import fabs
+from operator import truediv
 import os
+from types import TracebackType
 
 from flask import render_template, redirect, url_for, abort, current_app
 from flask.helpers import flash
@@ -30,7 +32,8 @@ def proveedores_select():
 
 
 def columnas_excel():
-    select_excel =[( '','Seleccionar columna'),( '0','A'),( '1','B'),( '2','C'),( '3','D'),( '4','E'),( '5','F'),( '6','G'),('7','H'),('8','I'),('9','J'),( '10','K'),('11','L')]
+    select_excel =[( '','Seleccionar columna'),( 'A','A'),( 'B','B'),( 'C','C'),( 'D','D'),( 'E','E'),( 'F','F'),( 'G','G'),('H','H'),('I','I'),('J','J'),( 'K','K'),('L','L')]
+    #select_excel =[( '','Seleccionar columna'),( '0','A'),( '1','B'),( '2','C'),( '3','D'),( '4','E'),( '5','F'),( '6','G'),('7','H'),('8','I'),('9','J'),( '10','K'),('11','L')]
     return select_excel
 
 @abms_bp.route("/abms/altaindividual", methods = ['GET', 'POST'])
@@ -121,22 +124,80 @@ def alta_masiva():
         proveedor = Proveedores.get_by_id(form.id_proveedor.data)
 
         import openpyxl 
-        documento = openpyxl.load_workbook(os.path.abspath(file_path))
-        
+        documento = openpyxl.load_workbook(os.path.abspath(file_path), data_only= True)
         ws = documento.active
-        filas = (ws.rows)
         
-        id_proveedor = proveedor.formato_id
+        columnas = [proveedor.nombre,
+                    proveedor.formato_id,
+                    proveedor.columna_id_lista_proveedor, 
+                    proveedor.columna_codigo_de_barras, 
+                    proveedor.columna_descripcion,
+                    proveedor.columna_importe ]
+        
+        rango_id_lista_proveedor =  ws[columnas[2]]
+        rango_codigo_de_barras =  ws[columnas[3]]
+        rango_descripcion =  ws[columnas[4]]
+        rango_importe =  ws[columnas[5]]
         registros_nuevos = 0
         registros_repetidos = 0
         registros_total = 0
-        '''falta comprobar si el archivo corresponde al proveedor con el id_proveedor
-        luego falta grabar si no existe el registro en la base de datos y actualizar si existe y hay cambios
+        '''falta grabar si no existe el registro en la base de datos y actualizar si existe y hay cambios
         '''
-        for campo in filas:
-
-            if campo[1].value != None and campo[1].value != id_proveedor:
-                print(campo[1].value)
+        #armo la matriz mat 
+        mat = []
+        for registro in rango_id_lista_proveedor:
+            mat.append([registro.value])
+        len_mat = len(mat)
+        secuencia = 0
+        for registro in rango_codigo_de_barras:
+            if secuencia != len_mat :
+                mat[secuencia].append(registro.value)
+                secuencia += 1
+        secuencia = 0 
+        for registro in rango_descripcion:
+            if secuencia != len_mat :
+                mat[secuencia].append(registro.value)
+                secuencia += 1
+        secuencia = 0 
+        for registro in rango_importe:
+            if secuencia != len_mat :
+                mat[secuencia].append(registro.value)
+                secuencia += 1
+        secuencia = 0
+        control_proveedor = False
+        # controlo que el archivo corresponda al proveedor
+        for id in rango_id_lista_proveedor:
+            if secuencia == 15:
+                break
+            if id.value == columnas[1]:
+                control_proveedor = True
+                break
+            secuencia +=1
+        id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
+        if control_proveedor == True:
+            ##hacer  update, etc
+        #inserto los registros que no existen
+            for id in mat:
+                # pass
+                if id[0] != None and id[0] != columnas[1]: 
+                    producto = Productos(codigo_de_barras = id[1],
+                                        id_proveedor = form.id_proveedor.data,
+                                        id_lista_proveedor = id[0],
+                                        descripcion = id[2],
+                                        importe = id[3],
+                                        cantidad_presentacion = 1,
+                                        id_ingreso = id_ingreso,
+                                        usuario_alta = current_user.email,
+                                        usuario_modificacion = current_user.email
+                                        )
+                    #ver como hacer un add y un solo commit
+                    producto.save()
+            flash ('El archivo de ' + columnas[0] + ' se procesó correctamente', "alert-success")
+            return redirect(url_for("public.index"))
+        else:
+            flash ('El archivo no pertenece a ' + columnas[0], "alert-warning")
+            return redirect(url_for("public.index"))
+        
         '''
            registros_total +=1
             if Recuperos.query.filter_by (rama = campo[0].value).first() and \

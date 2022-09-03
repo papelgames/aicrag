@@ -27,10 +27,10 @@ class Proveedores (Base):
     correo_electronico = db.Column(db.String(256))
     archivo_si_no = db.Column(db.Boolean, default=False)
     formato_id = db.Column(db.String(50))
-    columna_id_lista_proveedor = db.Column(db.Integer)
-    columna_codigo_de_barras = db.Column(db.Integer)
-    columna_descripcion = db.Column(db.Integer)
-    columna_importe = db.Column(db.Integer)
+    columna_id_lista_proveedor = db.Column(db.String(1))
+    columna_codigo_de_barras = db.Column(db.String(1))
+    columna_descripcion = db.Column(db.String(1))
+    columna_importe = db.Column(db.String(1))
     incluye_iva = db.Column(db.Boolean, default=False)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
@@ -39,7 +39,9 @@ class Proveedores (Base):
         if not self.id:
             db.session.add(self)
         db.session.commit()
-    
+
+
+
     @staticmethod
     def get_all():
         return Proveedores.query.all()
