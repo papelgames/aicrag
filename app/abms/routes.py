@@ -1,3 +1,6 @@
+from fcntl import F_SEAL_SEAL
+from genericpath import exists
+from itertools import product
 import logging
 from math import fabs
 from operator import truediv
@@ -121,12 +124,15 @@ def alta_masiva():
             file_path = os.path.join(archivo_dir, archivo_name)
             archivo.save(file_path)
         
+        #falta validar que sea un proveedor que actualiza por archivo
         proveedor = Proveedores.get_by_id(form.id_proveedor.data)
-
+        
+        #abro documento excel
         import openpyxl 
         documento = openpyxl.load_workbook(os.path.abspath(file_path), data_only= True)
         ws = documento.active
         
+        #traigo parametria del proveedor
         columnas = [proveedor.nombre,
                     proveedor.formato_id,
                     proveedor.columna_id_lista_proveedor, 
@@ -134,35 +140,18 @@ def alta_masiva():
                     proveedor.columna_descripcion,
                     proveedor.columna_importe ]
         
+        #indico que al excel en que columnas el proveedor carga cada dato.
         rango_id_lista_proveedor =  ws[columnas[2]]
         rango_codigo_de_barras =  ws[columnas[3]]
         rango_descripcion =  ws[columnas[4]]
         rango_importe =  ws[columnas[5]]
+        #falta armar el counter de cada caso.
         registros_nuevos = 0
         registros_repetidos = 0
         registros_total = 0
-        '''falta grabar si no existe el registro en la base de datos y actualizar si existe y hay cambios
-        '''
-        #armo la matriz mat 
-        mat = []
-        for registro in rango_id_lista_proveedor:
-            mat.append([registro.value])
-        len_mat = len(mat)
-        secuencia = 0
-        for registro in rango_codigo_de_barras:
-            if secuencia != len_mat :
-                mat[secuencia].append(registro.value)
-                secuencia += 1
-        secuencia = 0 
-        for registro in rango_descripcion:
-            if secuencia != len_mat :
-                mat[secuencia].append(registro.value)
-                secuencia += 1
-        secuencia = 0 
-        for registro in rango_importe:
-            if secuencia != len_mat :
-                mat[secuencia].append(registro.value)
-                secuencia += 1
+        #genero la matriz de datos.
+        mat = list(zip( rango_id_lista_proveedor, rango_codigo_de_barras,rango_descripcion,rango_importe))
+        
         secuencia = 0
         control_proveedor = False
         # controlo que el archivo corresponda al proveedor
@@ -173,52 +162,47 @@ def alta_masiva():
                 control_proveedor = True
                 break
             secuencia +=1
+        
+        #genero un id unico por subida
         id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
+       
         if control_proveedor == True:
-            ##hacer  update, etc
         #inserto los registros que no existen
+            producto_nuevo = Productos()
             for id in mat:
-                # pass
-                if id[0] != None and id[0] != columnas[1]: 
-                    producto = Productos(codigo_de_barras = id[1],
-                                        id_proveedor = form.id_proveedor.data,
-                                        id_lista_proveedor = id[0],
-                                        descripcion = id[2],
-                                        importe = id[3],
-                                        cantidad_presentacion = 1,
-                                        id_ingreso = id_ingreso,
-                                        usuario_alta = current_user.email,
-                                        usuario_modificacion = current_user.email
-                                        )
-                    #ver como hacer un add y un solo commit
-                    producto.save()
+                if id[0].value != None and id[0].value != columnas[1]: 
+                    producto_por_id = Productos.get_by_id(id[0].value)
+                    if not producto_por_id:
+                        producto_nuevo = Productos(codigo_de_barras = id[1].value,
+                                                    id_proveedor = form.id_proveedor.data,
+                                                    id_lista_proveedor = id[0].value,
+                                                    descripcion = id[2].value,
+                                                    importe = id[3].value,
+                                                    cantidad_presentacion = 1,
+                                                    id_ingreso = id_ingreso,
+                                                    usuario_alta = current_user.email,
+                                                    usuario_modificacion = current_user.email
+                                                    )
+                        producto_nuevo.only_add()
+                    
+                    #actualizo productos que existe si es que tienen un ipmporte distinto al cargado.    
+                    if producto_por_id:
+                        if producto_por_id.importe != id[3].value:    
+                            producto_por_id.importe = id[3].value
+                            producto_por_id.usuario_modificacion = current_user.email
+                            producto_por_id.id_ingreso = id_ingreso
+                            producto_por_id.only_add()
+            
+            #commiteo las tablas
+            if producto_por_id:
+                producto_por_id.save()
+            producto_nuevo.only_save()
+            
+            #mejorar un poco a donde redirigir
             flash ('El archivo de ' + columnas[0] + ' se procesó correctamente', "alert-success")
             return redirect(url_for("public.index"))
         else:
             flash ('El archivo no pertenece a ' + columnas[0], "alert-warning")
             return redirect(url_for("public.index"))
-        
-        '''
-           registros_total +=1
-            if Recuperos.query.filter_by (rama = campo[0].value).first() and \
-                Recuperos.query.filter_by (siniestro = campo[1].value).first():
-                registros_repetidos += 1
-                continue
-            rama = campo[0].value 
-            siniestro = campo[1].value
-            desc_siniestro = campo[2].value
-            fe_ocurrencia = campo[3].value
-            importe_pagado = campo[4].value
-            estado = 1
-            
-            registro_recupero = Recuperos(rama = rama,\
-                                            siniestro = siniestro,\
-                                            desc_siniestro = desc_siniestro,\
-                                            fe_ocurrencia = fe_ocurrencia,\
-                                            importe_pagado =importe_pagado,\
-                                            estado = estado)
-            db.session.add(registro_recupero)
-            registros_nuevos += 1
-        db.session.commit()
-        '''
+ 
     return render_template("abms/alta_masiva.html", form=form)

@@ -40,8 +40,6 @@ class Proveedores (Base):
             db.session.add(self)
         db.session.commit()
 
-
-
     @staticmethod
     def get_all():
         return Proveedores.query.all()
@@ -66,7 +64,13 @@ class Productos (Base):
         if not self.id:
             db.session.add(self)
         db.session.commit()
-    
+       
+    def only_add(self):
+        db.session.add(self)
+        
+    def only_save(self):
+        db.session.commit()
+               
     @staticmethod
     def get_all():
         query_str = db.session.query(Productos, User, Proveedores)\
@@ -75,7 +79,12 @@ class Productos (Base):
             .filter(Productos.id_proveedor == Proveedores.id)\
             .all()
         return query_str
-    
+
+    @staticmethod
+    def get_by_id(id_lista):
+        return Productos.query.filter_by(id_lista_proveedor = id_lista).first()
+
+
     '''
     
     Session.query(User,Document,DocumentPermissions)
