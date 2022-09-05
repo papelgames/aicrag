@@ -81,6 +81,26 @@ class Productos (Base):
         return query_str
 
     @staticmethod
+    def get_by_codigo_de_barras(codigo_barras):
+        query_str = db.session.query(Productos, User, Proveedores)\
+            .filter(Productos.usuario_alta == User.email)\
+            .filter(Productos.usuario_modificacion == User.email)\
+            .filter(Productos.id_proveedor == Proveedores.id)\
+            .filter(Productos.codigo_de_barras == codigo_barras)\
+            .all()
+        return query_str
+
+    @staticmethod
+    def get_like_descripcion(descripcion_):
+        query_str = db.session.query(Productos, User, Proveedores)\
+            .filter(Productos.usuario_alta == User.email)\
+            .filter(Productos.usuario_modificacion == User.email)\
+            .filter(Productos.id_proveedor == Proveedores.id)\
+            .filter(Productos.descripcion.contains(descripcion_))\
+            .all()
+        return query_str
+
+    @staticmethod
     def get_by_id(id_lista):
         return Productos.query.filter_by(id_lista_proveedor = id_lista).first()
 

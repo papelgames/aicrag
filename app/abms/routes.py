@@ -17,7 +17,7 @@ from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, Proveedores
 from . import abms_bp
-from .forms import ProductosForm, ProveedoresForm, ProductosMasivosForm
+from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm
 
 from app.common.mail import send_email
 from time import strftime, gmtime
@@ -36,7 +36,6 @@ def proveedores_select():
 
 def columnas_excel():
     select_excel =[( '','Seleccionar columna'),( 'A','A'),( 'B','B'),( 'C','C'),( 'D','D'),( 'E','E'),( 'F','F'),( 'G','G'),('H','H'),('I','I'),('J','J'),( 'K','K'),('L','L')]
-    #select_excel =[( '','Seleccionar columna'),( '0','A'),( '1','B'),( '2','C'),( '3','D'),( '4','E'),( '5','F'),( '6','G'),('7','H'),('8','I'),('9','J'),( '10','K'),('11','L')]
     return select_excel
 
 @abms_bp.route("/abms/altaindividual", methods = ['GET', 'POST'])
@@ -63,7 +62,7 @@ def alta_individual():
                               usuario_alta = current_user.email,
                               usuario_modificacion = current_user.email
                               )
-        print (strftime('%d%m%y%H%m%s', gmtime()))
+        
         producto.save()
         flash("Producto dado de alta correctamente", "alert-success")
         return redirect(url_for("public.index"))
@@ -206,3 +205,42 @@ def alta_masiva():
             return redirect(url_for("public.index"))
  
     return render_template("abms/alta_masiva.html", form=form)
+
+@abms_bp.route("/abms/busqueda/<criterio>", methods = ['GET', 'POST'])
+@abms_bp.route("/abms/busqueda/", methods = ['GET', 'POST'])
+@login_required
+def busqueda_productos(criterio = ""):
+    form = BusquedaForm()
+    lista_de_productos = []
+    if form.validate_on_submit():
+        buscar = form.buscar.data
+        return redirect(url_for("abms.busqueda_productos", criterio = buscar))
+    
+    if criterio.isdigit() == True:
+        lista_de_productos = Productos.get_by_codigo_de_barras(criterio)
+    elif criterio == "":
+        pass
+    else:
+        lista_de_productos = Productos.get_like_descripcion(criterio)
+        
+    return render_template("abms/busqueda_productos.html", form = form, lista_de_productos=lista_de_productos )
+
+
+# @abms_bp.route("/abms/modificacion/<int:id_producto>", methods = ['GET', 'POST'])
+# @abms_bp.route("/abms/modificacion/", methods = ['GET', 'POST'])
+# @login_required
+# def modificacion_productos(id_producto):
+#     # productos_codigo_de_barras = Productos.get_by_id(codigo_de_barras)
+#     # productos_id = Productos.get_by_id(id_producto)
+#     form = BusquedaForm()
+
+#     if form.validate_on_submit():
+#         buscar = form.buscar.data
+
+#         print (type(buscar))
+
+#         flash ("Se ha guardado correctamente", "alert-success")
+#         return redirect(url_for("abms.tareas"))
+
+
+#     return render_template("abms/modificacion_productos.html",  form = form)

@@ -32,3 +32,7 @@ class ProductosMasivosForm(FlaskForm):
               DataRequired('Debe seleccionar un archivo' ),
               FileAllowed(['xls', 'xlsx', 'xltm'], 'No es un archivo permitido')
               ])
+
+class BusquedaForm(FlaskForm):
+    buscar = StringField('Buscar', validators=[DataRequired('Escriba la descripción de un producto o su código de barras' )])
+ 
