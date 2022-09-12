@@ -17,7 +17,7 @@ from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, Proveedores
 from . import abms_bp
-from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm
+from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, ProveedoresConsultaForm
 
 from app.common.mail import send_email
 from time import strftime, gmtime
@@ -68,6 +68,52 @@ def alta_individual():
         return redirect(url_for("public.index"))
     return render_template("abms/alta_individual.html", form=form)
 
+@abms_bp.route("/abms/busquedaproducto/<criterio>", methods = ['GET', 'POST'])
+@abms_bp.route("/abms/busquedaproducto/", methods = ['GET', 'POST'])
+@login_required
+def busqueda_productos(criterio = ""):
+    form = BusquedaForm()
+    lista_de_productos = []
+    if form.validate_on_submit():
+        buscar = form.buscar.data
+        return redirect(url_for("abms.busqueda_productos", criterio = buscar))
+    
+    if criterio.isdigit() == True:
+        lista_de_productos = Productos.get_by_codigo_de_barras(criterio)
+    elif criterio == "":
+        pass
+    else:
+        lista_de_productos = Productos.get_like_descripcion(criterio)
+        
+    return render_template("abms/busqueda_productos.html", form = form, lista_de_productos=lista_de_productos )
+
+@abms_bp.route("/abms/modificacionproducto/<int:id_producto>", methods = ['GET', 'POST'])
+@abms_bp.route("/abms/modificacionproducto", methods = ['GET', 'POST'])
+@login_required
+def modificacion_producto(id_producto = ""):
+    if id_producto == "":
+        return redirect(url_for("abms.busqueda_productos"))
+
+    form=ProductosForm()
+    form.id_proveedor.choices = proveedores_select()
+    
+    producto = Productos.get_by_id(id_producto)
+
+    if form.validate_on_submit():
+        producto.codigo_de_barras = form.codigo_de_barras.data
+        producto.id_proveedor = form.id_proveedor.data
+        producto.id_lista_proveedor = form.id_lista_proveedor.data
+        producto.descripcion = form.descripcion.data
+        producto.importe = form.importe.data
+        producto.cantidad_presentacion = form.cantidad_presentacion.data
+        producto.id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
+        producto.usuario_modificacion = current_user.email
+
+        producto.save()
+        flash("Producto actualizado correctamente", "alert-success")
+        return redirect(url_for("public.index"))
+    return render_template("abms/modificacion_producto.html", form=form, producto = producto)
+
 @abms_bp.route("/abms/altaproveedor", methods = ['GET', 'POST'])
 @login_required
 def alta_proveedor():
@@ -107,6 +153,47 @@ def alta_proveedor():
 
     return render_template("abms/alta_proveedor.html", form = form)
 
+@abms_bp.route("/abms/busquedaproveedor/", methods = ['GET', 'POST'])
+@login_required
+def busqueda_proveedores(criterio = ""):
+  
+    lista_de_proveedores = Proveedores.get_all()
+     
+    return render_template("abms/busqueda_proveedores.html", lista_de_proveedores=lista_de_proveedores )
+
+@abms_bp.route("/abms/modificacionproveedor/<id_proveedor>", methods = ['GET', 'POST'])
+@abms_bp.route("/abms/modificacionproveedor", methods = ['GET', 'POST'])
+@login_required
+def modificacion_proveedor(id_proveedor= ""):
+    if id_proveedor == "":
+        return redirect(url_for("abms.busqueda_proveedores"))
+
+    form= ProveedoresForm()
+    proveedor = Proveedores.get_by_id(id_proveedor)
+    
+    form.columna_id_lista_proveedor.choices = columnas_excel()
+    form.columna_codigo_de_barras.choices = columnas_excel()
+    form.columna_descripcion.choices = columnas_excel()
+    form.columna_importe.choices = columnas_excel()
+
+
+    if form.validate_on_submit():
+        proveedor.nombre = form.nombre.data
+        proveedor.correo_electronico = form.correo_electronico.data
+        proveedor.archivo_si_no = form.archivo_si_no.data
+        proveedor.formato_id = form.formato_id.data
+        proveedor.columna_id_lista_proveedor = form.columna_id_lista_proveedor.data
+        proveedor.columna_codigo_de_barras = form.columna_codigo_de_barras.data
+        proveedor.columna_descripcion = form.columna_descripcion.data
+        proveedor.columna_importe = form.columna_importe.data
+        proveedor.incluye_iva = form.incluye_iva.data
+        proveedor.usuario_modificacion = current_user.email
+        
+        #proveedor.save()
+        flash("Proveedor actualizado correctamente", "alert-success")
+        return redirect(url_for("public.index"))
+
+    return render_template("abms/modificacion_proveedor.html", form = form, proveedor = proveedor)
 
 @abms_bp.route("/abms/altamasiva", methods = ['GET', 'POST'])
 @login_required
@@ -170,7 +257,7 @@ def alta_masiva():
             producto_nuevo = Productos()
             for id in mat:
                 if id[0].value != None and id[0].value != columnas[1]: 
-                    producto_por_id = Productos.get_by_id(id[0].value)
+                    producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value)
                     if not producto_por_id:
                         producto_nuevo = Productos(codigo_de_barras = id[1].value,
                                                     id_proveedor = form.id_proveedor.data,
@@ -205,42 +292,3 @@ def alta_masiva():
             return redirect(url_for("public.index"))
  
     return render_template("abms/alta_masiva.html", form=form)
-
-@abms_bp.route("/abms/busqueda/<criterio>", methods = ['GET', 'POST'])
-@abms_bp.route("/abms/busqueda/", methods = ['GET', 'POST'])
-@login_required
-def busqueda_productos(criterio = ""):
-    form = BusquedaForm()
-    lista_de_productos = []
-    if form.validate_on_submit():
-        buscar = form.buscar.data
-        return redirect(url_for("abms.busqueda_productos", criterio = buscar))
-    
-    if criterio.isdigit() == True:
-        lista_de_productos = Productos.get_by_codigo_de_barras(criterio)
-    elif criterio == "":
-        pass
-    else:
-        lista_de_productos = Productos.get_like_descripcion(criterio)
-        
-    return render_template("abms/busqueda_productos.html", form = form, lista_de_productos=lista_de_productos )
-
-
-# @abms_bp.route("/abms/modificacion/<int:id_producto>", methods = ['GET', 'POST'])
-# @abms_bp.route("/abms/modificacion/", methods = ['GET', 'POST'])
-# @login_required
-# def modificacion_productos(id_producto):
-#     # productos_codigo_de_barras = Productos.get_by_id(codigo_de_barras)
-#     # productos_id = Productos.get_by_id(id_producto)
-#     form = BusquedaForm()
-
-#     if form.validate_on_submit():
-#         buscar = form.buscar.data
-
-#         print (type(buscar))
-
-#         flash ("Se ha guardado correctamente", "alert-success")
-#         return redirect(url_for("abms.tareas"))
-
-
-#     return render_template("abms/modificacion_productos.html",  form = form)

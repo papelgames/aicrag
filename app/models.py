@@ -101,8 +101,12 @@ class Productos (Base):
         return query_str
 
     @staticmethod
-    def get_by_id(id_lista):
+    def get_by_id_lista_proveedor(id_lista):
         return Productos.query.filter_by(id_lista_proveedor = id_lista).first()
+
+    @staticmethod
+    def get_by_id(id_producto):
+        return Productos.query.filter_by(id = id_producto).first()
 
 
     '''

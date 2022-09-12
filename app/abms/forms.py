@@ -17,9 +17,12 @@ class ProveedoresForm(FlaskForm):
     columna_descripcion = SelectField('Descripción del producto', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar una una columna')])
     columna_importe = SelectField('Importe', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar una una columna')])
     incluye_iva = SelectField('¿Lista con iva?', choices =[( '','Seleccionar acción'),( '1','Si'),( '0','NO')], coerce = str, default = None, validators=[DataRequired('Completar si o no')])
-    
+
+class ProveedoresConsultaForm(FlaskForm):
+    id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None)
+
 class ProductosForm(FlaskForm):
-    codigo_de_barras = IntegerField('Código de barras', validators=[DataRequired('Complete código de barras' )])
+    codigo_de_barras = IntegerField('Código de barras')
     id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar un proveedor')])
     id_lista_proveedor = StringField('Id del producto del proveedor')
     descripcion = StringField('Descripcion del producto',validators=[DataRequired('Complete la descripcion del producto' )])

@@ -1,0 +1,45 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    aicrag | Busqueda de proveedores
+{% endblock %}
+
+{% block content %}
+
+{% if lista_de_proveedores %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">ID PROVEEDOR</th>
+            <th scope="col">NOMBRE</th>
+            <th scope="col">FORMATO</th>
+            <th scope="col">Accion</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        {% for proveedor in lista_de_proveedores %}
+            <tr>
+                <th scope="row">{{ proveedor.id }}</th>
+                <td> {{ proveedor.nombre }}</td>
+                <td> {{ proveedor.formato_id }}</td>
+
+                <td>
+                    <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Acción
+                    </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="{{ url_for('abms.modificacion_proveedor', id_proveedor = proveedor.id) }}">Modificar</a>
+                            <a class="dropdown-item" href="#">Eliminar</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

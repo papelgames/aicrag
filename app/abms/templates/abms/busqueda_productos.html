@@ -44,7 +44,7 @@
                         Acción
                     </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item" href="#">Modificar</a>
+                            <a class="dropdown-item" href="{{ url_for('abms.modificacion_producto', id_producto = producto.Productos.id) }}">Modificar</a>
                             <a class="dropdown-item" href="#">Eliminar</a>
                         </div>
                     </div>
