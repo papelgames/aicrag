@@ -1,9 +1,48 @@
 {% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
 
 {% block title %}
-    aicrag | Consulta de productos
+    aicrag | Consulta de precios
 {% endblock %}
 
 {% block content %}
+<div class="row">
+	<div class="offset-md-3 col-md-6">
+		<h1>Consulta de precios</h1>
+
+		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+			{{ render_input(form.buscar,'', id= "buscar" , class="form-control", placeholder="Ingrese un código de barras o la descripción de un producto" ) }}
+			<button type="submmit" class="btn btn-primary" >Buscar</button>
+		</form>
+	</div>
+</div>
+{% if lista_de_productos %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">CODIGO DE BARRAS</th>
+            <th scope="col">PRODUCTO</th>
+            <th scope="col">IMPORTE</th>
+            <th scope="col">CANTIDAD POR PRESENTACION</th>
+            <th scope="col">PROVEEDOR</th>
+            
+        </tr>
+    </thead>
+    
+    <tbody>
+        {% for producto in lista_de_productos %}
+            <tr>
+                <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
+                <td> {{ producto.Productos.descripcion }}</td>
+                <td> {{ producto.Productos.importe }}</td>
+                <td> {{ producto.Productos.cantidad_presentacion }}</td>
+                <td> {{ producto.Proveedores.nombre }}</td>
+                
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 
 {% endblock %}

@@ -114,6 +114,14 @@ def modificacion_producto(id_producto = ""):
         return redirect(url_for("public.index"))
     return render_template("abms/modificacion_producto.html", form=form, producto = producto)
 
+@abms_bp.route("/abms/eliminarproducto/<int:id_producto>", methods = ['GET', 'POST'])
+@login_required
+def eliminar_producto_id(id_producto):
+    producto = Productos.get_by_id(id_producto)
+    producto.delete()
+
+    return redirect(url_for("abms.busqueda_productos"))
+
 @abms_bp.route("/abms/altaproveedor", methods = ['GET', 'POST'])
 @login_required
 def alta_proveedor():
@@ -170,26 +178,39 @@ def modificacion_proveedor(id_proveedor= ""):
 
     form= ProveedoresForm()
     proveedor = Proveedores.get_by_id(id_proveedor)
-    
     form.columna_id_lista_proveedor.choices = columnas_excel()
     form.columna_codigo_de_barras.choices = columnas_excel()
     form.columna_descripcion.choices = columnas_excel()
     form.columna_importe.choices = columnas_excel()
 
+    #modifico los valores booleanos por int porque no me toma boolean para el selectfield
+    if proveedor.archivo_si_no == True:
+        proveedor.archivo_si_no = '1'
+    elif proveedor.archivo_si_no == False:
+        proveedor.archivo_si_no = '0'
+    else:
+        proveedor.archivo_si_no = ''
+
+    if proveedor.incluye_iva == True:
+        proveedor.incluye_iva = '1'
+    elif proveedor.incluye_iva == False:
+        proveedor.incluye_iva = '0'
+    else:
+        proveedor.incluye_iva = ''
 
     if form.validate_on_submit():
         proveedor.nombre = form.nombre.data
         proveedor.correo_electronico = form.correo_electronico.data
-        proveedor.archivo_si_no = form.archivo_si_no.data
+        proveedor.archivo_si_no = int(form.archivo_si_no.data)
         proveedor.formato_id = form.formato_id.data
         proveedor.columna_id_lista_proveedor = form.columna_id_lista_proveedor.data
         proveedor.columna_codigo_de_barras = form.columna_codigo_de_barras.data
         proveedor.columna_descripcion = form.columna_descripcion.data
         proveedor.columna_importe = form.columna_importe.data
-        proveedor.incluye_iva = form.incluye_iva.data
+        proveedor.incluye_iva = int(form.incluye_iva.data)
         proveedor.usuario_modificacion = current_user.email
         
-        #proveedor.save()
+        proveedor.save()
         flash("Proveedor actualizado correctamente", "alert-success")
         return redirect(url_for("public.index"))
 

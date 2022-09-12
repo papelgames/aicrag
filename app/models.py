@@ -90,6 +90,10 @@ class Productos (Base):
             .all()
         return query_str
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     @staticmethod
     def get_like_descripcion(descripcion_):
         query_str = db.session.query(Productos, User, Proveedores)\

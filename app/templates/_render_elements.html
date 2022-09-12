@@ -15,9 +15,9 @@
 		<td> {{field_name.label}}
 			<div class="form-group">
 				<select name ="{{field_name.name}}"  id = "{{field_name.name}}" class=" form-control"  >
-					{% for   desc in field_name %}
-						{% if os|int == desc.data|int %}
-							<option selected = {{ os }} value = {{ os }}> {{ desc.label }}</option>  
+					{% for desc in field_name %}
+						{% if os|safe == desc.data|safe %}
+							<option selected = {{ os }} value = {{ os }}> {{ desc.label }} </option>
 						{% else %}
 							{{ desc }} 
 						{% endif %}

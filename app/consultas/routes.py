@@ -12,14 +12,25 @@ from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
 from . import consultas_bp 
-from .forms import AltaCompulsaForm, ImagenesBienesForm
+from .forms import BusquedaForm
 
 logger = logging.getLogger(__name__)
 
-@consultas_bp.route("/consultaproductos/")
+@consultas_bp.route("/abms/consultaproducto/<criterio>", methods = ['GET', 'POST'])
+@consultas_bp.route("/abms/consultaproducto/", methods = ['GET', 'POST'])
 @login_required
-#@admin_required
-def consulta_productos():
-
-    return render_template("consultas/consulta_productos.html")
-
+def consulta_productos(criterio = ""):
+    form = BusquedaForm()
+    lista_de_productos = []
+    if form.validate_on_submit():
+        buscar = form.buscar.data
+        return redirect(url_for("consultas.consulta_productos", criterio = buscar))
+    
+    if criterio.isdigit() == True:
+        lista_de_productos = Productos.get_by_codigo_de_barras(criterio)
+    elif criterio == "":
+        pass
+    else:
+        lista_de_productos = Productos.get_like_descripcion(criterio)
+    #falta calcular la ganancia a aplicarle a cada producto.     
+    return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos )
