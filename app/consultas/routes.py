@@ -16,8 +16,8 @@ from .forms import BusquedaForm
 
 logger = logging.getLogger(__name__)
 
-@consultas_bp.route("/abms/consultaproducto/<criterio>", methods = ['GET', 'POST'])
-@consultas_bp.route("/abms/consultaproducto/", methods = ['GET', 'POST'])
+@consultas_bp.route("/consultas/consultaproducto/<criterio>", methods = ['GET', 'POST'])
+@consultas_bp.route("/consultas/consultaproducto/", methods = ['GET', 'POST'])
 @login_required
 def consulta_productos(criterio = ""):
     form = BusquedaForm()

@@ -31,6 +31,7 @@ class Proveedores (Base):
     columna_codigo_de_barras = db.Column(db.String(1))
     columna_descripcion = db.Column(db.String(1))
     columna_importe = db.Column(db.String(1))
+    columna_utilidad = db.Column(db.String(1))
     incluye_iva = db.Column(db.Boolean, default=False)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
@@ -59,6 +60,8 @@ class Productos (Base):
     id_ingreso = db.Column(db.String(256))
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
+    es_servicio = db.Column(db.Boolean)
+    utilidad = db.Column(db.Float)
 
     def save(self):
         if not self.id:

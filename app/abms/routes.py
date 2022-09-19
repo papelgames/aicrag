@@ -50,7 +50,9 @@ def alta_individual():
         id_lista_proveedor = form.id_lista_proveedor.data
         descripcion = form.descripcion.data
         importe = form.importe.data
+        utilidad = form.utilidad.data
         cantidad_presentacion = form.cantidad_presentacion.data
+        es_servicio = form.es_servicio.data
 
         producto = Productos(codigo_de_barras=codigo_de_barras,
                               id_proveedor=id_proveedor,
@@ -59,6 +61,8 @@ def alta_individual():
                               importe=importe,
                               cantidad_presentacion=cantidad_presentacion,
                               id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime())),
+                              utilidad = utilidad,
+                              es_servicio = bool(es_servicio),
                               usuario_alta = current_user.email,
                               usuario_modificacion = current_user.email
                               )
@@ -99,12 +103,21 @@ def modificacion_producto(id_producto = ""):
     
     producto = Productos.get_by_id(id_producto)
 
+    if producto.es_servicio == True:
+        producto.es_servicio = '1'
+    else: 
+        producto.es_servicio = '0'
+
     if form.validate_on_submit():
+
+        
         producto.codigo_de_barras = form.codigo_de_barras.data
         producto.id_proveedor = form.id_proveedor.data
         producto.id_lista_proveedor = form.id_lista_proveedor.data
         producto.descripcion = form.descripcion.data
         producto.importe = form.importe.data
+        producto.utilidad = form.utilidad.data
+        producto.es_servicio = bool(form.es_servicio.data)
         producto.cantidad_presentacion = form.cantidad_presentacion.data
         producto.id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
         producto.usuario_modificacion = current_user.email
@@ -130,6 +143,7 @@ def alta_proveedor():
     form.columna_codigo_de_barras.choices = columnas_excel()
     form.columna_descripcion.choices = columnas_excel()
     form.columna_importe.choices = columnas_excel()
+    form.columna_utilidad.choices = columnas_excel()
 
     if form.validate_on_submit():
         nombre = form.nombre.data
@@ -140,6 +154,7 @@ def alta_proveedor():
         columna_codigo_de_barras = form.columna_codigo_de_barras.data
         columna_descripcion = form.columna_descripcion.data
         columna_importe = form.columna_importe.data
+        columna_utilidad = form.columna_utilidad.data
         incluye_iva = form.incluye_iva.data
 
         proveedor = Proveedores(nombre=nombre, 
@@ -150,6 +165,7 @@ def alta_proveedor():
                                 columna_codigo_de_barras=columna_codigo_de_barras,
                                 columna_descripcion=columna_descripcion,
                                 columna_importe=columna_importe,
+                                columna_utilidad=columna_utilidad,
                                 incluye_iva=int(incluye_iva),
                                 usuario_alta = current_user.email,
                                 usuario_modificacion = current_user.email
@@ -182,6 +198,7 @@ def modificacion_proveedor(id_proveedor= ""):
     form.columna_codigo_de_barras.choices = columnas_excel()
     form.columna_descripcion.choices = columnas_excel()
     form.columna_importe.choices = columnas_excel()
+    form.columna_utilidad.choices = columnas_excel()
 
     #modifico los valores booleanos por int porque no me toma boolean para el selectfield
     if proveedor.archivo_si_no == True:
@@ -207,6 +224,7 @@ def modificacion_proveedor(id_proveedor= ""):
         proveedor.columna_codigo_de_barras = form.columna_codigo_de_barras.data
         proveedor.columna_descripcion = form.columna_descripcion.data
         proveedor.columna_importe = form.columna_importe.data
+        proveedor.columna_utilidad = form.columna_utilidad.data
         proveedor.incluye_iva = int(form.incluye_iva.data)
         proveedor.usuario_modificacion = current_user.email
         
@@ -245,19 +263,21 @@ def alta_masiva():
                     proveedor.columna_id_lista_proveedor, 
                     proveedor.columna_codigo_de_barras, 
                     proveedor.columna_descripcion,
-                    proveedor.columna_importe ]
+                    proveedor.columna_importe,
+                    proveedor.columna_utilidad ]
         
         #indico que al excel en que columnas el proveedor carga cada dato.
         rango_id_lista_proveedor =  ws[columnas[2]]
         rango_codigo_de_barras =  ws[columnas[3]]
         rango_descripcion =  ws[columnas[4]]
         rango_importe =  ws[columnas[5]]
+        rango_utilidad = ws[columnas[6]]
         #falta armar el counter de cada caso.
         registros_nuevos = 0
         registros_repetidos = 0
         registros_total = 0
         #genero la matriz de datos.
-        mat = list(zip( rango_id_lista_proveedor, rango_codigo_de_barras,rango_descripcion,rango_importe))
+        mat = list(zip(rango_id_lista_proveedor, rango_codigo_de_barras, rango_descripcion, rango_importe, rango_utilidad))
         
         secuencia = 0
         control_proveedor = False
@@ -280,13 +300,20 @@ def alta_masiva():
                 if id[0].value != None and id[0].value != columnas[1]: 
                     producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value)
                     if not producto_por_id:
+                        if id[4].value == None:
+                            utilidad_ = 100
+                        else:
+                            utilidad_ = id[4].value
+
                         producto_nuevo = Productos(codigo_de_barras = id[1].value,
                                                     id_proveedor = form.id_proveedor.data,
                                                     id_lista_proveedor = id[0].value,
                                                     descripcion = id[2].value,
                                                     importe = id[3].value,
+                                                    utilidad = utilidad_,
                                                     cantidad_presentacion = 1,
                                                     id_ingreso = id_ingreso,
+                                                    es_servicio = False,
                                                     usuario_alta = current_user.email,
                                                     usuario_modificacion = current_user.email
                                                     )

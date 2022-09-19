@@ -17,6 +17,8 @@
 			{{ render_input(form.id_lista_proveedor,'', id= "id_lista_proveedor" , class="form-control", placeholder="Id del producto para el proveedor" ) }}
 			{{ render_input(form.descripcion,'', id= "descripcion" , class="form-control", placeholder="Descripcion del producto" ) }}
 			{{ render_input(form.importe,'', id= "importe" , class="form-control", placeholder="Valor del producto sin iva" ) }}
+			{{ render_input(form.utilidad,'', id= "utilidad" , class="form-control", placeholder="Elija el porcentaje que quiere cargarle al producto/servicio" ) }}
+			{{ render_input(form.es_servicio,'', id= "es_servicio" , class="form-control") }}
 			{{ render_input(form.cantidad_presentacion,'', id= "cantidad_presentacion" , class="form-control", placeholder="Cantidad del producto por presntación" ) }}
             <button type="submmit" class="btn btn-primary" >Crear producto</button>
 			
