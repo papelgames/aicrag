@@ -24,7 +24,7 @@ APP_ENV = ''
 # Configuración del email
 MAIL_SERVER = 'smtp.gmail.com'
 MAIL_PORT = 587
-MAIL_USERNAME = '@gmail.com'
+MAIL_USERNAME = ''
 MAIL_PASSWORD = ''
 DONT_REPLY_FROM_EMAIL = '(no responder, @gmail.com)'
 ADMINS = ('@gmail.com', )

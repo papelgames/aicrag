@@ -116,16 +116,6 @@ class Productos (Base):
         return Productos.query.filter_by(id = id_producto).first()
 
 
-    '''
-    
-    Session.query(User,Document,DocumentPermissions)
-        .filter(User.email == Document.author)
-        .filter(Document.name == DocumentPermissions.document)
-        .filter(User.email == 'someemail')
-        .all()
-'''
-
-
 class CabecerasPresupuestos (Base):
     __tablename__ = "cabeceraspresupuestos"
     fecha_vencimiento = db.Column(db.DateTime, nullable = False)
@@ -136,6 +126,11 @@ class CabecerasPresupuestos (Base):
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
 
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
 class Presupuestos (Base):
     __tablename__ = "presupuestos"
     id_cabecera_presupuesto = db.Column(db.Integer)
@@ -144,6 +139,12 @@ class Presupuestos (Base):
     importe = db.Column(db.Float)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
 
 class Compras (Base):
     __tablename__ = "compras"
