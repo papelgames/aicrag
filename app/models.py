@@ -136,6 +136,7 @@ class Presupuestos (Base):
     id_cabecera_presupuesto = db.Column(db.Integer)
     id_producto = db.Column(db.Integer)
     cantidad = db.Column(db.Integer)
+    descripcion = db.Column(db.String(256))
     importe = db.Column(db.Float)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
