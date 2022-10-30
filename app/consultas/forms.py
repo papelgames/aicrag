@@ -14,8 +14,8 @@ class BusquedaForm(FlaskForm):
 class CabeceraPresupuesto(FlaskForm):
     nombre_cliente = StringField("Cliente", validators=[DataRequired('Debe cargar el nombre del cliente' )])
     correo_electronico = StringField('Correo electrónico', validators=[Email()])
-    fecha_vencimiento = DateField('Fecha de vencimiento',format='%d/%m/%Y', validators=[DataRequired('El vencimiento no puede estar vacío' )])
-
+    fecha_vencimiento = DateField('Fecha de vencimiento',validators=[DataRequired('El vencimiento no puede estar vacío' )])
+    # format='%d/%m/%Y', 
 class ProductosPresupuesto (FlaskForm):
     buscar = StringField('Buscar')
     id = IntegerField()

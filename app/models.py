@@ -125,11 +125,19 @@ class CabecerasPresupuestos (Base):
     estado = db.Column(db.Integer)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
+    
+    def only_add(self):
+        db.session.add(self)
 
     def save(self):
         if not self.id:
             db.session.add(self)
         db.session.commit()
+
+    @staticmethod
+    def get_by_id(id_presupuesto):
+        return CabecerasPresupuestos.query.filter_by(id = id_presupuesto).first()
+
 
 class Presupuestos (Base):
     __tablename__ = "presupuestos"
@@ -141,10 +149,20 @@ class Presupuestos (Base):
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
 
+    def only_add(self):
+        db.session.add(self)
+        
+    def only_save(self):
+        db.session.commit()
+ 
     def save(self):
         if not self.id:
             db.session.add(self)
         db.session.commit()
+        
+    @staticmethod
+    def get_by_id(id_presupuesto):
+        return Presupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).all()
 
 
 class Compras (Base):

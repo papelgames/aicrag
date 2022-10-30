@@ -44,6 +44,15 @@ def consulta_presupuestos():
 
     return render_template("consultas/consulta_presupuestos.html")
 
+@consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
+@login_required
+def presupuesto(id_presupuesto):
+    cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
+    productos = Presupuestos.get_by_id(id_presupuesto)
+    # validar que el presupuesto no esté vendido.
+    return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos)
+
+
 @consultas_bp.route("/consultas/altapresupuesto/", methods = ['GET', 'POST'])
 @login_required
 def alta_presupuesto():
@@ -60,6 +69,7 @@ def alta_presupuesto():
             datos_cliente.append(nombre_cliente)
             datos_cliente.append(correo_electronico)
             datos_cliente.append(fecha_vencimiento)
+            
             return render_template("consultas/alta_presupuesto.html", form2 = form2, form = form, datos_cliente=datos_cliente )            
                  
     if form.validate_on_submit(): 
@@ -95,13 +105,28 @@ def alta_presupuesto():
                                              usuario_alta = current_user.email,
                                              usuario_modificacion = current_user.email
                                              )           
-
+            
             cabecera.save()
-
+            for registro in lista_productos_presupuesto:
+                # id, 0 
+                # descripcion, 1 
+                # cantidad , 2
+                # importe 3
+                
+                presupuesto = Presupuestos(id_cabecera_presupuesto = cabecera.id,
+                                           id_producto = registro[0],
+                                           cantidad = registro[2],
+                                           descripcion = registro[1],
+                                           importe = registro[3],
+                                           usuario_alta = current_user.email,
+                                           usuario_modificacion = current_user.email
+                                           )
+                presupuesto.save()
+              
             datos_cliente.clear()
             lista_productos_presupuesto.clear() 
-
-            return redirect(url_for("consultas.consulta_presupuestos"))
+            flash("El presupuesto se ha grabado", "alert-success")
+            return redirect(url_for("consultas.presupuesto", id_presupuesto = cabecera.id))
             
         elif form.condicion.data == "c":
             datos_cliente.clear()
