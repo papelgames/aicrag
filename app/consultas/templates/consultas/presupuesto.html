@@ -6,10 +6,15 @@
 
 {% block content %}
 
-</div><div id="app" class="col-11">
-
-    <h2>Presupuesto</h2>
-
+<div class="col-12">  
+    {% if vencimiento_si_no %}
+      <h1 class="text-danger">Presupuesto {{ vencimiento_si_no }}</h1>
+    {% else %}  
+      <a  href="{{ url_for('consultas.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">Modificar datos del cliente</a>
+      <a  href="{{ url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">Modificar productos del presupuesto</a> 
+      <h1 class="text-success">Presupuesto VIGENTE</h1>
+    {% endif %}
+    
     <div class="row my-3">
       <div class="col-10">
         <h1>Del carril</h1>
@@ -22,7 +27,7 @@
       </div>
     </div>
   
-    <hr />
+    <hr>
   
     <div class="row mt-3">
       <div class="col-3">

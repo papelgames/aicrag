@@ -15,7 +15,7 @@
                 {{ form2.hidden_tag() }}
                 {{ render_input(form2.nombre_cliente,'', id= "nombre_cliente" , class="form-control", placeholder="Ingrese el nombre cliente" ) }}
                 {{ render_input(form2.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Ingrese correo electronico del cliente" ) }}
-                {{ render_input(form2.fecha_vencimiento,'', id= "fecha_vencimiento" , class="form-control", placeholder="Ingrese la fecha de vencimiento del presupuesto", type="date"  ) }}
+                {{ render_input(form2.fecha_vencimiento,'', id= "fecha_vencimiento" , class="form-control", type="date"  ) }}
                 <!-- , type="date" -->
                 <button type="submmit" class="btn btn-primary">Guardar</button>
             </form>

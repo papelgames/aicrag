@@ -12,9 +12,14 @@ from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
 from . import consultas_bp 
-from .forms import BusquedaForm, CabeceraPresupuesto, ProductosPresupuesto
+from .forms import BusquedaForm, CabeceraPresupuestoForm, ProductosPresupuestoForm
 
 logger = logging.getLogger(__name__)
+
+def control_vencimiento (fecha):
+    if fecha < datetime.now():
+        return "VENCIDO"
+
 
 @consultas_bp.route("/consultas/consultaproducto/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultaproducto/", methods = ['GET', 'POST'])
@@ -41,23 +46,31 @@ lista_productos_presupuesto = []
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
 @login_required
 def consulta_presupuestos():
-
-    return render_template("consultas/consulta_presupuestos.html")
+    cabecera = CabecerasPresupuestos.get_all()
+    now = datetime.now()
+    print (now)
+    return render_template("consultas/consulta_presupuestos.html", cabecera = cabecera, now = now)
 
 @consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
 def presupuesto(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     productos = Presupuestos.get_by_id(id_presupuesto)
-    # validar que el presupuesto no esté vendido.
-    return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos)
+    vencimiento_si_no = control_vencimiento(cabecera.fecha_vencimiento)
+    if vencimiento_si_no == "VENCIDO" and cabecera.estado != 2:
+        cabecera.estado = 2
+        cabecera.save()
+
+    return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
+
+
 
 
 @consultas_bp.route("/consultas/altapresupuesto/", methods = ['GET', 'POST'])
 @login_required
 def alta_presupuesto():
-    form2 = CabeceraPresupuesto()
-    form = ProductosPresupuesto()
+    form2 = CabeceraPresupuestoForm()
+    form = ProductosPresupuestoForm()
     lista_productos_seleccion = []
     
     if len(datos_cliente) == 0:
@@ -153,7 +166,47 @@ def alta_presupuesto():
     
     return render_template("consultas/alta_presupuesto.html", form = form, form2 = form2, lista_productos_presupuesto=lista_productos_presupuesto, lista_productos_seleccion = lista_productos_seleccion, datos_cliente = datos_cliente  )
              
+@consultas_bp.route("/consultas/modificaciondatoscliente/<int:id_presupuesto>", methods = ['GET', 'POST'])
+@login_required
+def modificacion_datos_cliente(id_presupuesto):
+    cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
+    
+    form = CabeceraPresupuestoForm()
+    
+    if cabecera.estado == 2:
+        flash ("El presupuesto se encuentra vencido", "alert-warning" )
+        return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
+
+    if form.validate_on_submit():
+        cabecera.correo_elecronico = form.correo_electronico.data
+        cabecera.fecha_vencimiento = form.fecha_vencimiento.data
+        cabecera.save()
+        flash("Se han actualizado los datos correctamente", "alert-success")            
+        return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
+
+
+    return render_template("consultas/modificacion_datos_cliente.html", form = form, cabecera = cabecera)
 
   
+@consultas_bp.route("/consultas/modificacionproductospresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
+@login_required
+def modificacion_productos_presupuesto(id_presupuesto):
+    cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
+    
+    form = CabeceraPresupuestoForm()
+    
+    if cabecera.estado == 2:
+        flash ("El presupuesto se encuentra vencido", "alert-warning" )
+        return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
+
+    if form.validate_on_submit():
+        cabecera.correo_elecronico = form.correo_electronico.data
+        cabecera.fecha_vencimiento = form.fecha_vencimiento.data
+        cabecera.save()
+        flash("Se han actualizado los datos correctamente", "alert-success")            
+        return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
+
+
+    return render_template("consultas/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera)
 
         

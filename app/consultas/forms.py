@@ -11,12 +11,13 @@ from wtforms.validators import DataRequired, Length, Required, Email
 class BusquedaForm(FlaskForm):
     buscar = StringField('Buscar')
 
-class CabeceraPresupuesto(FlaskForm):
+class CabeceraPresupuestoForm(FlaskForm):
     nombre_cliente = StringField("Cliente", validators=[DataRequired('Debe cargar el nombre del cliente' )])
     correo_electronico = StringField('Correo electrónico', validators=[Email()])
     fecha_vencimiento = DateField('Fecha de vencimiento',validators=[DataRequired('El vencimiento no puede estar vacío' )])
+    
     # format='%d/%m/%Y', 
-class ProductosPresupuesto (FlaskForm):
+class ProductosPresupuestoForm (FlaskForm):
     buscar = StringField('Buscar')
     id = IntegerField()
     descripcion = StringField()

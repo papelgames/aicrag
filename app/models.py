@@ -138,6 +138,11 @@ class CabecerasPresupuestos (Base):
     def get_by_id(id_presupuesto):
         return CabecerasPresupuestos.query.filter_by(id = id_presupuesto).first()
 
+    @staticmethod
+    def get_all():
+        return CabecerasPresupuestos.query.all()
+
+
 
 class Presupuestos (Base):
     __tablename__ = "presupuestos"
