@@ -6,7 +6,7 @@ APP_ENV = APP_ENV_DEVELOPMENT
 
 SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}?auth_plugin=mysql_native_password".format(
     username = "root",
-    password = "112020Jo",
+    password = "",
     hostname = "localhost:3306",
     databasename = "aicragdb"
 )
