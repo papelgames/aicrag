@@ -30,7 +30,7 @@
                 <th scope="row">{{ presupuesto.id }}</th>
                 <td> {{ presupuesto.created.strftime('%d-%m-%Y') }}</td>
                 <td> {{ presupuesto.nombre_cliente }} </td>
-                <td> {{ presupuesto.importe }}</td>
+                <td> {{ presupuesto.importe_total }}</td>
                 {% if now < presupuesto.fecha_vencimiento %}
                 
                 <td> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>

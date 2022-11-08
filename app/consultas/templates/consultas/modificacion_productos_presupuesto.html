@@ -7,21 +7,143 @@
 
 {% block content %}
 <div class="row">
-	<div class="offset-md-2 col-md-8">
+	<div class="col-md-12">
 		<h2>Presupuesto: {{ cabecera.id }}</h2>
         <h1>Datos del cliente</h1>
-        
-        <h3>Cliente: {{ cabecera.nombre_cliente }}</h3>    
-         
-		<form action="" method="post" enctype="multipart/form-data" novalidate>	
-            {{ form.hidden_tag() }}
-			{{ form.nombre_cliente(type = "hidden", value = cabecera.nombre_cliente) }}
-            {{ render_input(form.correo_electronico,'', id= "correo_electronico", value = cabecera.correo_electronico, class="form-control", placeholder="Ingrese correo elecrtonico" ) }}
-			{{ render_input(form.fecha_vencimiento,'', id= "fecha_vencimiento" ,value = cabecera.fecha_vencimiento.strftime('%Y-%m-%d'), class="form-control", type = "date") }}
-			<button type="submmit" class="btn btn-primary" >Crear producto</button>
+        <div class="row mt-3">
+		<div class="col-6">
+			<h3>Cliente: {{ cabecera.nombre_cliente }}</h3> 
+			<h3>Correo electronico: {{ cabecera.correo_electronico }}</h3>   
+			<h3>Fecha de vencimiento: {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</h3>      
+		</div>
+		<div class="col-6">
+			<h1>TOTAL PRESUPUESTO: ${{ cabecera.importe_total }}</h1>
+		</div>
+		</div>
+		{% if lista_productos_seleccion|length == 0 %}
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
+					Agregar productos
+				</button>
+				<div class="modal fade bd-example-modal-lg" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+					<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<h1>Buscar productos</h1>
+								<form action="" method="post" enctype="multipart/form-data" novalidate>	
+									{{ form.hidden_tag() }}
+									{{ form.condicion(type = "hidden", value = "b") }}
+									{{ render_input(form.buscar,'', id= "buscar" , class="form-control", placeholder="Ingrese un código de barras o la descripción de un producto" ) }}
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										<button type="submmit" class="btn btn-primary" >Buscar</button>
+									</div> 
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endif%}
+			{% if lista_productos_seleccion %}
+
+
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">ID</th>
+						<th scope="col">PROVEEDOR</th>
+						<th scope="col">PRODUCTO</th>
+						<th scope="col">CANTIDAD</th>
+						<th scope="col">IMPORTE</th>
+						<th scope="col">SELECCIONAR</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for producto in lista_productos_seleccion %}
+						
+						<form action="" method="post" enctype="multipart/form-data" novalidate>	
+							{{ form.hidden_tag() }}
+							<tr>
+							{{ form.condicion(type = "hidden", value = "a") }}
+							{{ form.id(type = "hidden", value = producto[0]) }} 
+							{{ form.descripcion(type = "hidden", value = producto[1]) }} 
+								<th scope="row">{{ producto[0] }}</th>
+								<td> {{ producto[3] }} </td>
+								<td> {{ producto[1] }}</td>
+							
+								<td> {{ form.cantidad( value = 1) }} </td>
+								<td> ${{ form.importe(value = producto[2]) }} </td>
+								
+								
+								<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+							</tr>
+						</form>
+						
+					{% endfor %}
+				</tbody>
+			</table>
 			
-		</form>
-            
+			{% endif %}
+		
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">PROVEEDOR</th>
+					<th scope="col">PRODUCTO</th>
+					<th scope="col">CANTIDAD</th>
+					<th scope="col">IMPORTE</th>
+					<th scope="col">TOTAL</th>
+					<th scope="col">RECALCULO</th>
+					<th scope="col">ACCION</th>
+					
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in producto %}
+					
+					<form action="" method="post" enctype="multipart/form-data" novalidate>	
+						{{ form.hidden_tag() }}
+						<tr>
+						{{ form.condicion(type = "hidden", value = "m") }}
+						{{ form.id(type = "hidden", value = item.Presupuestos.id) }} 
+						{{ form.descripcion(type = "hidden", value = item.Presupuestos.descripcion) }} 
+							<th scope="row">{{ item.Presupuestos.id_producto }}</th>
+							<td> {{ item.Productos.id_proveedor}} </td>
+							<td> {{ item.Presupuestos.descripcion }}</td>
+							<td> {{ form.cantidad(value = item.Presupuestos.cantidad) }} </td>
+							<td> {{ form.importe(value = item.Presupuestos.importe) }} </td>
+							<td> ${{ item.Presupuestos.importe * item.Presupuestos.cantidad }} </td>
+							{% if item.Productos.importe > item.Presupuestos.importe %}
+								<td class="text-danger"> ${{ item.Productos.importe }}</td>
+							{% else %}
+								<td> ${{ item.Productos.importe }}</td>
+							{% endif %}
+							<td>
+								<div class="dropdown">
+									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										Acción
+								</button>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+									<button class="dropdown-item"  type="submit">Guardar</button>
+									<a class="dropdown-item"  href="{{ url_for('consultas.elimina_productos_presupuesto', id_producto = item.Presupuestos.id) }}">Eliminar</a>
+								</div>
+							</td>
+							
+							
+						</tr>
+						
+					</form>
+					
+				{% endfor %}
+			</tbody>
+		</table>
+		
 	</div>
 </div>
 

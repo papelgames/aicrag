@@ -42,3 +42,8 @@ puedes arrancar el proyecto ejecutando:
     flask run
 
 
+## parametrias iniciales
+insert into parametros (descripcion, tabla, tipo_parametro) values ("","dias_vencimiento","10");
+insert into parametros (descripcion, tabla, tipo_parametro) values ("Activo","estado_presupuesto","1");
+insert into parametros (descripcion, tabla, tipo_parametro) values ("Vencido","estado_presupuesto","2");
+insert into parametros (descripcion, tabla, tipo_parametro) values ("Anulado","estado_presupuesto","3");

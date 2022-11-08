@@ -6,7 +6,7 @@ from types import ClassMethodDescriptorType
 from typing import Text
 
 from slugify import slugify
-from sqlalchemy import Column
+from sqlalchemy import Column, func
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.auth.models import User
@@ -140,7 +140,7 @@ class CabecerasPresupuestos (Base):
 
     @staticmethod
     def get_all():
-        return CabecerasPresupuestos.query.all()
+        return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
 
 
 
@@ -164,10 +164,40 @@ class Presupuestos (Base):
         if not self.id:
             db.session.add(self)
         db.session.commit()
-        
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     @staticmethod
-    def get_by_id(id_presupuesto):
+    def get_by_id_producto(id):
+        return Presupuestos.query.filter_by(id = id).first()
+
+    @staticmethod
+    def get_by_id_presupuesto(id_presupuesto):
         return Presupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).all()
+
+    @staticmethod
+    def get_q_by_id_presupuesto(id_presupuesto):
+        return Presupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).count()
+    
+    @staticmethod
+    def get_importe_total_by_id_presupuesto(id_presupuesto):
+        return db.session.query(Presupuestos.id_cabecera_presupuesto, func.sum(Presupuestos.importe * Presupuestos.cantidad)).\
+            filter(Presupuestos.id_cabecera_presupuesto == id_presupuesto).first()
+            
+    @staticmethod
+    def get_by_id_presupuesto_paquete(id_presupuesto):
+        query_str = db.session.query(Presupuestos, Productos)\
+            .filter(Presupuestos.id_cabecera_presupuesto == id_presupuesto)\
+            .filter(Presupuestos.id_producto == Productos.id)\
+            .all()
+        return query_str
+
+    @staticmethod
+    def get_by_id_producto(id):
+        return Presupuestos.query.filter_by(id= id).first()
+
 
 
 class Compras (Base):
@@ -188,4 +218,8 @@ class Parametros (Base):
     descripcion = db.Column(db.String(50))
     tabla = db.Column(db.String(50))
     tipo_parametro = db.Column(db.String(50))
+
+    @staticmethod
+    def get_by_tabla(tabla):
+        return Parametros.query.filter_by(tabla = tabla).first()
 
