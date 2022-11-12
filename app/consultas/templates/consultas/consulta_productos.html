@@ -26,20 +26,32 @@
             <th scope="col">IMPORTE</th>
             <th scope="col">CANTIDAD POR PRESENTACION</th>
             <th scope="col">PROVEEDOR</th>
+            <th scope="col">ULTIMA ACTUALIZACION</th>
             
         </tr>
     </thead>
     
     <tbody>
         {% for producto in lista_de_productos %}
+            {% if producto.Productos.modified< fecha_tope %}
+            <tr class = "text-danger">
+                <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
+                <td> {{ producto.Productos.descripcion }}</td>
+                <td> {{ producto.importe_calculado }} </td>
+                <td> {{ producto.Productos.cantidad_presentacion }}</td>
+                <td> {{ producto.Proveedores.nombre }}</td>
+                <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
+            </tr>
+            {% else %}
             <tr>
                 <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
                 <td> {{ producto.Productos.descripcion }}</td>
-                <td> {{ (((producto.Productos.importe/producto.Productos.cantidad_presentacion)  * producto.Productos.utilidad) / 100) + (producto.Productos.importe/producto.Productos.cantidad_presentacion) }} </td>
+                <td> {{ producto.importe_calculado }} </td>
                 <td> {{ producto.Productos.cantidad_presentacion }}</td>
                 <td> {{ producto.Proveedores.nombre }}</td>
-                
+                <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
             </tr>
+            {% endif %}
         {% endfor %}
     </tbody>
 </table>

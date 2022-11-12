@@ -85,7 +85,8 @@ class Productos (Base):
 
     @staticmethod
     def get_by_codigo_de_barras(codigo_barras):
-        query_str = db.session.query(Productos, User, Proveedores)\
+        query_str = db.session.query(Productos, User, Proveedores, \
+            ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion).label('importe_calculado'))\
             .filter(Productos.usuario_alta == User.email)\
             .filter(Productos.usuario_modificacion == User.email)\
             .filter(Productos.id_proveedor == Proveedores.id)\
@@ -99,7 +100,8 @@ class Productos (Base):
 
     @staticmethod
     def get_like_descripcion(descripcion_):
-        query_str = db.session.query(Productos, User, Proveedores)\
+        query_str = db.session.query(Productos, User, Proveedores, \
+            ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion).label('importe_calculado'))\
             .filter(Productos.usuario_alta == User.email)\
             .filter(Productos.usuario_modificacion == User.email)\
             .filter(Productos.id_proveedor == Proveedores.id)\

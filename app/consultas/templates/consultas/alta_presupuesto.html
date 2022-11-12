@@ -70,6 +70,7 @@
             <th scope="col">CANTIDAD</th>
             <th scope="col">IMPORTE</th>
             <th scope="col">SELECCIONAR</th>
+            <th scope="col">ULTIMA MODIFICACION</th>
         </tr>
     </thead>
     <tbody>
@@ -77,7 +78,9 @@
             
             <form action="" method="post" enctype="multipart/form-data" novalidate>	
                 {{ form.hidden_tag() }}
-                <tr>
+                <!-- aca control ultimo movimiento -->
+                {% if producto[4] < fecha_tope %}
+                <tr class="text-danger">
                 {{ form.condicion(type = "hidden", value = "a") }}
                 {{ form.id(type = "hidden", value = producto[0]) }} 
                 {{ form.descripcion(type = "hidden", value = producto[1]) }} 
@@ -85,12 +88,29 @@
                     <td> {{ producto[3] }} </td>
                     <td> {{ producto[1] }}</td>
                 
-                    <td> {{ form.cantidad( value = 1) }} </td>
-                    <td> {{ form.importe(value = producto[2]) }} </td>
+                    <td> {{ form.cantidad( value = 1, class="text-danger") }} </td>
+                    <td> {{ form.importe(value = producto[2], class="text-danger") }} </td>
+                    <td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
                     
                     
                     <td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
                 </tr>
+                {% else %}
+                <tr >
+                    {{ form.condicion(type = "hidden", value = "a") }}
+                    {{ form.id(type = "hidden", value = producto[0]) }} 
+                    {{ form.descripcion(type = "hidden", value = producto[1]) }} 
+                        <th scope="row">{{ producto[0] }}</th>
+                        <td> {{ producto[3] }} </td>
+                        <td> {{ producto[1] }}</td>
+                    
+                        <td> {{ form.cantidad( value = 1) }} </td>
+                        <td> {{ form.importe(value = producto[2]) }} </td>
+                        <td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
+                        
+                        <td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+                    </tr>
+                {% endif %}
             </form>
             
         {% endfor %}
@@ -153,9 +173,18 @@
         </div>
     </div>
 </form>
+<form action="" method="post" enctype="multipart/form-data" novalidate>	
+    {{ form.hidden_tag() }}
+    {{ form.condicion(type = "hidden", value = "c") }}
+    <div class="container">
+        <div class="row">
+            <div class="col align-self-end">
+                <button type="submmit" class="btn btn-primary" >Cancelar presupuesto</button> </td>
+             </div>
+        </div>
+    </div>
+</form>
 
 {% endif %}
-
-
 
 {% endblock %}
