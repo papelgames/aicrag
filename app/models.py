@@ -56,7 +56,7 @@ class Productos (Base):
     id_lista_proveedor = db.Column(db.String(256))
     descripcion = db.Column(db.String(256))
     importe = db.Column(db.Float)
-    cantidad_presentacion = db.Column(db.Integer, default=1)
+    cantidad_presentacion = db.Column(db.Float, default=1) # pasar a float
     id_ingreso = db.Column(db.String(256))
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
@@ -138,11 +138,36 @@ class CabecerasPresupuestos (Base):
 
     @staticmethod
     def get_by_id(id_presupuesto):
-        return CabecerasPresupuestos.query.filter_by(id = id_presupuesto).first()
+        return CabecerasPresupuestos.query.filter_by(id = id_presupuesto)\
+                                          .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+                                          .first()
+    
+    @staticmethod
+    def get_all_by_id(id_presupuesto):
+        return db.session.query(CabecerasPresupuestos,Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
+                                                                 .filter_by(id = id_presupuesto)\
+                                                                 .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+                                                                 .all()
+
+    @staticmethod
+    def get_like_descripcion(descripcion_):
+        query_str = db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
+                                                           .filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
+                                                           .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+                                                           .all()
+        return query_str
 
     @staticmethod
     def get_all():
         return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
+
+    @staticmethod
+    def get_all_estado(estado_cabecera): #1 es esado activo 
+        print("pasa")
+        return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
+                                                                  .filter(CabecerasPresupuestos.estado == estado_cabecera)\
+                                                                  .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+                                                                  .all()
 
 
 

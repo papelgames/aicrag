@@ -48,13 +48,27 @@ datos_cliente =[]
 lista_productos_presupuesto = []
 suma_importe_total = 0
 
+@consultas_bp.route("/consultas/consultapresupuestos/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
 @login_required
-def consulta_presupuestos():
-    cabecera = CabecerasPresupuestos.get_all()
+def consulta_presupuestos(criterio=""):
+    form = BusquedaForm()
+    cabecera = CabecerasPresupuestos.get_all_estado("1")
     now = datetime.now()
+
+    if form.validate_on_submit():
+        buscar = form.buscar.data
+        return redirect(url_for("consultas.consulta_presupuestos", criterio = buscar))
+    
+    if criterio.isdigit() == True:
+        cabecera = CabecerasPresupuestos.get_all_by_id(criterio)
+    elif criterio == "":
+        pass
+    else:
+        cabecera = CabecerasPresupuestos.get_like_descripcion(criterio)
+     
    
-    return render_template("consultas/consulta_presupuestos.html", cabecera = cabecera, now = now)
+    return render_template("consultas/consulta_presupuestos.html", form = form, cabecera = cabecera, now = now)
 
 @consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
@@ -62,7 +76,7 @@ def presupuesto(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     productos = Presupuestos.get_by_id_presupuesto(id_presupuesto)
     vencimiento_si_no = control_vencimiento(cabecera.fecha_vencimiento)
-    if vencimiento_si_no == "VENCIDO" and cabecera.estado != 2:
+    if vencimiento_si_no == "VENCIDO" and cabecera.estado == 1:
         cabecera.estado = 2
         cabecera.save()
 
@@ -324,3 +338,16 @@ def elimina_productos_presupuesto(id_producto):
     cabecera.importe_total = total_presupuesto[1]
     cabecera.save()
     return redirect(url_for("consultas.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))  
+
+
+@consultas_bp.route("/consultas/anulapresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
+@login_required
+def anula_presupuesto(id_presupuesto):
+    cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
+    if cabecera.estado == 2:
+        flash ("El presupuesto ya está vencido no se puede anular", "alert-danger") 
+        return redirect(url_for("consultas.consulta_presupuestos"))
+    cabecera.estado = 3
+    cabecera.save()
+    
+    return redirect(url_for("consultas.consulta_presupuestos"))  

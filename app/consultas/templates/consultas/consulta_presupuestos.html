@@ -1,4 +1,5 @@
 {% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
 
 {% block title %}
     aicrag | Consulta de presupuestos
@@ -6,6 +7,16 @@
 
 {% block content %}
 <h1>Consulta de presupuestos</h1>
+
+<div class="row">
+	<div class="offset-md-2 col-md-8">
+            <form action="" method="post" class = "form-horizontal" enctype="multipart/form-data" novalidate>	
+                {{ form.hidden_tag() }}
+                {{ render_input(form.buscar,'', id= "nombre_cliente" , class="form-control", placeholder="Ingrese el número de presupuesto o nombre cliente" ) }}
+                <button type="submmit" class="btn btn-primary">Guardar</button>
+            </form>
+    </div>
+</div>
 
 <a  href="{{ url_for('consultas.alta_presupuesto') }}">Nuevo Presupuesto</a> 
 
@@ -17,6 +28,7 @@
             <th scope="col">FECHA</th>
             <th scope="col">CLIENTE</th>
             <th scope="col">IMPORTE</th>
+            <th scope="col">ESTADO</th>
             <th scope="col">VENCIMIENTO</th>
             <th scope="col">ACCIÓN</th>
             
@@ -27,33 +39,36 @@
         
         {% for presupuesto in cabecera %}
             <tr>
-                <th scope="row">{{ presupuesto.id }}</th>
-                <td> {{ presupuesto.created.strftime('%d-%m-%Y') }}</td>
-                <td> {{ presupuesto.nombre_cliente }} </td>
-                <td> {{ presupuesto.importe_total }}</td>
-                {% if now < presupuesto.fecha_vencimiento %}
+                <th scope="row">{{ presupuesto.CabecerasPresupuestos.id }}</th>
+                <td> {{ presupuesto.CabecerasPresupuestos.created.strftime('%d-%m-%Y') }}</td>
+                <td> {{ presupuesto.CabecerasPresupuestos.nombre_cliente }} </td>
+                <td> {{ presupuesto.CabecerasPresupuestos.importe_total }}</td>
+                <td> {{ presupuesto.Parametros.descripcion }}</td>
+                {% if now < presupuesto.CabecerasPresupuestos.fecha_vencimiento %}
                 
-                <td> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Acción
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a>
-                        <a class="dropdown-item"  href="{{ url_for('consultas.modificacion_datos_cliente', id_presupuesto = presupuesto.id) }}">Modificar datos del cliente</a>
-                        <a class="dropdown-item"  href="{{ url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = presupuesto.id) }}">Modificar productos del presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.modificacion_datos_cliente', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar datos del cliente</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar productos del presupuesto</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.anula_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar productos del presupuesto</a>
                     </div>
                 </td>
                 {% else %}
-                <td class="text-danger"> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td class="text-danger"> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
                 <td >
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Acción
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
                     </div>
                 </td>
                 {% endif %}

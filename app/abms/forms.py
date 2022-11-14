@@ -28,8 +28,8 @@ class ProductosForm(FlaskForm):
     id_lista_proveedor = StringField('Id del producto del proveedor')
     descripcion = StringField('Descripcion del producto',validators=[DataRequired('Complete la descripcion del producto' )])
     importe = FloatField('Importe del producto', validators=[DataRequired('Ingrese el importe del producto sin iva' )] )
-    utilidad = FloatField('Porcentaje de utilidad', validators=[DataRequired('Ingrese el porcentaje que quiere cargarle al producto/servicio' )] )
-    cantidad_presentacion = IntegerField('Cantidad de productos por presentación')
+    utilidad = FloatField('Porcentaje de utilidad', validators=[DataRequired('Ingrese el porcentaje que quiere cargarle al producto/servicio' )] ) # validar que si es servicio se se pueda grabar en cero 
+    cantidad_presentacion = FloatField('Cantidad de productos por presentación')
     es_servicio = SelectField('¿Es servicio?', choices =[( '','Seleccionar acción'),( "1",'Si'),( "0",'NO')], coerce = str, default = None, validators=[DataRequired('Completar si o no')])
 
 class ProductosMasivosForm(FlaskForm):
