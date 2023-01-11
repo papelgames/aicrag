@@ -37,7 +37,7 @@
             <tr class = "text-danger">
                 <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
                 <td> {{ producto.Productos.descripcion }}</td>
-                <td> {{ producto.importe_calculado }} </td>
+                <td> ${{ producto.importe_calculado|round(2)  }}</td>
                 <td> {{ producto.Productos.cantidad_presentacion }}</td>
                 <td> {{ producto.Proveedores.nombre }}</td>
                 <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
@@ -46,7 +46,7 @@
             <tr>
                 <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
                 <td> {{ producto.Productos.descripcion }}</td>
-                <td> {{ producto.importe_calculado }} </td>
+                <td> ${{ producto.importe_calculado|round(2)  }} </td>
                 <td> {{ producto.Productos.cantidad_presentacion }}</td>
                 <td> {{ producto.Proveedores.nombre }}</td>
                 <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>

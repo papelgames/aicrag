@@ -35,7 +35,7 @@
             <tr>
                 <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
                 <td> {{ producto.Productos.descripcion }}</td>
-                <td> {{ producto.Productos.importe }}</td>
+                <td> {{ producto.Productos.importe|round(2) }}</td>
                 <td> {{ producto.Productos.cantidad_presentacion }}</td>
                 <td> {{ producto.Proveedores.nombre }}</td>
                 <td>

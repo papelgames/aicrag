@@ -10,6 +10,7 @@ from sqlalchemy import Column, func
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.auth.models import User
+import locale
 
 from app import db
 

@@ -136,3 +136,4 @@ database.db
 /migrations
 cosas_viejas.txt
 CHANGELOG.md
+.env

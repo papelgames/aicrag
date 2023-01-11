@@ -72,7 +72,7 @@
                 <td>{{ producto.id }} </td>
                 <td>{{ producto.cantidad }} </td>
                 <td>{{ producto.descripcion }} </td>
-                <td>{{ producto.importe }} </td>
+                <td>{{ producto.importe|round(2) }} </td>
                 <td>{{ producto.cantidad * producto.importe }} </td>
               
             </tr>
@@ -85,7 +85,7 @@
             <th></th>
             <th></th>
             <th>Total presupuesto</th>
-            <th> {{ cabecera.importe_total }} </th>
+            <th> {{ cabecera.importe_total|round(2) }} </th>
           </tr>
         </tfoot>
       </table>

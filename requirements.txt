@@ -22,3 +22,5 @@ WTForms==2.2.1
 rsa 
 pandas
 mysql-connector-python
+python-dotenv==0.21.0
+openpyxl==3.0.9

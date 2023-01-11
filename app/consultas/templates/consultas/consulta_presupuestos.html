@@ -42,7 +42,7 @@
                 <th scope="row">{{ presupuesto.CabecerasPresupuestos.id }}</th>
                 <td> {{ presupuesto.CabecerasPresupuestos.created.strftime('%d-%m-%Y') }}</td>
                 <td> {{ presupuesto.CabecerasPresupuestos.nombre_cliente }} </td>
-                <td> {{ presupuesto.CabecerasPresupuestos.importe_total }}</td>
+                <td> {{ presupuesto.CabecerasPresupuestos.importe_total|round(2) }}</td>
                 <td> {{ presupuesto.Parametros.descripcion }}</td>
                 {% if now < presupuesto.CabecerasPresupuestos.fecha_vencimiento %}
                 
