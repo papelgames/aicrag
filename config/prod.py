@@ -1,9 +1,13 @@
-
 from .default import *
-
-
-SECRET_KEY = '5e04a4955d8878191923e86fe6a0dfb24edb226c87d6c7787f35ba4698afc86e95cae409aebd47f7'
+import os
 
 APP_ENV = APP_ENV_PRODUCTION
 
-SQLALCHEMY_DATABASE_URI = 'postgresql://db_user:db_pass@host:port/db_name'
+SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}?auth_plugin=mysql_native_password".format(
+    username = os.getenv('DB_USERNAME'),
+    password = os.getenv('DB_PASSWORD'),
+    hostname = os.getenv('DB_HOSTNAME'),
+    databasename = os.getenv('DB_DATABASE')
+)
+
+SECRET_KEY = os.getenv('SECRET_KEY')

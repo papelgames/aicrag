@@ -44,9 +44,9 @@ def consulta_productos(criterio = ""):
     
     return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, fecha_tope = fecha_tope )
 
-datos_cliente =[]
-lista_productos_presupuesto = []
-suma_importe_total = 0
+# global datos_cliente 
+# global lista_productos_presupuesto 
+# global suma_importe_total 
 
 @consultas_bp.route("/consultas/consultapresupuestos/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
@@ -81,6 +81,13 @@ def presupuesto(id_presupuesto):
         cabecera.save()
 
     return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
+global datos_cliente 
+global lista_productos_presupuesto 
+global suma_importe_total 
+
+datos_cliente = []
+lista_productos_presupuesto= []
+suma_importe_total =0
 
 
 @consultas_bp.route("/consultas/altapresupuesto/", methods = ['GET', 'POST'])
@@ -97,8 +104,6 @@ def alta_presupuesto():
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
 
-    
-   
     if len(datos_cliente) == 0:
        if form2.validate_on_submit():
             nombre_cliente = form2.nombre_cliente.data

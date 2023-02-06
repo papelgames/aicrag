@@ -277,7 +277,9 @@ def alta_masiva():
         registros_repetidos = 0
         registros_total = 0
         #genero la matriz de datos.
+        
         mat = list(zip(rango_id_lista_proveedor, rango_codigo_de_barras, rango_descripcion, rango_importe, rango_utilidad))
+            
         
         secuencia = 0
         control_proveedor = False
@@ -304,8 +306,9 @@ def alta_masiva():
                             utilidad_ = 100
                         else:
                             utilidad_ = id[4].value
-
-                        producto_nuevo = Productos(codigo_de_barras = id[1].value,
+                        #antes de grabar chequeo si el proveedor guarda con iva o no
+                        if proveedor.incluye_iva == True:
+                            producto_nuevo = Productos(codigo_de_barras = id[1].value,
                                                     id_proveedor = form.id_proveedor.data,
                                                     id_lista_proveedor = id[0].value,
                                                     descripcion = id[2].value,
@@ -317,14 +320,34 @@ def alta_masiva():
                                                     usuario_alta = current_user.email,
                                                     usuario_modificacion = current_user.email
                                                     )
+                        else:
+                            producto_nuevo = Productos(codigo_de_barras = id[1].value,
+                                                        id_proveedor = form.id_proveedor.data,
+                                                        id_lista_proveedor = id[0].value,
+                                                        descripcion = id[2].value,
+                                                        importe = id[3].value * 1.21,
+                                                        utilidad = utilidad_,
+                                                        cantidad_presentacion = 1,
+                                                        id_ingreso = id_ingreso,
+                                                        es_servicio = False,
+                                                        usuario_alta = current_user.email,
+                                                        usuario_modificacion = current_user.email
+                                                        )
                         producto_nuevo.only_add()
                     
                     #actualizo productos que existe si es que tienen un ipmporte distinto al cargado.    
                     if producto_por_id:
-                        if producto_por_id.importe != id[3].value:    
-                            producto_por_id.importe = id[3].value
-                            producto_por_id.usuario_modificacion = current_user.email
-                            producto_por_id.id_ingreso = id_ingreso
+                        if proveedor.incluye_iva == True:
+                            if producto_por_id.importe != id[3].value:    
+                                producto_por_id.importe = id[3].value
+                                producto_por_id.usuario_modificacion = current_user.email
+                                producto_por_id.id_ingreso = id_ingreso
+                        else:
+                            if producto_por_id.importe != id[3].value * 1.21:    
+                                producto_por_id.importe = id[3].value * 1.21
+                                producto_por_id.usuario_modificacion = current_user.email
+                                producto_por_id.id_ingreso = id_ingreso 
+                            
                             producto_por_id.only_add()
             
             #commiteo las tablas
