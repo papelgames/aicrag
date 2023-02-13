@@ -39,7 +39,7 @@
       <div class="col-3">
         <h5>Enviar a: </h5>
         <p>
-          {{ cabecera.correo_electronico }}
+          {{ cabecera.correo_electronico }} 
         </p>
       </div>
       <div class="col-3">
@@ -69,7 +69,7 @@
           {% for producto in productos %}
             <tr>
               
-                <td>{{ producto.id }} </td>
+                <td>{{ producto.id_producto }} </td>
                 <td>{{ producto.cantidad }} </td>
                 <td>{{ producto.descripcion }} </td>
                 <td>{{ producto.importe|round(2) }} </td>

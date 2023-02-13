@@ -12,11 +12,11 @@
 		<h1>Datos del cliente</h1>
         {% if datos_cliente|length == 0 %}
             <form action="" method="post" class = "form-horizontal" enctype="multipart/form-data" novalidate>	
-                {{ form2.hidden_tag() }}
-                {{ render_input(form2.nombre_cliente,'', id= "nombre_cliente" , class="form-control", placeholder="Ingrese el nombre cliente" ) }}
-                {{ render_input(form2.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Ingrese correo electronico del cliente" ) }}
-                {{ render_input(form2.fecha_vencimiento,'', id= "fecha_vencimiento" ,value = vencimiento_estimado.strftime('%Y-%m-%d'), class="form-control", type="date"  ) }}
-                
+                {{ form.hidden_tag() }}
+                {{ render_input(form.nombre_cliente,'', id= "nombre_cliente" , class="form-control", placeholder="Ingrese el nombre cliente" ) }}
+                {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Ingrese correo electronico del cliente" ) }}
+                {{ render_input(form.fecha_vencimiento,'', id= "fecha_vencimiento" ,value = vencimiento_estimado.strftime('%Y-%m-%d'), class="form-control", type="date"  ) }}
+                {{ form.condicion(type = "hidden", value = "cargacliente") }}
                 <button type="submmit" class="btn btn-primary">Guardar</button>
             </form>
         {% else %}
@@ -43,6 +43,7 @@
                                 <form action="" method="post" enctype="multipart/form-data" novalidate>	
                                     {{ form.hidden_tag() }}
                                     {{ render_input(form.buscar,'', id= "buscar" , class="form-control", placeholder="Ingrese un código de barras o la descripción de un producto" ) }}
+                                    {{ form.condicion(type = "hidden", value = "buscarproductos") }}
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                         <button type="submmit" class="btn btn-primary" >Buscar</button>
@@ -81,7 +82,7 @@
                 <!-- aca control ultimo movimiento -->
                 {% if producto[4] < fecha_tope %}
                 <tr class="text-danger">
-                {{ form.condicion(type = "hidden", value = "a") }}
+                {{ form.condicion(type = "hidden", value = "agregaproducto") }}
                 {{ form.id(type = "hidden", value = producto[0]) }} 
                 {{ form.descripcion(type = "hidden", value = producto[1]) }} 
                     <th scope="row">{{ producto[0] }}</th>
@@ -97,7 +98,7 @@
                 </tr>
                 {% else %}
                 <tr >
-                    {{ form.condicion(type = "hidden", value = "a") }}
+                    {{ form.condicion(type = "hidden", value = "agregaproducto") }}
                     {{ form.id(type = "hidden", value = producto[0]) }} 
                     {{ form.descripcion(type = "hidden", value = producto[1]) }} 
                         <th scope="row">{{ producto[0] }}</th>
@@ -150,7 +151,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <form action="" method="post" enctype="multipart/form-data" novalidate>
                         {{ form.hidden_tag() }}
-                        {{ form.condicion(type = "hidden", value = "d") }} 
+                        {{ form.condicion(type = "hidden", value = "borraproducto") }} 
                         {{ form.registro(type = "hidden", value =  loop.index  ) }}
                         <button type="submmit" class="dropdown-item" >Eliminar</button>
                     </form>
@@ -164,7 +165,7 @@
 </table>
 <form action="" method="post" enctype="multipart/form-data" novalidate>	
     {{ form.hidden_tag() }}
-    {{ form.condicion(type = "hidden", value = "s") }}
+    {{ form.condicion(type = "hidden", value = "grabapresupuesto") }}
     <div class="container">
         <div class="row">
             <div class="col align-self-end">
@@ -175,7 +176,7 @@
 </form>
 <form action="" method="post" enctype="multipart/form-data" novalidate>	
     {{ form.hidden_tag() }}
-    {{ form.condicion(type = "hidden", value = "c") }}
+    {{ form.condicion(type = "hidden", value = "cancelapresupuesto") }}
     <div class="container">
         <div class="row">
             <div class="col align-self-end">
