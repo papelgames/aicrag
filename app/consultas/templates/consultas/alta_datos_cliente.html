@@ -1,0 +1,27 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    aicrag | Modificacion de presupuesto
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="offset-md-2 col-md-8">
+		<h1>Datos del cliente</h1>
+        
+		<form action="" method="post" class = "form-horizontal" enctype="multipart/form-data" novalidate>	
+			{{ form.hidden_tag() }}
+			{{ render_input(form.nombre_cliente,'', id= "nombre_cliente" , class="form-control", placeholder="Ingrese el nombre cliente" ) }}
+			{{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Ingrese correo electronico del cliente" ) }}
+			{{ render_input(form.fecha_vencimiento,'', id= "fecha_vencimiento" ,value = vencimiento_estimado.strftime('%Y-%m-%d'), class="form-control", type="date"  ) }}
+			
+			<button type="submmit" class="btn btn-primary">Guardar</button>
+			
+		</form>
+            
+	</div>
+</div>
+
+
+{% endblock %}

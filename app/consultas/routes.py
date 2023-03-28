@@ -12,7 +12,7 @@ from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
 from . import consultas_bp 
-from .forms import BusquedaForm, PresupuestoForm
+from .forms import BusquedaForm, CabeceraPresupuestoForm, ProductosPresupuestoForm
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,6 @@ def consulta_productos(criterio = ""):
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
     return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, fecha_tope = fecha_tope )
-
-# global datos_cliente 
-# global lista_productos_presupuesto 
-# global suma_importe_total 
 
 @consultas_bp.route("/consultas/consultapresupuestos/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
@@ -82,173 +78,41 @@ def presupuesto(id_presupuesto):
 
     return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
 
-global datos_cliente 
-global lista_productos_presupuesto 
-global suma_importe_total 
-
-datos_cliente = []
-lista_productos_presupuesto= []
-suma_importe_total =0
-
 
 @consultas_bp.route("/consultas/altapresupuesto/", methods = ['GET', 'POST'])
 @login_required
 def alta_presupuesto():
-    form = PresupuestoForm()
-    
-    lista_productos_seleccion = []
-    suma_importe_total = 0
-
+    form = CabeceraPresupuestoForm()
     dias_a_vancer = timedelta(days = int(Parametros.get_by_tabla("dias_vencimiento").tipo_parametro))
     vencimiento_estimado = datetime.now() + dias_a_vancer
-    
-    cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
-    fecha_tope = datetime.now() - cantidad_dias_actualizacion
-
-    #if len(datos_cliente) == 0:
 
     if form.validate_on_submit():
-        if form.condicion.data == "cargacliente":
-            nombre_cliente = form.nombre_cliente.data
-            correo_electronico = form.correo_electronico.data
-            fecha_vencimiento = form.fecha_vencimiento.data
-            if form.fecha_vencimiento.data < date.today():
-                flash("La fecha de vencimiento no puede ser anterior a hoy", "alert-warning")
-                
-                return render_template("consultas/alta_presupuesto.html", 
-                                    form = form,  
-                                    lista_productos_presupuesto=lista_productos_presupuesto, 
-                                    lista_productos_seleccion = lista_productos_seleccion, 
-                                    datos_cliente = datos_cliente, 
-                                    vencimiento_estimado = vencimiento_estimado, 
-                                    fecha_tope = fecha_tope, 
-                                    suma_importe_total = suma_importe_total)
-        
-        datos_cliente.append(nombre_cliente)
-        datos_cliente.append(correo_electronico)
-        datos_cliente.append(fecha_vencimiento)
-        
-        return render_template("consultas/alta_presupuesto.html", 
-                                    form = form,  
-                                    lista_productos_presupuesto=lista_productos_presupuesto, 
-                                    lista_productos_seleccion = lista_productos_seleccion, 
-                                    datos_cliente = datos_cliente, 
-                                    vencimiento_estimado = vencimiento_estimado, 
-                                    fecha_tope = fecha_tope, 
-                                    suma_importe_total = suma_importe_total)
-                
-    #if form.validate_on_submit(): 
-    if form.condicion.data == "agregaproducto":
-        id = form.id.data
-        descripcion = form.descripcion.data
-        cantidad = form.cantidad.data
-        importe = form.importe.data
-        
-        if id != None:
-            lista_productos_presupuesto.append([id, descripcion, cantidad , importe ])
-            for monto in lista_productos_presupuesto:
-                suma_importe_total  += monto[3] 
-            return render_template("consultas/alta_presupuesto.html", 
-                                    form = form,  
-                                    lista_productos_presupuesto=lista_productos_presupuesto, 
-                                    lista_productos_seleccion = lista_productos_seleccion, 
-                                    datos_cliente = datos_cliente, 
-                                    vencimiento_estimado = vencimiento_estimado, 
-                                    fecha_tope = fecha_tope, 
-                                    suma_importe_total = suma_importe_total)    
-    
-    elif form.condicion.data == "borraproducto":
-        lista_productos_presupuesto.pop(int(form.registro.data)-1)
-        for monto in lista_productos_presupuesto:
-                suma_importe_total  += monto[3]
-        
-        return render_template("consultas/alta_presupuesto.html", 
-                                    form = form,  
-                                    lista_productos_presupuesto=lista_productos_presupuesto, 
-                                    lista_productos_seleccion = lista_productos_seleccion, 
-                                    datos_cliente = datos_cliente, 
-                                    vencimiento_estimado = vencimiento_estimado, 
-                                    fecha_tope = fecha_tope, 
-                                    suma_importe_total = suma_importe_total)
-    
-    elif form.condicion.data == "grabapresupuesto":
-        #presupuesto = Presupuestos()
-        
-        for monto in lista_productos_presupuesto:
-                suma_importe_total  += monto[3]
-
-        fecha_vencimiento = datos_cliente[2]
-        nombre_cliente = datos_cliente[0]
-        correo_electronico = datos_cliente[1]
-        importe_total = suma_importe_total
+        fecha_vencimiento = form.fecha_vencimiento.data
+        nombre_cliente = form.nombre_cliente.data
+        correo_electronico = form.correo_electronico.data
         
         cabecera = CabecerasPresupuestos(fecha_vencimiento = fecha_vencimiento,
                                             nombre_cliente = nombre_cliente,
                                             correo_electronico = correo_electronico,
-                                            importe_total = importe_total,
-                                            estado = 1,
+                                            estado = 4,
+                                            importe_total = 0.00,
                                             usuario_alta = current_user.email,
                                             usuario_modificacion = current_user.email
                                             )           
         
         cabecera.save()
-        for registro in lista_productos_presupuesto:
-            # id, 0 
-            # descripcion, 1 
-            # cantidad , 2
-            # importe 3
-            
-            presupuesto = Presupuestos(id_cabecera_presupuesto = cabecera.id,
-                                        id_producto = registro[0],
-                                        cantidad = registro[2],
-                                        descripcion = registro[1],
-                                        importe = registro[3],
-                                        usuario_alta = current_user.email,
-                                        usuario_modificacion = current_user.email
-                                        )
-            presupuesto.save()
-            
-        datos_cliente.clear()
-        lista_productos_presupuesto.clear() 
-        flash("El presupuesto se ha grabado", "alert-success")
-        return redirect(url_for("consultas.presupuesto", id_presupuesto = cabecera.id))
-        
-    elif form.condicion.data == "cancelapresupuesto":
-        datos_cliente.clear()
-        lista_productos_presupuesto.clear() 
-
-        return redirect(url_for("consultas.alta_presupuesto"))
-    elif form.condicion.data == "buscarproductos":
-        buscar = form.buscar.data
-        if buscar.isdigit() == True:
-            lista_de_productos = Productos.get_by_codigo_de_barras(buscar)
-            for registro in lista_de_productos:
-                lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre,registro.Productos.modified ])
-        elif buscar == "":
-            #corregir este mensaje cuando se graba vacio el nombre del clienete
-            flash("Escriba el nombre de un producto", "alert-warning")
-        else:
-            lista_de_productos = Productos.get_like_descripcion(buscar)
-            for registro in lista_de_productos:
-                lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre, registro.Productos.modified])
-        
-    return render_template("consultas/alta_presupuesto.html", 
-                                    form = form,  
-                                    lista_productos_presupuesto=lista_productos_presupuesto, 
-                                    lista_productos_seleccion = lista_productos_seleccion, 
-                                    datos_cliente = datos_cliente, 
-                                    vencimiento_estimado = vencimiento_estimado, 
-                                    fecha_tope = fecha_tope, 
-                                    suma_importe_total = suma_importe_total)
+        return redirect(url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = cabecera.id))
+    return render_template("consultas/alta_datos_cliente.html", form = form, vencimiento_estimado = vencimiento_estimado)
+    
 
 @consultas_bp.route("/consultas/modificaciondatoscliente/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
 def modificacion_datos_cliente(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
-    form = PresupuestoForm()
+    form = CabeceraPresupuestoForm()
     
-    if cabecera.estado == 2:
-        flash ("El presupuesto se encuentra vencido", "alert-warning" )
+    if cabecera.estado != 1:
+        flash ("El presupuesto no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
 
     if form.validate_on_submit():
@@ -274,14 +138,14 @@ def modificacion_datos_cliente(id_presupuesto):
 def modificacion_productos_presupuesto(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     producto = Presupuestos.get_by_id_presupuesto_paquete(id_presupuesto)
-    form = PresupuestoForm()
+    form = ProductosPresupuestoForm()
     lista_productos_seleccion = []
     
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
-    if cabecera.estado == 2:
-        flash ("El presupuesto se encuentra vencido", "alert-warning" )
+    if cabecera.estado != 1 and cabecera.estado != 4:
+        flash ("El presupuesto se no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
     
     if form.validate_on_submit():
@@ -294,6 +158,7 @@ def modificacion_productos_presupuesto(id_presupuesto):
             productos_presupuesto.save()
             total_presupuesto = Presupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
             cabecera.importe_total = total_presupuesto[1]
+            cabecera.estado = 1
             cabecera.save()
             
             flash("Se han actualizado los datos correctamente", "alert-success")            
@@ -326,6 +191,7 @@ def modificacion_productos_presupuesto(id_presupuesto):
             nuevo_producto.save()
             total_presupuesto = Presupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
             cabecera.importe_total = total_presupuesto[1]
+            cabecera.estado = 1
             cabecera.save()     
             flash ("Se incorporó un nuevo producto", "alert-success")
             return redirect(url_for("consultas.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
