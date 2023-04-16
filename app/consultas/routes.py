@@ -1,12 +1,15 @@
 import logging
 from operator import setitem
 import os
+import dbf 
+import threading
 from datetime import date, datetime, timedelta
 from string import capwords
 
-from flask import render_template, redirect, url_for, abort, current_app, flash, g
+from flask import render_template, redirect, url_for, abort, current_app, flash, send_file, make_response
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+
 
 from app.auth.decorators import admin_required
 from app.auth.models import User
@@ -20,7 +23,6 @@ def control_vencimiento (fecha):
     if fecha < datetime.now():
         return "VENCIDO"
 
-
 @consultas_bp.route("/consultas/consultaproducto/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultaproducto/", methods = ['GET', 'POST'])
 @login_required
@@ -32,14 +34,14 @@ def consulta_productos(criterio = ""):
         return redirect(url_for("consultas.consulta_productos", criterio = buscar))
     
     if criterio.isdigit() == True:
-        lista_de_productos = Productos.get_by_codigo_de_barras(criterio)
+        producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
+        lista_de_productos = Productos.get_by_id_completo(producto_caro.id)
     elif criterio == "":
         pass
     else:
         lista_de_productos = Productos.get_like_descripcion(criterio)
     
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
-   
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
     return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, fecha_tope = fecha_tope )
@@ -62,8 +64,6 @@ def consulta_presupuestos(criterio=""):
         pass
     else:
         cabecera = CabecerasPresupuestos.get_like_descripcion(criterio)
-     
-   
     return render_template("consultas/consulta_presupuestos.html", form = form, cabecera = cabecera, now = now)
 
 @consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
@@ -75,9 +75,7 @@ def presupuesto(id_presupuesto):
     if vencimiento_si_no == "VENCIDO" and cabecera.estado == 1:
         cabecera.estado = 2
         cabecera.save()
-
     return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
-
 
 @consultas_bp.route("/consultas/altapresupuesto/", methods = ['GET', 'POST'])
 @login_required
@@ -99,12 +97,10 @@ def alta_presupuesto():
                                             usuario_alta = current_user.email,
                                             usuario_modificacion = current_user.email
                                             )           
-        
         cabecera.save()
         return redirect(url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = cabecera.id))
     return render_template("consultas/alta_datos_cliente.html", form = form, vencimiento_estimado = vencimiento_estimado)
-    
-
+   
 @consultas_bp.route("/consultas/modificaciondatoscliente/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
 def modificacion_datos_cliente(id_presupuesto):
@@ -126,12 +122,9 @@ def modificacion_datos_cliente(id_presupuesto):
                 return redirect(url_for("consultas.modificacion_datos_cliente", id_presupuesto = id_presupuesto))
         
         cabecera.save()
-        
         flash("Se han actualizado los datos correctamente", "alert-success")            
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
-
     return render_template("consultas/modificacion_datos_cliente.html", form = form, cabecera = cabecera)
-
   
 @consultas_bp.route("/consultas/modificacionproductospresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
@@ -149,7 +142,6 @@ def modificacion_productos_presupuesto(id_presupuesto):
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
     
     if form.validate_on_submit():
-        
         if form.condicion.data == "modificarproducto":
             productos_presupuesto = Presupuestos.get_by_id_producto(form.id.data)
             productos_presupuesto.cantidad = form.cantidad.data
@@ -158,7 +150,6 @@ def modificacion_productos_presupuesto(id_presupuesto):
             productos_presupuesto.save()
             total_presupuesto = Presupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
             cabecera.importe_total = total_presupuesto[1]
-            cabecera.estado = 1
             cabecera.save()
             
             flash("Se han actualizado los datos correctamente", "alert-success")            
@@ -166,15 +157,14 @@ def modificacion_productos_presupuesto(id_presupuesto):
         elif form.condicion.data == "buscarproductos":
             buscar = form.buscar.data
             if buscar.isdigit() == True:
-                lista_de_productos = Productos.get_by_codigo_de_barras(buscar)
+                producto_caro = Productos.get_by_codigo_de_barras_caro(buscar)
+                lista_de_productos = Productos.get_by_id_completo(producto_caro.id)
                 for registro in lista_de_productos:
                     lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre, registro.Productos.modified])
             elif buscar == "":
-                
                 #corregir este mensaje cuando se graba vacio el nombre del clienete
                 flash("Escriba el nombre de un producto", "alert-warning")
             else:
-                
                 lista_de_productos = Productos.get_like_descripcion(buscar)
                 for registro in lista_de_productos:
                     lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre, registro.Productos.modified])
@@ -195,7 +185,6 @@ def modificacion_productos_presupuesto(id_presupuesto):
             cabecera.save()     
             flash ("Se incorporó un nuevo producto", "alert-success")
             return redirect(url_for("consultas.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
-        
     return render_template("consultas/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera, producto = producto, lista_productos_seleccion = lista_productos_seleccion, fecha_tope = fecha_tope)
 
 @consultas_bp.route("/consultas/eliminaprooductospresupuesto/<int:id_producto>", methods = ['GET', 'POST'])
@@ -214,7 +203,6 @@ def elimina_productos_presupuesto(id_producto):
     cabecera.save()
     return redirect(url_for("consultas.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))  
 
-
 @consultas_bp.route("/consultas/anulapresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
 def anula_presupuesto(id_presupuesto):
@@ -224,5 +212,27 @@ def anula_presupuesto(id_presupuesto):
         return redirect(url_for("consultas.consulta_presupuestos"))
     cabecera.estado = 3
     cabecera.save()
+    return redirect(url_for("consultas.consulta_presupuestos"))
+
+@consultas_bp.route("/consultas/exportarprecios")
+@login_required
+def exportar_precios():
+    print ("Empieza")
+    print (datetime.now())
+    archivo_dir = current_app.config['ARCHIVOS_DIR']
+    table = dbf.Table(archivo_dir + '/precios.dbf', 'CODIGO C(13); DETALLE C(56); PRECIOVP N(15,4)', codepage='cp1252', dbf_type='db3')
+    table.open(mode=dbf.READ_WRITE)
+    productos_precios = Productos.get_all_precios_dbf()
     
-    return redirect(url_for("consultas.consulta_presupuestos"))  
+    # Agregamos algunas filas de ejemplo
+    for row in productos_precios:
+        
+        table.append((row[0][:13],row[1][:56],round(row[2],2)))
+   
+    # Guardamos la tabla y cerramos el archivo
+    table.pack()
+    table.close()
+    print ("termina")
+    print (datetime.now())
+    return send_file(archivo_dir + '/precios.dbf', as_attachment=True)
+

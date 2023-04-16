@@ -24,15 +24,17 @@ from time import strftime, gmtime
 
 logger = logging.getLogger(__name__)
 
+def proveedores_select(archivo_si_no = None):
+    if archivo_si_no == None:
+        proveedores = Proveedores.get_all()
+    else:
+        proveedores = Proveedores.get_by_archivo_si_no(archivo_si_no)
 
-def proveedores_select():
-    proveedores = Proveedores.get_all()
     select_proveedor =[( '','Seleccionar proveedor')]
     for rs in proveedores:
         sub_select_proveedor = (str(rs.id), rs.nombre)
         select_proveedor.append(sub_select_proveedor)
     return select_proveedor
-
 
 def columnas_excel():
     select_excel =[( '','Seleccionar columna'),( 'A','A'),( 'B','B'),( 'C','C'),( 'D','D'),( 'E','E'),( 'F','F'),( 'G','G'),('H','H'),('I','I'),('J','J'),( 'K','K'),('L','L')]
@@ -109,8 +111,6 @@ def modificacion_producto(id_producto = ""):
         producto.es_servicio = '0'
 
     if form.validate_on_submit():
-
-        
         producto.codigo_de_barras = form.codigo_de_barras.data
         producto.id_proveedor = form.id_proveedor.data
         producto.id_lista_proveedor = form.id_lista_proveedor.data
@@ -238,7 +238,7 @@ def modificacion_proveedor(id_proveedor= ""):
 @login_required
 def alta_masiva():
     form = ProductosMasivosForm()
-    form.id_proveedor.choices = proveedores_select()
+    form.id_proveedor.choices = proveedores_select(True)
 
     if form.validate_on_submit():
         archivo = form.archivo.data

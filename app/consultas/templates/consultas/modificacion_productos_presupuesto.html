@@ -8,19 +8,22 @@
 {% block content %}
 <div class="row">
 	<div class="col-md-12">
-		<h2>Presupuesto: {{ cabecera.id }}</h2>
-        <h1>Datos del cliente</h1>
-        <div class="row mt-3">
-		<div class="col-6">
-			<h3>Cliente: {{ cabecera.nombre_cliente }}</h3> 
-			<h3>Correo electronico: {{ cabecera.correo_electronico }}</h3>   
-			<h3>Fecha de vencimiento: {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</h3>      
+		<div class="container">
+			<h2>Presupuesto: {{ cabecera.id }}</h2>
+			<h1>Datos del cliente</h1>
+			<div class="row mt-3">
+				<div class="col-6">
+					<h3>Cliente: {{ cabecera.nombre_cliente }}</h3> 
+					<h3>Correo electronico: {{ cabecera.correo_electronico }}</h3>   
+					<h3>Fecha de vencimiento: {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</h3>      
+				</div>
+				<div class="col-6">
+					<h1>TOTAL PRESUPUESTO: ${{ cabecera.importe_total|round(2) }}</h1>
+				</div>
+			</div>
 		</div>
-		<div class="col-6">
-			<h1>TOTAL PRESUPUESTO: ${{ cabecera.importe_total|round(2) }}</h1>
-		</div>
-		</div>
-		{% if lista_productos_seleccion|length == 0 %}
+		<div class="col-md-12">
+			{% if lista_productos_seleccion|length == 0 %}
 				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
 					Agregar productos
 				</button>
@@ -30,7 +33,7 @@
 							<div class="modal-header">
 								<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
+									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
 							<div class="modal-body">
@@ -50,9 +53,56 @@
 				</div>
 			{% endif%}
 			{% if lista_productos_seleccion %}
-
-
-			<table class="table table-striped">
+				<table class="table table-striped mx-auto">
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">PROVEEDOR</th>
+							<th scope="col">PRODUCTO</th>
+							<th scope="col">CANTIDAD</th>
+							<th scope="col">IMPORTE</th>
+							<th scope="col">ULTIMA MODIFICACION</th>
+							<th scope="col">SELECCIONAR</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for producto in lista_productos_seleccion %}
+							<form action="" method="post" enctype="multipart/form-data" novalidate>	
+								{{ form.hidden_tag() }}
+								<!-- aca control ultimo movimiento -->
+								{% if producto[4] < fecha_tope %}
+									<tr class="text-danger">
+										{{ form.condicion(type = "hidden", value = "agregarproducto") }}
+										{{ form.id(type = "hidden", value = producto[0]) }} 
+										{{ form.descripcion(type = "hidden", value = producto[1]) }} 
+										<th scope="row">{{ producto[0] }}</th>
+										<td> {{ producto[3] }} </td>
+										<td> {{ producto[1] }}</td>
+										<td> {{ form.cantidad( value = 1, class="text-danger form-control-sm") }} </td>
+										<td> {{ form.importe(value = producto[2]|round(2), class="text-danger form-control-sm") }} </td>
+										<td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
+										<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+									</tr>
+								{% else %}
+									<tr>
+										{{ form.condicion(type = "hidden", value = "agregarproducto") }}
+										{{ form.id(type = "hidden", value = producto[0]) }} 
+										{{ form.descripcion(type = "hidden", value = producto[1]) }} 
+										<th scope="row">{{ producto[0] }}</th>
+										<td> {{ producto[3] }} </td>
+										<td> {{ producto[1] }}</td>
+										<td> {{ form.cantidad( value = 1, class = "form-control-sm") }} </td>
+										<td> {{ form.importe(value = producto[2]|round(2), class = "form-control-sm") }} </td>
+										<td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
+										<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+									</tr>
+								{% endif %}
+							</form>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% endif %}
+			<table class="table table-striped mx-auto my-5">
 				<thead>
 					<tr>
 						<th scope="col">ID</th>
@@ -60,114 +110,77 @@
 						<th scope="col">PRODUCTO</th>
 						<th scope="col">CANTIDAD</th>
 						<th scope="col">IMPORTE</th>
-						<th scope="col">ULTIMA MODIFICACION</th>
-						<th scope="col">SELECCIONAR</th>
+						<th scope="col">TOTAL</th>
+						<th scope="col">RECALCULO</th>
+						<th scope="col">ACCION</th>
 					</tr>
 				</thead>
 				<tbody>
-					{% for producto in lista_productos_seleccion %}
-						
+					{% for item in producto %}
 						<form action="" method="post" enctype="multipart/form-data" novalidate>	
 							{{ form.hidden_tag() }}
-							<!-- aca control ultimo movimiento -->
-							{% if producto[4] < fecha_tope %}
-							<tr class="text-danger">
-							{{ form.condicion(type = "hidden", value = "agregarproducto") }}
-							{{ form.id(type = "hidden", value = producto[0]) }} 
-							{{ form.descripcion(type = "hidden", value = producto[1]) }} 
-								<th scope="row">{{ producto[0] }}</th>
-								<td> {{ producto[3] }} </td>
-								<td> {{ producto[1] }}</td>
-							
-								<td> {{ form.cantidad( value = 1, class="text-danger form-control-sm") }} </td>
-								<td> {{ form.importe(value = producto[2]|round(2), class="text-danger form-control-sm") }} </td>
-								<td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
-								
-								
-								<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
-							</tr>
-							{% else %}
 							<tr>
-							{{ form.condicion(type = "hidden", value = "agregarproducto") }}
-							{{ form.id(type = "hidden", value = producto[0]) }} 
-							{{ form.descripcion(type = "hidden", value = producto[1]) }} 
-								<th scope="row">{{ producto[0] }}</th>
-								<td> {{ producto[3] }} </td>
-								<td> {{ producto[1] }}</td>
-							
-								<td> {{ form.cantidad( value = 1, class = "form-control-sm") }} </td>
-								<td> {{ form.importe(value = producto[2]|round(2), class = "form-control-sm") }} </td>
-								<td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
-								
-								
-								<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+								{{ form.condicion(type = "hidden", value = "modificarproducto") }}
+								{{ form.id(type = "hidden", value = item.Presupuestos.id) }} 
+								{{ form.descripcion(type = "hidden", value = item.Presupuestos.descripcion) }} 
+								<th scope="row">{{ item.Presupuestos.id_producto }}</th>
+								<td> {{ item.Productos.id_proveedor}} </td>
+								<td> {{ item.Presupuestos.descripcion }}</td>
+								<td> {{ form.cantidad(value = item.Presupuestos.cantidad) }} </td>
+								<td> {{ form.importe(value = item.Presupuestos.importe|round(2)) }} </td>
+								<td> {{ item.Presupuestos.importe * item.Presupuestos.cantidad }} </td>
+								{% if item.Productos.importe > item.Presupuestos.importe %}
+									<td class="text-danger"> {{ item.Productos.importe }}</td>
+								{% else %}
+									<td> {{ item.Productos.importe }}</td>
+								{% endif %}
+								<td>
+									<div class="dropdown">
+										<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											Acción
+									</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+										<button class="dropdown-item"  type="submit">Guardar</button>
+										<a class="dropdown-item"  href="{{ url_for('consultas.elimina_productos_presupuesto', id_producto = item.Presupuestos.id) }}">Eliminar</a>
+									</div>
+								</td>
 							</tr>
-							{% endif %}
-
 						</form>
-						
 					{% endfor %}
 				</tbody>
 			</table>
-			
-			{% endif %}
-		
-		<table class="table table-striped">
-			<thead>
-				<tr>
-					<th scope="col">ID</th>
-					<th scope="col">PROVEEDOR</th>
-					<th scope="col">PRODUCTO</th>
-					<th scope="col">CANTIDAD</th>
-					<th scope="col">IMPORTE</th>
-					<th scope="col">TOTAL</th>
-					<th scope="col">RECALCULO</th>
-					<th scope="col">ACCION</th>
-					
-				</tr>
-			</thead>
-			<tbody>
-				{% for item in producto %}
-					
-					<form action="" method="post" enctype="multipart/form-data" novalidate>	
-						{{ form.hidden_tag() }}
-						<tr>
-						{{ form.condicion(type = "hidden", value = "modificarproducto") }}
-						{{ form.id(type = "hidden", value = item.Presupuestos.id) }} 
-						{{ form.descripcion(type = "hidden", value = item.Presupuestos.descripcion) }} 
-							<th scope="row">{{ item.Presupuestos.id_producto }}</th>
-							<td> {{ item.Productos.id_proveedor}} </td>
-							<td> {{ item.Presupuestos.descripcion }}</td>
-							<td> {{ form.cantidad(value = item.Presupuestos.cantidad) }} </td>
-							<td> {{ form.importe(value = item.Presupuestos.importe|round(2)) }} </td>
-							<td> {{ item.Presupuestos.importe * item.Presupuestos.cantidad }} </td>
-							{% if item.Productos.importe > item.Presupuestos.importe %}
-								<td class="text-danger"> {{ item.Productos.importe }}</td>
-							{% else %}
-								<td> {{ item.Productos.importe }}</td>
-							{% endif %}
-							<td>
-								<div class="dropdown">
-									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										Acción
+			<div>
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+					Anular presupuesto
+				</button>
+				<!-- Modal -->
+				<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
 								</button>
-								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-									<button class="dropdown-item"  type="submit">Guardar</button>
-									<a class="dropdown-item"  href="{{ url_for('consultas.elimina_productos_presupuesto', id_producto = item.Presupuestos.id) }}">Eliminar</a>
-								</div>
-							</td>
-							
-							
-						</tr>
-						
-					</form>
-					
-				{% endfor %}
-			</tbody>
-		</table>
-		
+							</div>
+							<div class="modal-body">
+								¿Está seguro de anular el presupuesto? 
+								Una vez confirmado no se podrá rehabilitar.
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar anulación</button>
+								<a href="{{ url_for('consultas.anula_presupuesto', id_presupuesto = cabecera.id) }}">
+									<button type="button" class="btn btn-primary">Confirmar anulación</button>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<a href="{{ url_for('consultas.presupuesto', id_presupuesto = cabecera.id) }}">
+					<button class="btn btn-primary">Ver presupuesto</button>
+				</a> 
+			</div>
+		</div>
 	</div>
 </div>
-
-
 {% endblock %}

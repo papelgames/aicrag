@@ -5,13 +5,17 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="col-12">  
     {% if vencimiento_si_no %}
       <h1 class="text-danger">Presupuesto {{ vencimiento_si_no }}</h1>
-    {% else %}  
-      <a  href="{{ url_for('consultas.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">Modificar datos del cliente</a>
-      <a  href="{{ url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">Modificar productos del presupuesto</a> 
+    {% else %} 
+    <a href="{{ url_for('consultas.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">
+      <button class="btn btn-primary">Modificar datos del cliente</button>
+    </a> 
+    <a href="{{ url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">
+      <button class="btn btn-primary">Modificar datos del presupuesto</button>
+    </a>  
+      
       <h1 class="text-success">Presupuesto VIGENTE</h1>
     {% endif %}
     
@@ -73,7 +77,7 @@
                 <td>{{ producto.cantidad }} </td>
                 <td>{{ producto.descripcion }} </td>
                 <td>{{ producto.importe|round(2) }} </td>
-                <td>{{ producto.cantidad * producto.importe }} </td>
+                <td>{{ (producto.cantidad * producto.importe)|round(2) }} </td>
               
             </tr>
           {% endfor %}

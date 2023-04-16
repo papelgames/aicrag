@@ -45,7 +45,11 @@ class Proveedores (Base):
     @staticmethod
     def get_all():
         return Proveedores.query.all()
-    
+
+    @staticmethod
+    def get_by_archivo_si_no(true_false):
+        return Proveedores.query.filter_by(archivo_si_no = true_false).all()
+
     @staticmethod
     def get_by_id(id_proveedor):
         return Proveedores.query.filter_by(id = id_proveedor).first()
@@ -85,13 +89,42 @@ class Productos (Base):
         return query_str
 
     @staticmethod
+    def get_all_precios_dbf():
+        valor_calculado = ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        query_str = db.session.query(Productos.codigo_de_barras, Productos.descripcion, valor_calculado)\
+            .filter(Productos.codigo_de_barras.isnot(None))\
+            .all()
+        return query_str
+
+    @staticmethod
+    def get_by_codigo_de_barras_caro(codigo_barras):
+        valor_calculado = ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        query_str = db.session.query(Productos.id, Productos.importe)\
+            .filter(Productos.codigo_de_barras == codigo_barras)\
+            .filter( valor_calculado == db.session.query(func.max(valor_calculado))\
+                .filter(Productos.codigo_de_barras == codigo_barras))\
+                .first()    
+        return query_str
+    
+    @staticmethod
     def get_by_codigo_de_barras(codigo_barras):
-        query_str = db.session.query(Productos, User, Proveedores, \
-            ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion).label('importe_calculado'))\
+        valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        query_str = db.session.query(Productos, User, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.usuario_alta == User.email)\
             .filter(Productos.usuario_modificacion == User.email)\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
+            .all()
+        return query_str
+    
+    @staticmethod
+    def get_by_id_completo(id_producto):
+        valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        query_str = db.session.query(Productos, User, Proveedores, valor_calculado.label('importe_calculado'))\
+            .filter(Productos.usuario_alta == User.email)\
+            .filter(Productos.usuario_modificacion == User.email)\
+            .filter(Productos.id_proveedor == Proveedores.id)\
+            .filter(Productos.id == id_producto)\
             .all()
         return query_str
 
