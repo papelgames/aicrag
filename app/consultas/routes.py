@@ -2,7 +2,6 @@ import logging
 from operator import setitem
 import os
 import dbf 
-import threading
 from datetime import date, datetime, timedelta
 from string import capwords
 
@@ -10,13 +9,12 @@ from flask import render_template, redirect, url_for, abort, current_app, flash,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
-
 from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
 from . import consultas_bp 
 from .forms import BusquedaForm, CabeceraPresupuestoForm, ProductosPresupuestoForm
-
+# from app.funciones import to_precios_dbf
 logger = logging.getLogger(__name__)
 
 def control_vencimiento (fecha):
@@ -217,22 +215,10 @@ def anula_presupuesto(id_presupuesto):
 @consultas_bp.route("/consultas/exportarprecios")
 @login_required
 def exportar_precios():
-    print ("Empieza")
-    print (datetime.now())
-    archivo_dir = current_app.config['ARCHIVOS_DIR']
-    table = dbf.Table(archivo_dir + '/precios.dbf', 'CODIGO C(13); DETALLE C(56); PRECIOVP N(15,4)', codepage='cp1252', dbf_type='db3')
-    table.open(mode=dbf.READ_WRITE)
-    productos_precios = Productos.get_all_precios_dbf()
-    
-    # Agregamos algunas filas de ejemplo
-    for row in productos_precios:
-        
-        table.append((row[0][:13],row[1][:56],round(row[2],2)))
-   
-    # Guardamos la tabla y cerramos el archivo
-    table.pack()
-    table.close()
-    print ("termina")
-    print (datetime.now())
-    return send_file(archivo_dir + '/precios.dbf', as_attachment=True)
+    job = current_app.task_queue.enqueue("app.funciones.to_precios_dbf",)
+    job.get_id()
+    #to_precios_dbf()
+    flash("Ha iniciado la generación del archio precios.dbf", "alert-success")
+    return redirect(url_for("consultas.consulta_presupuestos"))
+#    return send_file(archivo_dir + '/precios.dbf', as_attachment=True)
 

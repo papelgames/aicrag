@@ -10,6 +10,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from app.common.filters import format_datetime
 
+from redis import Redis
+import rq
+
 login_manager = LoginManager()
 db = SQLAlchemy()
 migrate = Migrate()
@@ -25,7 +28,7 @@ def create_app(settings_module):
         app.config.from_pyfile('config-testing.py', silent=True)
     else:
         app.config.from_pyfile('config.py', silent=True)
-
+    
     configure_logging(app)
 
     login_manager.init_app(app)
@@ -34,6 +37,9 @@ def create_app(settings_module):
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+   # Load the config task queue
+    app.redis = Redis.from_url(app.config['REDIS_URL'])
+    app.task_queue = rq.Queue('aicrag-tareas', connection=app.redis)
 
     # Registro de los filtros
     register_filters(app)
@@ -59,6 +65,7 @@ def create_app(settings_module):
 
     # Custom error handlers
     register_error_handlers(app)
+    app.app_context().push()
 
     return app
 

@@ -32,3 +32,6 @@ MAIL_USE_TLS = True
 MAIL_DEBUG = False
 
 ITEMS_PER_PAGE = 3
+
+#url redis
+REDIS_URL = "redis://"

@@ -11,3 +11,5 @@ SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://{username}:{password}@{hostnam
 )
 
 SECRET_KEY = os.getenv('SECRET_KEY')
+
+REDIS_URL = os.getenv('REDIS_URL') 
