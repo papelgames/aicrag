@@ -141,7 +141,7 @@
 									</button>
 									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 										<button class="dropdown-item"  type="submit">Guardar</button>
-										<a class="dropdown-item"  href="{{ url_for('consultas.elimina_productos_presupuesto', id_producto = item.Presupuestos.id) }}">Eliminar</a>
+										<a class="dropdown-item"  href="{{ url_for('gestiones.elimina_productos_presupuesto', id_producto = item.Presupuestos.id) }}">Eliminar</a>
 									</div>
 								</td>
 							</tr>
@@ -169,7 +169,7 @@
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar anulación</button>
-								<a href="{{ url_for('consultas.anula_presupuesto', id_presupuesto = cabecera.id) }}">
+								<a href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = cabecera.id) }}">
 									<button type="button" class="btn btn-primary">Confirmar anulación</button>
 								</a>
 							</div>

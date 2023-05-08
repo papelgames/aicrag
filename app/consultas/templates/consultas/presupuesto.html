@@ -9,10 +9,10 @@
     {% if vencimiento_si_no %}
       <h1 class="text-danger">Presupuesto {{ vencimiento_si_no }}</h1>
     {% else %} 
-    <a href="{{ url_for('consultas.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">
+    <a href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">
       <button class="btn btn-primary">Modificar datos del cliente</button>
     </a> 
-    <a href="{{ url_for('consultas.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">
+    <a href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">
       <button class="btn btn-primary">Modificar datos del presupuesto</button>
     </a>  
       

@@ -63,6 +63,9 @@ def create_app(settings_module):
     from .abms import abms_bp
     app.register_blueprint(abms_bp)
 
+    from .gestiones import gestiones_bp
+    app.register_blueprint(gestiones_bp)
+
     # Custom error handlers
     register_error_handlers(app)
     app.app_context().push()
