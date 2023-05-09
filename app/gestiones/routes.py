@@ -162,7 +162,7 @@ def anula_presupuesto(id_presupuesto):
 @gestiones_bp.route("/gestiones/exportarprecios")
 @login_required
 def exportar_precios():
-    job = current_app.task_queue.enqueue("app.funciones.to_precios_dbf",)
+    job = current_app.task_queue.enqueue("app.tareas.to_precios_dbf", job_timeout = 3600)
     job.get_id()
     #to_precios_dbf()
     flash("Ha iniciado la generación del archio precios.dbf", "alert-success")
