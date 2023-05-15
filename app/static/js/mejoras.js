@@ -16,12 +16,3 @@ function imprSelec(nombre, titulo) {
     ventimp.close();
   }
 
-function enPesos(numero) {
-    const formatoPesos = new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-    });
-  
-    return formatoPesos.format(numero);
-  }
-  

@@ -242,124 +242,58 @@ def alta_masiva():
 
     if form.validate_on_submit():
         archivo = form.archivo.data
+        id_proveedor = form.id_proveedor.data
+        #falta validar que sea un proveedor que actualiza por archivo
+        proveedor = Proveedores.get_by_id(id_proveedor)
         if archivo:
             archivo_name = secure_filename(archivo.filename)
             archivo_dir = current_app.config['ARCHIVOS_DIR']
             os.makedirs(archivo_dir, exist_ok=True)
-            file_path = os.path.join(archivo_dir, archivo_name)
+            file_path = os.path.join(archivo_dir, proveedor.nombre +".xlsx" )
             archivo.save(file_path)
-        
-        #falta validar que sea un proveedor que actualiza por archivo
-        proveedor = Proveedores.get_by_id(form.id_proveedor.data)
-        
-        #abro documento excel
-        import openpyxl 
-        documento = openpyxl.load_workbook(os.path.abspath(file_path), data_only= True)
-        ws = documento.active
-        
-        #traigo parametria del proveedor
-        columnas = [proveedor.nombre,
-                    proveedor.formato_id,
-                    proveedor.columna_id_lista_proveedor, 
-                    proveedor.columna_codigo_de_barras, 
-                    proveedor.columna_descripcion,
-                    proveedor.columna_importe,
-                    proveedor.columna_utilidad ]
-        
-        #indico que al excel en que columnas el proveedor carga cada dato.
-        rango_id_lista_proveedor =  ws[columnas[2]]
-        rango_codigo_de_barras =  ws[columnas[3]]
-        rango_descripcion =  ws[columnas[4]]
-        rango_importe =  ws[columnas[5]]
-        rango_utilidad = ws[columnas[6]]
-        #falta armar el counter de cada caso.
-        registros_nuevos = 0
-        registros_repetidos = 0
-        registros_total = 0
-        #genero la matriz de datos.
-        
-        mat = list(zip(rango_id_lista_proveedor, rango_codigo_de_barras, rango_descripcion, rango_importe, rango_utilidad))
+
+            #abro documento excel
+            import openpyxl 
+            documento = openpyxl.load_workbook(os.path.abspath(file_path), data_only= True)
+            ws = documento.active
             
-        
-        secuencia = 0
-        control_proveedor = False
-        # controlo que el archivo corresponda al proveedor
-        for id in rango_id_lista_proveedor:
-            if secuencia == 15:
-                break
-            if id.value == columnas[1]:
-                control_proveedor = True
-                break
-            secuencia +=1
-        
-        #genero un id unico por subida
-        id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
-       
-        if control_proveedor == True:
-        #inserto los registros que no existen
-            producto_nuevo = Productos()
-            for id in mat:
-                if id[0].value != None and id[0].value != columnas[1]: 
-                    producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value)
-                    if not producto_por_id:
-                        if id[4].value == None:
-                            utilidad_ = 100
-                        else:
-                            utilidad_ = id[4].value
-                        #antes de grabar chequeo si el proveedor guarda con iva o no
-                        if proveedor.incluye_iva == True:
-                            producto_nuevo = Productos(codigo_de_barras = id[1].value,
-                                                    id_proveedor = form.id_proveedor.data,
-                                                    id_lista_proveedor = id[0].value,
-                                                    descripcion = id[2].value,
-                                                    importe = id[3].value,
-                                                    utilidad = utilidad_,
-                                                    cantidad_presentacion = 1,
-                                                    id_ingreso = id_ingreso,
-                                                    es_servicio = False,
-                                                    usuario_alta = current_user.email,
-                                                    usuario_modificacion = current_user.email
-                                                    )
-                        else:
-                            producto_nuevo = Productos(codigo_de_barras = id[1].value,
-                                                        id_proveedor = form.id_proveedor.data,
-                                                        id_lista_proveedor = id[0].value,
-                                                        descripcion = id[2].value,
-                                                        importe = id[3].value * 1.21,
-                                                        utilidad = utilidad_,
-                                                        cantidad_presentacion = 1,
-                                                        id_ingreso = id_ingreso,
-                                                        es_servicio = False,
-                                                        usuario_alta = current_user.email,
-                                                        usuario_modificacion = current_user.email
-                                                        )
-                        producto_nuevo.only_add()
-                    
-                    #actualizo productos que existe si es que tienen un ipmporte distinto al cargado.    
-                    if producto_por_id:
-                        if proveedor.incluye_iva == True:
-                            if producto_por_id.importe != id[3].value:    
-                                producto_por_id.importe = id[3].value
-                                producto_por_id.usuario_modificacion = current_user.email
-                                producto_por_id.id_ingreso = id_ingreso
-                        else:
-                            if producto_por_id.importe != id[3].value * 1.21:    
-                                producto_por_id.importe = id[3].value * 1.21
-                                producto_por_id.usuario_modificacion = current_user.email
-                                producto_por_id.id_ingreso = id_ingreso 
-                            
-                            producto_por_id.only_add()
+            #traigo parametria del proveedor
+            columnas = [proveedor.nombre,
+                        proveedor.formato_id,
+                        proveedor.columna_id_lista_proveedor, 
+                        proveedor.columna_codigo_de_barras, 
+                        proveedor.columna_descripcion,
+                        proveedor.columna_importe,
+                        proveedor.columna_utilidad ]
             
-            #commiteo las tablas
-            if producto_por_id:
-                producto_por_id.save()
-            producto_nuevo.only_save()
-            
-            #mejorar un poco a donde redirigir
-            flash ('El archivo de ' + columnas[0] + ' se procesó correctamente', "alert-success")
-            return redirect(url_for("public.index"))
-        else:
-            flash ('El archivo no pertenece a ' + columnas[0], "alert-warning")
-            return redirect(url_for("public.index"))
- 
+            #indico que al excel en que columnas el proveedor carga cada dato.
+            rango_id_lista_proveedor =  ws[columnas[2]]
+            rango_codigo_de_barras =  ws[columnas[3]]
+            rango_descripcion =  ws[columnas[4]]
+            rango_importe =  ws[columnas[5]]
+            rango_utilidad = ws[columnas[6]]
+            #falta armar el counter de cada caso.
+            registros_nuevos = 0
+            registros_repetidos = 0
+            registros_total = 0
+            #genero la matriz de datos.
+            secuencia = 0
+            control_proveedor = False
+            # controlo que el archivo corresponda al proveedor
+            for id in rango_id_lista_proveedor:
+                if secuencia == 15:
+                        break
+                if id.value == columnas[1]:
+                        control_proveedor = True
+                        break
+                secuencia +=1
+            if control_proveedor == True:
+                email = current_user.email
+                job = current_app.task_queue.enqueue("app.tareas.in_lista_masiva", file_path = file_path, id_proveedor = id_proveedor, email= email, job_timeout = 3600)
+                job.get_id()
+                
+                flash("Ha iniciado la actualización masiva de precios de: " + proveedor.nombre , "alert-success")
+                return redirect(url_for("public.index"))
+            else:
+                flash("El archivo seleccionado no corresponde al proveedor: " + proveedor.nombre , "alert-warning")
     return render_template("abms/alta_masiva.html", form=form)
