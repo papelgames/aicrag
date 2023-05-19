@@ -1,0 +1,52 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+    aicrag | Eliminacion de lotes de productos
+{% endblock %}
+
+{% block content %}
+    {% if tarea_actual != "inactiva" %}
+        <div >
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">TAREA INICIADA</th>
+                        <th scope="col">NOMBRE</th>
+                        <th scope="col">INICIADA</th>
+                        <th scope="col">ESTADO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class = "text-danger">
+                    <td> {{ tarea_actual.id }}</td>
+                    <td> {{ tarea_actual.func_name }}</td>
+                    <td> {{ tarea_actual.started_at.strftime('%d-%m-%Y %H:%m') }}</td>
+                    <td> {{ tarea_actual._status }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div >
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">TAREA PENDIENTE</th>
+                            <th scope="col">NOMBRE</th>
+                            <th scope="col">SOLICITADA</th>
+                            <th scope="col">ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr >
+                        {% for tarea_pendiente in tareas_pendientes %}
+                        <td> {{ tarea_pendiente.id }}</td>
+                        <td> {{ tarea_pendiente.func_name }}</td>
+                        <td> {{ tarea_pendiente.enqueued_at.strftime('%d-%m-%Y %H:%m') }}</td>
+                        <td> {{ tarea_pendiente._status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+     
+    {% endif %}
+{% endblock %}

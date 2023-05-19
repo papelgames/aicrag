@@ -22,6 +22,9 @@ from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivo
 from app.common.mail import send_email
 from time import strftime, gmtime
 
+from rq import Worker
+
+
 logger = logging.getLogger(__name__)
 
 def proveedores_select(archivo_si_no = None):
@@ -297,3 +300,20 @@ def alta_masiva():
             else:
                 flash("El archivo seleccionado no corresponde al proveedor: " + proveedor.nombre , "alert-warning")
     return render_template("abms/alta_masiva.html", form=form)
+
+@abms_bp.route("/abms/agenda", methods = ['GET', 'POST'])
+@login_required
+def agenda():
+    queue = current_app.task_queue
+    
+    workers = Worker.all(queue=queue)
+    worker = workers[0]
+    if worker.state == 'busy':
+        tarea_actual = worker.get_current_job()
+    else:
+        tarea_actual = 'inactiva'
+        flash("Sin tareas pendientes", "alert-success")
+    tareas_pendientes = queue.jobs
+    
+    return render_template("abms/agenda.html", tarea_actual=tarea_actual, tareas_pendientes=tareas_pendientes)
+

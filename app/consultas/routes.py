@@ -12,9 +12,13 @@ from werkzeug.utils import secure_filename
 from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
+from app.controles import get_tarea_corriendo
+
 from . import consultas_bp 
 from .forms import BusquedaForm
-# from app.funciones import to_precios_dbf
+
+
+
 logger = logging.getLogger(__name__)
 
 def control_vencimiento (fecha):
@@ -42,7 +46,8 @@ def consulta_productos(criterio = ""):
     
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
-    
+    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
+        flash('Los precios se están actualizando', 'alert-warning')
     return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, fecha_tope = fecha_tope )
 
 @consultas_bp.route("/consultas/consultapresupuestos/<criterio>", methods = ['GET', 'POST'])

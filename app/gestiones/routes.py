@@ -9,6 +9,7 @@ from flask import render_template, redirect, url_for, abort, current_app, flash,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
+from app.controles import get_tarea_corriendo
 from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
@@ -43,6 +44,8 @@ def alta_presupuesto():
                                             )           
         cabecera.save()
         return redirect(url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id))
+    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
+        flash('Los precios se están actualizando', 'alert-warning')
     return render_template("gestiones/alta_datos_cliente.html", form = form, vencimiento_estimado = vencimiento_estimado)
    
 @gestiones_bp.route("/gestiones/modificaciondatoscliente/<int:id_presupuesto>", methods = ['GET', 'POST'])
@@ -113,6 +116,8 @@ def modificacion_productos_presupuesto(id_presupuesto):
                 lista_de_productos = Productos.get_like_descripcion(buscar)
                 for registro in lista_de_productos:
                     lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre, registro.Productos.modified])
+            if get_tarea_corriendo('app.tareas.in_lista_masiva'):
+                flash('Los precios se están actualizando', 'alert-warning')
             return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera, producto = producto, lista_productos_seleccion = lista_productos_seleccion, fecha_tope = fecha_tope)
         
         elif form.condicion.data == "agregarproducto":
@@ -130,6 +135,8 @@ def modificacion_productos_presupuesto(id_presupuesto):
             cabecera.save()     
             flash ("Se incorporó un nuevo producto", "alert-success")
             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
+    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
+        flash('Los precios se están actualizando', 'alert-warning')
     return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera, producto = producto, lista_productos_seleccion = lista_productos_seleccion, fecha_tope = fecha_tope)
 
 @gestiones_bp.route("/gestiones/eliminaprooductospresupuesto/<int:id_producto>", methods = ['GET', 'POST'])
