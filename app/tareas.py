@@ -25,7 +25,8 @@ def to_precios_dbf():
    
    # Agregamos algunas filas de ejemplo
    for row in productos_precios:
-      
+      if len(str(row[2]))>12:
+          print (row) 
       table.append((row[0][:13],row[1][:56],round(row[2],2)))
 
    # Guardamos la tabla y cerramos el archivo
@@ -59,7 +60,7 @@ def in_lista_masiva(file_path, id_proveedor, email):
    rango_utilidad = ws[columnas[6]]
    #falta armar el counter de cada caso.
    registros_nuevos = 0
-   registros_repetidos = 0
+   registros_actualizados = 0
    registros_total = 0
    registros_ignorados = 0
    #genero un id unico por subida
@@ -112,33 +113,29 @@ def in_lista_masiva(file_path, id_proveedor, email):
          #actualizo productos que existe si es que tienen un importe distinto al cargado.    
          if producto_por_id:
             if proveedor.incluye_iva == True:
-               if producto_por_id.importe != float(format(id[3].value ,'.2f')):    
-                  producto_por_id.importe = float(format(id[3].value,'.2f'))
+               if float(producto_por_id.importe) != round(id[3].value,2):    
+                  producto_por_id.importe = round(id[3].value,2)
                   producto_por_id.usuario_modificacion = email
                   producto_por_id.id_ingreso = id_ingreso
-                  registros_repetidos += 1   
-                  print(str(producto_por_id.importe))
-                  print(str(float(format(id[3].value  ,'.2f'))))
-                  print(str(id[3].value))
+                  registros_actualizados += 1   
+                  producto_por_id.only_add()
                else:
                   registros_ignorados += 1 
             else:
-               if producto_por_id.importe != float(format(id[3].value * 1.21 ,'.2f')):    
-                  producto_por_id.importe = float(format(id[3].value * 1.21 ,'.2f'))
+               if float(producto_por_id.importe) != round(id[3].value * 1.21 ,2):
+                  producto_por_id.importe = round(id[3].value * 1.21 ,2)
                   producto_por_id.usuario_modificacion = email
                   producto_por_id.id_ingreso = id_ingreso 
-                  registros_repetidos += 1
-                  print(str(producto_por_id.importe))
-                  print(str(float(format(id[3].value * 1.21 ,'.2f'))))
-                  print(str(id[3].value * 1.21))
+                  registros_actualizados += 1
+                  producto_por_id.only_add()
                else:
                   registros_ignorados += 1
-               producto_por_id.only_add()
+               
    #commiteo las tablas
    if producto_por_id:
          producto_por_id.save()
    producto_nuevo.only_save()
    print ("Registros nuevos: " + str(registros_nuevos))
-   print ("Registros repetidos: " + str(registros_repetidos))
+   print ("Registros actualizados: " + str(registros_actualizados))
    print ("Registros ignorados: " + str(registros_ignorados))
    print ("Registros totales: " + str(registros_total))
