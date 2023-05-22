@@ -6,7 +6,7 @@ from types import ClassMethodDescriptorType
 from typing import Text
 
 from slugify import slugify
-from sqlalchemy import Column, func
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.auth.models import User
@@ -89,11 +89,36 @@ class Productos (Base):
         return query_str
 
     @staticmethod
+    def get_all_productos_sin_codigo_de_barras():
+        query_str = db.session.query(Productos.codigo_de_barras, Productos.id_lista_proveedor, Productos.descripcion, Productos.importe, Proveedores.nombre)\
+        .filter(Productos.id_proveedor == Proveedores.id)\
+        .filter(or_(Productos.codigo_de_barras.is_(None), \
+            Productos.codigo_de_barras == "",\
+            Productos.codigo_de_barras == " ",\
+            Productos.codigo_de_barras == "#N/A"))\
+        .all()
+        return query_str
+
+    @staticmethod
     def get_all_precios_dbf():
         valor_calculado = ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        query_str = db.session.query(Productos.codigo_de_barras, Productos.descripcion, valor_calculado)\
-            .filter(Productos.codigo_de_barras.isnot(None))\
-            .all()
+        subquery = db.session.query(
+        Productos.codigo_de_barras,
+        func.max(valor_calculado).label('max_precio'))\
+        .filter(Productos.codigo_de_barras.isnot(None))\
+        .filter(Productos.codigo_de_barras != "")\
+        .filter(Productos.codigo_de_barras != " ")\
+        .filter(Productos.codigo_de_barras != "#N/A")\
+        .group_by(Productos.codigo_de_barras).subquery()
+
+        query_str = db.session.query(
+        subquery.c.codigo_de_barras,
+        Productos.descripcion,
+        subquery.c.max_precio
+    ).join(
+        Productos,
+        (subquery.c.codigo_de_barras == Productos.codigo_de_barras) & (subquery.c.max_precio == valor_calculado)
+    ).distinct().all()
         return query_str
 
     @staticmethod
@@ -101,7 +126,7 @@ class Productos (Base):
         valor_calculado = ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
         query_str = db.session.query(Productos.id, Productos.importe)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
-            .filter( valor_calculado == db.session.query(func.max(valor_calculado))\
+            .filter(valor_calculado == db.session.query(func.max(valor_calculado))\
                 .filter(Productos.codigo_de_barras == codigo_barras))\
                 .first()    
         return query_str

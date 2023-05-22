@@ -10,7 +10,12 @@
         <button class="btn btn-primary">Exportar Precios</button>
     </a>
 </div>
-{% if archivos %}
+<div>
+    <a href="{{ url_for('gestiones.exportar_codigos_de_barra_faltantes') }}">
+        <button class="btn btn-primary">Exportar codigos de barras faltantes</button>
+    </a>
+</div>
+{% if archivos_dict%}
 <table class="table table-striped">
     <thead>
         <tr>
@@ -21,17 +26,17 @@
     </thead>
     
     <tbody>
-        {% for archivo in archivos %}
+        {% for archivo in archivos_dict %}
          <tr >
             <th scope="row">{{ archivo }}</th>
-            <td> fecha a cargar del archivo </td>
+            <td> {{ archivos_dict[archivo] }}</td>
             <td>
                 <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Acción
                 </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="#">Descargar</a>
+                        <a class="dropdown-item" href="{{ url_for('gestiones.descarga_archivo', archivo=archivo) }}">Descargar</a>
                         
                     </div>
                 </div>

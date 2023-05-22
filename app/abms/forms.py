@@ -61,7 +61,7 @@ class ProductosMasivosForm(FlaskForm):
     id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar un proveedor')])
     archivo = FileField('Archivo de alta', validators=[
               DataRequired('Debe seleccionar un archivo' ),
-              FileAllowed(['xls', 'xlsx', 'xltm'], 'No es un archivo permitido')
+              FileAllowed(['xlsx'], 'No es un archivo permitido')
               ])
 
 class BusquedaForm(FlaskForm):

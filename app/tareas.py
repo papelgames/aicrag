@@ -6,12 +6,26 @@ from werkzeug.utils import secure_filename
 from time import strftime, gmtime
 import locale
 from dotenv import load_dotenv
+import openpyxl
 
 load_dotenv()
 settings_module = os.getenv('APP_SETTINGS_MODULE')
 app = create_app(settings_module)
 
 app.app_context().push()
+
+def sin_codigo_barras_to_excel():
+   # Filtrar y preparar los datos para la inserción
+   archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
+   productos_incompletos = Productos.get_all_productos_sin_codigo_de_barras()
+
+   wb = openpyxl.Workbook()
+   hoja = wb.active
+   hoja.append(('Codigo_de_barras', 'Id_proveedores', 'Descripcion', 'Importe', 'Nombre_proveedor'))
+   for row in productos_incompletos:
+      hoja.append(row)
+   wb.save(archivo_dir + '/productos_sin_codigo_barra.xlsx')
+
 
 def to_precios_dbf():
    # Filtrar y preparar los datos para la inserción

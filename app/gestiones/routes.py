@@ -1,7 +1,7 @@
 import logging
 from operator import setitem
 import os
-
+from time import ctime
 from datetime import date, datetime, timedelta
 from string import capwords
 
@@ -171,15 +171,38 @@ def anula_presupuesto(id_presupuesto):
 def exportar_datos():
     archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
     archivos = os.listdir(archivo_dir)
-    
-    return render_template("gestiones/exportar.html", archivos = archivos)
+    archivos_dict = {}
+    for datos in archivos: 
+        archivos_dict[datos] =  ctime(os.path.getmtime(archivo_dir + '/' + datos))
+
+    print (archivos_dict) 
+    return render_template("gestiones/exportar.html", archivos_dict = archivos_dict, archivo_dir = archivo_dir)
+
 @gestiones_bp.route("/gestiones/exportarprecios")
 @login_required
 def exportar_precios():
     job = current_app.task_queue.enqueue("app.tareas.to_precios_dbf", job_timeout = 3600)
     job.get_id()
     #to_precios_dbf()
-    flash("Ha iniciado la generación del archio precios.dbf", "alert-success")
-    return redirect(url_for("gestiones.exportar_datos"))
+    flash("Ha iniciado la generación del archivo precios.dbf", "alert-success")
+    return redirect(url_for("abms.agenda"))
 #    return send_file(archivo_dir + '/precios.dbf', as_attachment=True)
 
+@gestiones_bp.route("/gestiones/exportarcodigosbarrasfaltante")
+@login_required
+def exportar_codigos_de_barra_faltantes():
+    job = current_app.task_queue.enqueue("app.tareas.sin_codigo_barras_to_excel", job_timeout = 3600)
+    job.get_id()
+    #to_precios_dbf()
+    flash("Ha iniciado la generación del archivo precios.dbf", "alert-success")
+    return redirect(url_for("abms.agenda"))
+
+@gestiones_bp.route("/gestiones/descargararchivos/<archivo>")
+@login_required
+def descarga_archivo(archivo):
+    archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
+    archivos = os.listdir(archivo_dir)
+    if archivo not in archivos:
+        flash('El archivo no existe', 'alert-warning')
+        return redirect(url_for("gestiones.exportar_datos"))
+    return send_file(archivo_dir + '/' + archivo, as_attachment=True)
