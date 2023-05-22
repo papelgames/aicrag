@@ -1,12 +1,10 @@
-import dbf
-from datetime import datetime
 from app.models import Productos, Proveedores
 from flask import current_app
 from app import create_app
 import os
 from werkzeug.utils import secure_filename
 from time import strftime, gmtime
-
+import locale
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,25 +14,30 @@ app = create_app(settings_module)
 app.app_context().push()
 
 def to_precios_dbf():
-   print ("Empieza")
-   print (datetime.now())
+   # Filtrar y preparar los datos para la inserción
    archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
-   table = dbf.Table(archivo_dir + '/precios.dbf', 'CODIGO C(13); DETALLE C(56); PRECIOVP N(15,4)', codepage='cp1252', dbf_type='db3')
-   table.open(mode=dbf.READ_WRITE)
    productos_precios = Productos.get_all_precios_dbf()
+   table = [(f'CODIGO,C,13\tDETALLE,C,56\tPRECIOVP,N,10,4')]
+   errores = []
+   locale.setlocale(locale.LC_ALL, '')
    
-   # Agregamos algunas filas de ejemplo
+   #recorro la tabla y si ha precios que no concuerdan con el tipo de precio que soporta el dbf armo un archivo txt
+   #para que el usuario pueda revisar esos productos y corregirlos. 
+
    for row in productos_precios:
-      if len(str(row[2]))>12:
-          print (row) 
-      table.append((row[0][:13],row[1][:56],round(row[2],2)))
-
-   # Guardamos la tabla y cerramos el archivo
-   table.pack()
-   table.close()
-   print ("termina")
-   print (datetime.now())
-
+      if len(str(round(row[2]))) > 10:
+         errores.append(f'{row[0][:13]}\t{row[1][:56]}\t{row[2]}')
+      else:
+         table.append(f'{row[0][:13]}\t{row[1][:56]}\t{locale.format("%.2f", row[2], grouping=True, monetary=True)}')
+   # Inserto los importes no soportados en el archivo precios_elevados.txt siempre y cuando haya.
+   if errores:
+      with open(archivo_dir + '/precios_elevados.txt', 'w') as errores_file:
+         errores_file.write('\n'.join(errores))
+   
+   # Inserto los datos en el archivo .dbf
+   with open(archivo_dir + '/Precios.dbf', 'w') as precios_file:
+      precios_file.write('\n'.join(table))
+   
 def in_lista_masiva(file_path, id_proveedor, email):
    proveedor = Proveedores.get_by_id(id_proveedor)
 
@@ -58,20 +61,19 @@ def in_lista_masiva(file_path, id_proveedor, email):
    rango_descripcion =  ws[columnas[4]]
    rango_importe =  ws[columnas[5]]
    rango_utilidad = ws[columnas[6]]
-   #falta armar el counter de cada caso.
+   #incremental de cada caso
    registros_nuevos = 0
    registros_actualizados = 0
    registros_total = 0
    registros_ignorados = 0
-   #genero un id unico por subida
+   #genero un id unico por subida para cada registro
    id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
-   
-   
+   #creo una matriz con los datos del excel para luego iterarla.   
    mat = list(zip(rango_id_lista_proveedor, rango_codigo_de_barras, rango_descripcion, rango_importe, rango_utilidad))
-      #inserto los registros que no existen
+   #inserto los registros que no existen
    producto_nuevo = Productos()
    for id in mat:
-      if id[0].value != None and id[0].value != columnas[1]: 
+      if id[0].value != None and str(id[0].value).upper() != str(columnas[1]).upper(): 
          producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value)
          registros_total += 1
          if not producto_por_id:
@@ -135,7 +137,3 @@ def in_lista_masiva(file_path, id_proveedor, email):
    if producto_por_id:
          producto_por_id.save()
    producto_nuevo.only_save()
-   print ("Registros nuevos: " + str(registros_nuevos))
-   print ("Registros actualizados: " + str(registros_actualizados))
-   print ("Registros ignorados: " + str(registros_ignorados))
-   print ("Registros totales: " + str(registros_total))

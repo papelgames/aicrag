@@ -271,22 +271,14 @@ def alta_masiva():
             
             #indico que al excel en que columnas el proveedor carga cada dato.
             rango_id_lista_proveedor =  ws[columnas[2]]
-            rango_codigo_de_barras =  ws[columnas[3]]
-            rango_descripcion =  ws[columnas[4]]
-            rango_importe =  ws[columnas[5]]
-            rango_utilidad = ws[columnas[6]]
-            #falta armar el counter de cada caso.
-            registros_nuevos = 0
-            registros_repetidos = 0
-            registros_total = 0
-            #genero la matriz de datos.
+
             secuencia = 0
             control_proveedor = False
             # controlo que el archivo corresponda al proveedor
             for id in rango_id_lista_proveedor:
                 if secuencia == 15:
                         break
-                if id.value == columnas[1]:
+                if str(id.value).upper() == str(columnas[1]).upper():
                         control_proveedor = True
                         break
                 secuencia +=1

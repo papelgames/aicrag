@@ -1,7 +1,7 @@
 import logging
 from operator import setitem
 import os
-import dbf 
+
 from datetime import date, datetime, timedelta
 from string import capwords
 
@@ -166,6 +166,13 @@ def anula_presupuesto(id_presupuesto):
     cabecera.save()
     return redirect(url_for("consultas.consulta_presupuestos"))
 
+@gestiones_bp.route("/gestiones/exportardatos")
+@login_required
+def exportar_datos():
+    archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
+    archivos = os.listdir(archivo_dir)
+    
+    return render_template("gestiones/exportar.html", archivos = archivos)
 @gestiones_bp.route("/gestiones/exportarprecios")
 @login_required
 def exportar_precios():
@@ -173,6 +180,6 @@ def exportar_precios():
     job.get_id()
     #to_precios_dbf()
     flash("Ha iniciado la generación del archio precios.dbf", "alert-success")
-    return redirect(url_for("consultas.consulta_presupuestos"))
+    return redirect(url_for("gestiones.exportar_datos"))
 #    return send_file(archivo_dir + '/precios.dbf', as_attachment=True)
 
