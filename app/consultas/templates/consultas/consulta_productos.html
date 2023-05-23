@@ -17,7 +17,7 @@
 		</form>
 	</div>
 </div>
-{% if lista_de_productos %}
+{% if lista_de_productos.items %}
 <table class="table table-striped">
     <thead>
         <tr>
@@ -32,7 +32,7 @@
     </thead>
     
     <tbody>
-        {% for producto in lista_de_productos %}
+        {% for producto in lista_de_productos.items %}
             {% if producto.Productos.modified< fecha_tope %}
             <tr class = "text-danger">
                 <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
@@ -55,6 +55,59 @@
         {% endfor %}
     </tbody>
 </table>
+<div class=pagination>
+    {%- for page in lista_de_productos.iter_pages() %}
+        {% if page %}
+            {% if page != lista_de_productos.page %}
+                <a href="{{ url_for('consultas.consulta_productos', criterio= criterio, page=page) }}">{{ page }}</a>
+            {% else %}
+                <strong>{{ page }}</strong>
+            {% endif %}
+        {% else %}
+            <span class=ellipsis>…</span>
+        {% endif %}
+    {%- endfor %}
+</div>
+{% elif lista_de_productos %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">CODIGO DE BARRAS</th>
+            <th scope="col">PRODUCTO</th>
+            <th scope="col">IMPORTE</th>
+            <th scope="col">CANTIDAD POR PRESENTACION</th>
+            <th scope="col">PROVEEDOR</th>
+            <th scope="col">ULTIMA ACTUALIZACION</th>
+            
+        </tr>
+    </thead>
+    
+    <tbody>
+        {% for producto in lista_de_productos  %}
+            {% if producto.Productos.modified< fecha_tope %}
+            <tr class = "text-danger">
+                <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
+                <td> {{ producto.Productos.descripcion }}</td>
+                <td> ${{ producto.importe_calculado|round(2)  }}</td>
+                <td> {{ producto.Productos.cantidad_presentacion }}</td>
+                <td> {{ producto.Proveedores.nombre }}</td>
+                <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
+                <td> {{ producto.Productos.descripcion }}</td>
+                <td> ${{ producto.importe_calculado|round(2)  }} </td>
+                <td> {{ producto.Productos.cantidad_presentacion }}</td>
+                <td> {{ producto.Proveedores.nombre }}</td>
+                <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<h2>No hay productos para esa busqueda.</h2>
 {% endif %}
 
 {% endblock %}

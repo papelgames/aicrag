@@ -169,6 +169,17 @@ class Productos (Base):
         return query_str
 
     @staticmethod
+    def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
+        descripcion_ = descripcion_.replace(' ','%')
+        return db.session.query(Productos, User, Proveedores, \
+            ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion).label('importe_calculado'))\
+            .filter(Productos.usuario_alta == User.email)\
+            .filter(Productos.usuario_modificacion == User.email)\
+            .filter(Productos.id_proveedor == Proveedores.id)\
+            .filter(Productos.descripcion.contains(descripcion_))\
+            .paginate(page=page, per_page=per_page, error_out=False)
+
+    @staticmethod
     def get_by_id_lista_proveedor(id_lista):
         return Productos.query.filter_by(id_lista_proveedor = id_lista).first()
 

@@ -5,7 +5,7 @@ import dbf
 from datetime import date, datetime, timedelta
 from string import capwords
 
-from flask import render_template, redirect, url_for, abort, current_app, flash, send_file, make_response
+from flask import render_template, redirect, url_for, abort, current_app, flash, request
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
@@ -31,6 +31,8 @@ def control_vencimiento (fecha):
 def consulta_productos(criterio = ""):
     form = BusquedaForm()
     lista_de_productos = []
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
     if form.validate_on_submit():
         buscar = form.buscar.data
         return redirect(url_for("consultas.consulta_productos", criterio = buscar))
@@ -39,16 +41,18 @@ def consulta_productos(criterio = ""):
         producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
         if producto_caro: 
             lista_de_productos = Productos.get_by_id_completo(producto_caro.id)
+            print(lista_de_productos)
     elif criterio == "":
         pass
     else:
-        lista_de_productos = Productos.get_like_descripcion(criterio)
-    
+        #lista_de_productos = Productos.get_like_descripcion(criterio)
+        lista_de_productos = Productos.get_like_descripcion_all_paginated(criterio,page, per_page)
+        print(lista_de_productos)
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     if get_tarea_corriendo('app.tareas.in_lista_masiva'):
         flash('Los precios se están actualizando', 'alert-warning')
-    return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, fecha_tope = fecha_tope )
+    return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, criterio = criterio, fecha_tope = fecha_tope )
 
 @consultas_bp.route("/consultas/consultapresupuestos/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
