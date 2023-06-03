@@ -68,7 +68,6 @@ def create_app(settings_module):
 
     # Custom error handlers
     register_error_handlers(app)
-    app.app_context().push()
 
     return app
 
