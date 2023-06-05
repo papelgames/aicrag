@@ -27,7 +27,7 @@ def show_signup_form():
         # Comprobamos que no hay ya un usuario con ese email
         user = User.get_by_email(email)
         if user is not None:
-            flash ("Has mandado fruta con los datos.","alert-warning")
+            flash ("El correo electrónico seleccionado ya ha sido usado","alert-warning")
         else:
             # Creamos el usuario y lo guardamos
             
