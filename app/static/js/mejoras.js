@@ -9,10 +9,12 @@ function imprSelec(nombre, titulo) {
       '<link rel="stylesheet" href="/static/css/style.css">'
     );
     ventimp.document.write('</head><body>');
-    ventimp.document.write(ventimp.document.body.innerHTML);
+    ventimp.document.write(ficha.innerHTML);
     ventimp.document.write('</body></html>');
     ventimp.document.close();
+    
     ventimp.print();
     ventimp.close();
+    
   }
 
