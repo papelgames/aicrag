@@ -55,19 +55,34 @@
         {% endfor %}
     </tbody>
 </table>
-<div class=pagination>
-    {%- for page in lista_de_productos.iter_pages() %}
-        {% if page %}
-            {% if page != lista_de_productos.page %}
-                <a href="{{ url_for('consultas.consulta_productos', criterio= criterio, page=page) }}">{{ page }}</a>
-            {% else %}
-                <strong>{{ page }}</strong>
-            {% endif %}
-        {% else %}
-            <span class=ellipsis>…</span>
-        {% endif %}
-    {%- endfor %}
-</div>
+
+<nav aria-label="Page navigation example">
+	<ul class="pagination justify-content-center">
+            <!-- <li class="page-item disabled">
+                <a class="page-link" href="#">Anterior</a>
+            </li> -->
+        {%- for page in lista_de_productos.iter_pages() %}
+			{% if page %}
+
+				{% if page != lista_de_productos.page %}
+					<li class="page-item"><a class="page-link" href="{{ url_for('consultas.consulta_productos', criterio= criterio, page=page) }}">{{ page }}</a>
+				{% else %}
+					<li class="page-item active">
+						<span class="page-link">
+							{{ page }}
+							<span class="sr-only">(current)</span>
+						</span>
+					</li>
+                {% endif %}
+			{% endif %}
+		{%- endfor %}
+        <!-- <li class="page-item">
+            <a class="page-link" href="#">Siguiente</a>
+        </li> -->
+	</ul>
+</nav>
+
+
 {% elif lista_de_productos %}
 <table class="table table-striped">
     <thead>
@@ -106,8 +121,7 @@
         {% endfor %}
     </tbody>
 </table>
-{% else %}
-<h2>No hay productos para esa busqueda.</h2>
+
 {% endif %}
 
 {% endblock %}

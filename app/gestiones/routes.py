@@ -1,20 +1,20 @@
 import logging
-from operator import setitem
+# from operator import setitem
 import os
 from time import ctime
 from datetime import date, datetime, timedelta
-from string import capwords
+# from string import capwords
 
 from flask import render_template, redirect, url_for, abort, current_app, flash, send_file, make_response
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
+# from werkzeug.utils import secure_filename
 
 from app.controles import get_tarea_corriendo
-from app.auth.decorators import admin_required
+# from app.auth.decorators import admin_required
 from app.auth.models import User
-from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Proveedores
+from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros #, Proveedores
 from . import gestiones_bp 
-from .forms import BusquedaForm, CabeceraPresupuestoForm, ProductosPresupuestoForm
+from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm #, BusquedaForm 
 # from app.funciones import to_precios_dbf
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,6 @@ def modificacion_productos_presupuesto(id_presupuesto):
     if cabecera.estado != 1 and cabecera.estado != 4:
         flash ("El presupuesto no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
-
 
     if form.validate_on_submit():
         if form.condicion.data == "modificarproducto":
@@ -183,17 +182,16 @@ def exportar_datos():
 def exportar_precios():
     job = current_app.task_queue.enqueue("app.tareas.to_precios_dbf", job_timeout = 3600)
     job.get_id()
-    #to_precios_dbf()
+
     flash("Ha iniciado la generación del archivo precios.dbf", "alert-success")
     return redirect(url_for("abms.agenda"))
-#    return send_file(archivo_dir + '/precios.dbf', as_attachment=True)
 
 @gestiones_bp.route("/gestiones/exportarcodigosbarrasfaltante")
 @login_required
 def exportar_codigos_de_barra_faltantes():
     job = current_app.task_queue.enqueue("app.tareas.sin_codigo_barras_to_excel", job_timeout = 3600)
     job.get_id()
-    #to_precios_dbf()
+
     flash("Ha iniciado la generación del archivo precios.dbf", "alert-success")
     return redirect(url_for("abms.agenda"))
 
