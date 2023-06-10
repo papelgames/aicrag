@@ -53,9 +53,13 @@ class ProductosForm(FlaskForm):
     id_lista_proveedor = StringField('Id del producto del proveedor')
     descripcion = StringField('Descripcion del producto',validators=[DataRequired('Complete la descripcion del producto' )])
     importe = FloatField('Importe del producto', validators=[DataRequired('Ingrese el importe del producto sin iva' )] )
-    utilidad = FloatField('Porcentaje de utilidad', validators=[DataRequired('Ingrese el porcentaje que quiere cargarle al producto/servicio' )] ) # validar que si es servicio se se pueda grabar en cero 
+    utilidad = StringField('Porcentaje de utilidad', default = 0 )
     cantidad_presentacion = FloatField('Cantidad de productos por presentación')
     es_servicio = SelectField('¿Es servicio?', choices =[( '','Seleccionar acción'),( "1",'Si'),( "0",'NO')], coerce = str, default = None, validators=[DataRequired('Completar si o no')])
+
+    def validate_utilidad(self, utilidad):
+        if self.es_servicio.data == "0" and utilidad.data == "0":
+            raise ValidationError('Debe cargar la utilidad del producto.')
 
 class ProductosMasivosForm(FlaskForm):
     id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar un proveedor')])
