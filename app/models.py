@@ -159,8 +159,8 @@ class Productos (Base):
 
     @staticmethod
     def get_like_descripcion(descripcion_):
-        query_str = db.session.query(Productos, User, Proveedores, \
-            ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion).label('importe_calculado'))\
+        valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        query_str = db.session.query(Productos, User, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.usuario_alta == User.email)\
             .filter(Productos.usuario_modificacion == User.email)\
             .filter(Productos.id_proveedor == Proveedores.id)\
@@ -171,14 +171,14 @@ class Productos (Base):
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
         descripcion_ = descripcion_.replace(' ','%')
-        return db.session.query(Productos, User, Proveedores, \
-            ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion).label('importe_calculado'))\
+        valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        return db.session.query(Productos, User, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.usuario_alta == User.email)\
             .filter(Productos.usuario_modificacion == User.email)\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.descripcion.contains(descripcion_))\
             .paginate(page=page, per_page=per_page, error_out=False)
-
+ 
     @staticmethod
     def get_by_id_lista_proveedor(id_lista):
         return Productos.query.filter_by(id_lista_proveedor = id_lista).first()
@@ -228,16 +228,23 @@ class CabecerasPresupuestos (Base):
         return query_str
 
     @staticmethod
+    def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
+        return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
+                                                           .filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
+                                                           .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+                                                           .paginate(page=page, per_page=per_page, error_out=False)
+        
+
+    @staticmethod
     def get_all():
         return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
 
     @staticmethod
-    def get_all_estado(estado_cabecera): #1 es esado activo 
-        print("pasa")
+    def get_all_estado(estado_cabecera, page=1, per_page=20): #1 es esado activo 
         return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
                                                                   .filter(CabecerasPresupuestos.estado == estado_cabecera)\
                                                                   .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-                                                                  .all()
+                                                                  .paginate(page=page, per_page=per_page, error_out=False)
 
 
 
@@ -285,7 +292,8 @@ class Presupuestos (Base):
             
     @staticmethod
     def get_by_id_presupuesto_paquete(id_presupuesto):
-        query_str = db.session.query(Presupuestos, Productos)\
+        valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
+        query_str = db.session.query(Presupuestos, Productos, valor_calculado.label('importe_calculado'))\
             .filter(Presupuestos.id_cabecera_presupuesto == id_presupuesto)\
             .filter(Presupuestos.id_producto == Productos.id)\
             .all()

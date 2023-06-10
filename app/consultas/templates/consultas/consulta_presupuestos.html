@@ -6,10 +6,10 @@
 {% endblock %}
 
 {% block content %}
-<h1>Consulta de presupuestos</h1>
 
 <div class="row">
-	<div class="offset-md-2 col-md-8">
+	<div class="offset-md-3 col-md-6">
+        <h1>Consulta de presupuestos</h1>
             <form action="" method="post" class = "form-horizontal" enctype="multipart/form-data" novalidate>	
                 {{ form.hidden_tag() }}
                 {{ render_input(form.buscar,'', id= "buscar" , class="form-control", placeholder="Ingrese el número de presupuesto o nombre cliente" ) }}
@@ -20,7 +20,7 @@
 
 <a  href="{{ url_for('gestiones.alta_presupuesto') }}">Nuevo Presupuesto</a> 
 
-{% if cabecera %}
+{% if cabecera.items %}  
 <table class="table table-striped">
     <thead>
         <tr>
@@ -36,7 +36,90 @@
     </thead>
     
     <tbody>
-        
+       
+        {% for presupuesto in cabecera.items %}
+            <tr>
+                <th scope="row">{{ presupuesto.CabecerasPresupuestos.id }}</th>
+                <td> {{ presupuesto.CabecerasPresupuestos.created.strftime('%d-%m-%Y') }}</td>
+                <td> {{ presupuesto.CabecerasPresupuestos.nombre_cliente }} </td>
+                <td> {{ presupuesto.CabecerasPresupuestos.importe_total|round(2) }}</td>
+                <td> {{ presupuesto.Parametros.descripcion }}</td>
+                {% if now < presupuesto.CabecerasPresupuestos.fecha_vencimiento %}
+                
+                <td> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Acción
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar datos del cliente</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar productos del presupuesto</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Anular presupuesto</a>
+                    </div>
+                </td>
+                {% else %}
+                <td class="text-danger"> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td >
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Acción
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
+                    </div>
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+<nav aria-label="Page navigation example">
+	<ul class="pagination justify-content-center">
+            <!-- <li class="page-item disabled">
+                <a class="page-link" href="#">Anterior</a>
+            </li> -->
+        {%- for page in cabecera.iter_pages() %}
+			{% if page %}
+
+				{% if page != cabecera.page %}
+					<li class="page-item"><a class="page-link" href="{{ url_for('consultas.consulta_presupuestos', criterio= criterio, page=page) }}">{{ page }}</a>
+				{% else %}
+					<li class="page-item active">
+						<span class="page-link">
+							{{ page }}
+							<span class="sr-only">(current)</span>
+						</span>
+					</li>
+                {% endif %}
+			{% endif %}
+		{%- endfor %}
+        <!-- <li class="page-item">
+            <a class="page-link" href="#">Siguiente</a>
+        </li> -->
+	</ul>
+</nav>
+
+{% elif cabecera %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">NRO</th>
+            <th scope="col">FECHA</th>
+            <th scope="col">CLIENTE</th>
+            <th scope="col">IMPORTE</th>
+            <th scope="col">ESTADO</th>
+            <th scope="col">VENCIMIENTO</th>
+            <th scope="col">ACCIÓN</th>
+            
+        </tr>
+    </thead>
+    
+    <tbody>
+         
         {% for presupuesto in cabecera %}
             <tr>
                 <th scope="row">{{ presupuesto.CabecerasPresupuestos.id }}</th>

@@ -23,7 +23,7 @@
 			</div>
 		</div>
 		<div class="col-md-12">
-			{% if lista_productos_seleccion|length == 0 %}
+			{% if not lista_productos_seleccion %}
 				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
 					Agregar productos
 				</button>
@@ -52,7 +52,85 @@
 					</div>
 				</div>
 			{% endif%}
-			{% if lista_productos_seleccion %}
+			{% if lista_productos_seleccion.items %}
+				<table class="table table-striped mx-auto">
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">PROVEEDOR</th>
+							<th scope="col">PRODUCTO</th>
+							<th scope="col">CANTIDAD</th>
+							<th scope="col">IMPORTE</th>
+							<th scope="col">ULTIMA MODIFICACION</th>
+							<th scope="col">SELECCIONAR</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for producto in lista_productos_seleccion.items %}
+							<form action="" method="post" enctype="multipart/form-data" novalidate>	
+					
+								{{ form.hidden_tag() }}
+								<!-- aca control ultimo movimiento -->
+								{% if producto.Productos.modified < fecha_tope %}
+									<tr class="text-danger">
+										{{ form.condicion(type = "hidden", value = "agregarproducto") }}
+										{{ form.id(type = "hidden", value = producto.Productos.id) }} 
+										{{ form.descripcion(type = "hidden", value = producto.Productos.descripcion) }} 
+										<th scope="row">{{ producto.Productos.id }}</th>
+										<td> {{ producto.Proveedores.nombre }} </td>
+										<td> {{ producto.Productos.descripcion }}</td>
+										<td> {{ form.cantidad( value = 1, class="text-danger form-control-sm") }} </td>
+										<td> {{ form.importe(value = producto.importe_calculado|round(2), class="text-danger form-control-sm") }} </td>
+										<td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
+										<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+									</tr>
+								{% else %}
+									<tr>
+										{{ form.condicion(type = "hidden", value = "agregarproducto") }}
+										{{ form.id(type = "hidden", value = producto.Productos.id) }} 
+										{{ form.descripcion(type = "hidden", value = producto.Productos.descripcion) }} 
+										<th scope="row">{{ producto.Productos.id }}</th>
+										<td> {{ producto.Proveedores.nombre }} </td>
+										<td> {{ producto.Productos.descripcion }}</td>
+										<td> {{ form.cantidad( value = 1, class = "form-control-sm") }} </td>
+										<td> {{ form.importe(value = producto.importe_calculado|round(2), class = "form-control-sm") }} </td>
+										<td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
+										<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
+									</tr>
+								{% endif %}
+							</form>
+						{% endfor %}
+					</tbody>
+				</table>
+				<nav aria-label="Page navigation example">
+					<ul class="pagination justify-content-center">
+							<!-- <li class="page-item disabled">
+								<a class="page-link" href="#">Anterior</a>
+							</li> -->
+						{%- for page in lista_productos_seleccion.iter_pages() %}
+							{% if page %}
+				
+								{% if page != lista_productos_seleccion.page %}
+									<li class="page-item"><a class="page-link" href="{{ url_for('gestiones.modificacion_productos_presupuesto',id_presupuesto = cabecera.id, criterio = criterio, page=page) }}">{{ page }}</a>
+								{% else %}
+									<li class="page-item active">
+										<span class="page-link">
+											{{ page }}
+											<span class="sr-only">(current)</span>
+										</span>
+									</li>
+								{% endif %}
+							{% endif %}
+						{%- endfor %}
+						<!-- <li class="page-item">
+							<a class="page-link" href="#">Siguiente</a>
+						</li> -->
+					</ul>
+				</nav>
+				<a href="{{ url_for('gestiones.modificacion_productos_presupuesto',id_presupuesto = cabecera.id)}}">
+					<button class="btn btn-primary">Cancelar búsqueda</button>
+				</a> 
+				{% elif lista_productos_seleccion %}
 				<table class="table table-striped mx-auto">
 					<thead>
 						<tr>
@@ -68,32 +146,33 @@
 					<tbody>
 						{% for producto in lista_productos_seleccion %}
 							<form action="" method="post" enctype="multipart/form-data" novalidate>	
+					
 								{{ form.hidden_tag() }}
 								<!-- aca control ultimo movimiento -->
-								{% if producto[4] < fecha_tope %}
+								{% if producto.Productos.modified < fecha_tope %}
 									<tr class="text-danger">
 										{{ form.condicion(type = "hidden", value = "agregarproducto") }}
-										{{ form.id(type = "hidden", value = producto[0]) }} 
-										{{ form.descripcion(type = "hidden", value = producto[1]) }} 
-										<th scope="row">{{ producto[0] }}</th>
-										<td> {{ producto[3] }} </td>
-										<td> {{ producto[1] }}</td>
+										{{ form.id(type = "hidden", value = producto.Productos.id) }} 
+										{{ form.descripcion(type = "hidden", value = producto.Productos.descripcion) }} 
+										<th scope="row">{{ producto.Productos.id }}</th>
+										<td> {{ producto.Proveedores.nombre }} </td>
+										<td> {{ producto.Productos.descripcion }}</td>
 										<td> {{ form.cantidad( value = 1, class="text-danger form-control-sm") }} </td>
-										<td> {{ form.importe(value = producto[2]|round(2), class="text-danger form-control-sm") }} </td>
-										<td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
+										<td> {{ form.importe(value = producto.importe_calculado|round(2), class="text-danger form-control-sm") }} </td>
+										<td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
 										<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
 									</tr>
 								{% else %}
 									<tr>
 										{{ form.condicion(type = "hidden", value = "agregarproducto") }}
-										{{ form.id(type = "hidden", value = producto[0]) }} 
-										{{ form.descripcion(type = "hidden", value = producto[1]) }} 
-										<th scope="row">{{ producto[0] }}</th>
-										<td> {{ producto[3] }} </td>
-										<td> {{ producto[1] }}</td>
+										{{ form.id(type = "hidden", value = producto.Productos.id) }} 
+										{{ form.descripcion(type = "hidden", value = producto.Productos.descripcion) }} 
+										<th scope="row">{{ producto.Productos.id }}</th>
+										<td> {{ producto.Proveedores.nombre }} </td>
+										<td> {{ producto.Productos.descripcion }}</td>
 										<td> {{ form.cantidad( value = 1, class = "form-control-sm") }} </td>
-										<td> {{ form.importe(value = producto[2]|round(2), class = "form-control-sm") }} </td>
-										<td> {{ producto[4].strftime('%d-%m-%Y') }}</td>
+										<td> {{ form.importe(value = producto.importe_calculado|round(2), class = "form-control-sm") }} </td>
+										<td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
 										<td> <button type="submmit" class="btn btn-primary" >OK</button> </td>
 									</tr>
 								{% endif %}
@@ -101,6 +180,9 @@
 						{% endfor %}
 					</tbody>
 				</table>
+				<a href="{{ url_for('gestiones.modificacion_productos_presupuesto',id_presupuesto = cabecera.id)}}">
+					<button class="btn btn-primary">Cancelar búsqueda</button>
+				</a>
 			{% endif %}
 			<table class="table table-striped mx-auto my-5">
 				<thead>
@@ -129,10 +211,10 @@
 								<td> {{ form.cantidad(value = item.Presupuestos.cantidad) }} </td>
 								<td> {{ form.importe(value = item.Presupuestos.importe|round(2)) }} </td>
 								<td> {{ item.Presupuestos.importe * item.Presupuestos.cantidad }} </td>
-								{% if item.Productos.importe > item.Presupuestos.importe %}
-									<td class="text-danger"> {{ item.Productos.importe }}</td>
+								{% if item.importe_calculado - 0.001 > item.Presupuestos.importe %}
+									<td class="text-danger"> {{ item.importe_calculado }}</td>
 								{% else %}
-									<td> {{ item.Productos.importe }}</td>
+									<td> {{ item.importe_calculado }}</td>
 								{% endif %}
 								<td>
 									<div class="dropdown">

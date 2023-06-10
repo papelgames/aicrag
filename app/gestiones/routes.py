@@ -5,7 +5,7 @@ from time import ctime
 from datetime import date, datetime, timedelta
 # from string import capwords
 
-from flask import render_template, redirect, url_for, abort, current_app, flash, send_file, make_response
+from flask import render_template, redirect, url_for, current_app, flash, send_file, request #, make_response, abort
 from flask_login import login_required, current_user
 # from werkzeug.utils import secure_filename
 
@@ -73,17 +73,29 @@ def modificacion_datos_cliente(id_presupuesto):
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
     return render_template("gestiones/modificacion_datos_cliente.html", form = form, cabecera = cabecera)
   
+@gestiones_bp.route("/gestiones/modificacionproductospresupuesto/<int:id_presupuesto>/<criterio>", methods = ['GET', 'POST'])
 @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
-def modificacion_productos_presupuesto(id_presupuesto):
+def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     producto = Presupuestos.get_by_id_presupuesto_paquete(id_presupuesto)
     form = ProductosPresupuestoForm()
-    lista_productos_seleccion = []
-    
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
+        
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
+    if criterio.isdigit() == True:
+                producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
+                lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
+    elif criterio == "":
+        lista_productos_seleccion = []
+    else:
+        lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(criterio, page, per_page)
+        if len(lista_productos_seleccion.items) == 0:
+            lista_productos_seleccion =[]
+
     if cabecera.estado != 1 and cabecera.estado != 4:
         flash ("El presupuesto no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
@@ -98,27 +110,14 @@ def modificacion_productos_presupuesto(id_presupuesto):
             total_presupuesto = Presupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
             cabecera.importe_total = total_presupuesto[1]
             cabecera.save()
-            
+             
             flash("Se han actualizado los datos correctamente", "alert-success")            
             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))  
+        
         elif form.condicion.data == "buscarproductos":
             buscar = form.buscar.data
-            if buscar.isdigit() == True:
-                producto_caro = Productos.get_by_codigo_de_barras_caro(buscar)
-                lista_de_productos = Productos.get_by_id_completo(producto_caro.id)
-                for registro in lista_de_productos:
-                    lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre, registro.Productos.modified])
-            elif buscar == "":
-                #corregir este mensaje cuando se graba vacio el nombre del clienete
-                flash("Escriba el nombre de un producto", "alert-warning")
-            else:
-                lista_de_productos = Productos.get_like_descripcion(buscar)
-                for registro in lista_de_productos:
-                    lista_productos_seleccion.append([registro.Productos.id, registro.Productos.descripcion, registro.importe_calculado, registro.Proveedores.nombre, registro.Productos.modified])
-            if get_tarea_corriendo('app.tareas.in_lista_masiva'):
-                flash('Los precios se están actualizando', 'alert-warning')
-            return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera, producto = producto, lista_productos_seleccion = lista_productos_seleccion, fecha_tope = fecha_tope)
-        
+            return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto, criterio =  buscar)) 
+               
         elif form.condicion.data == "agregarproducto":
             nuevo_producto = Presupuestos(id_cabecera_presupuesto = cabecera.id,
                                           id_producto = form.id.data, 
@@ -136,7 +135,8 @@ def modificacion_productos_presupuesto(id_presupuesto):
             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
     if get_tarea_corriendo('app.tareas.in_lista_masiva'):
         flash('Los precios se están actualizando', 'alert-warning')
-    return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera, producto = producto, lista_productos_seleccion = lista_productos_seleccion, fecha_tope = fecha_tope)
+    
+    return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, cabecera = cabecera, producto = producto, lista_productos_seleccion = lista_productos_seleccion, fecha_tope = fecha_tope, criterio = criterio)
 
 @gestiones_bp.route("/gestiones/eliminaprooductospresupuesto/<int:id_producto>", methods = ['GET', 'POST'])
 @login_required

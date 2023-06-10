@@ -17,7 +17,7 @@
 		</form>
 	</div>
 </div>
-{% if lista_de_productos %}
+{% if lista_de_productos.items %}
 <table class="table table-striped">
     <thead>
         <tr>
@@ -28,8 +28,68 @@
             <th scope="col">PROVEEDOR</th>
             <th scope="col">Accion</th>
         </tr>
-    </thead>
-    
+    </thead> 
+    <tbody>
+        {% for producto in lista_de_productos.items %}
+            <tr>
+                <th scope="row">{{ producto.Productos.codigo_de_barras }}</th>
+                <td> {{ producto.Productos.descripcion }}</td>
+                <td> {{ producto.Productos.importe|round(2) }}</td>
+                <td> {{ producto.Productos.cantidad_presentacion }}</td>
+                <td> {{ producto.Proveedores.nombre }}</td>
+                <td>
+                    <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Acción
+                    </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="{{ url_for('abms.modificacion_producto', id_producto = producto.Productos.id) }}">Modificar</a>
+                            <a class="dropdown-item" href="{{ url_for('abms.eliminar_producto_id', id_producto = producto.Productos.id) }}">Eliminar</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<nav aria-label="Page navigation example">
+	<ul class="pagination justify-content-center">
+            <!-- <li class="page-item disabled">
+                <a class="page-link" href="#">Anterior</a>
+            </li> -->
+        {%- for page in lista_de_productos.iter_pages() %}
+			{% if page %}
+
+				{% if page != lista_de_productos.page %}
+					<li class="page-item"><a class="page-link" href="{{ url_for('abms.busqueda_productos', criterio= criterio, page=page) }}">{{ page }}</a>
+				{% else %}
+					<li class="page-item active">
+						<span class="page-link">
+							{{ page }}
+							<span class="sr-only">(current)</span>
+						</span>
+					</li>
+                {% endif %}
+			{% endif %}
+		{%- endfor %}
+        <!-- <li class="page-item">
+            <a class="page-link" href="#">Siguiente</a>
+        </li> -->
+	</ul>
+</nav>
+
+{% elif lista_de_productos %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">CODIGO DE BARRAS</th>
+            <th scope="col">PRODUCTO</th>
+            <th scope="col">IMPORTE</th>
+            <th scope="col">CANTIDAD POR PRESENTACION</th>
+            <th scope="col">PROVEEDOR</th>
+            <th scope="col">Accion</th>
+        </tr>
+    </thead> 
     <tbody>
         {% for producto in lista_de_productos %}
             <tr>

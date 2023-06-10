@@ -44,9 +44,7 @@ def consulta_productos(criterio = ""):
     elif criterio == "":
         pass
     else:
-        
         lista_de_productos = Productos.get_like_descripcion_all_paginated(criterio,page, per_page)
-        
         if len(lista_de_productos.items) == 0:
             lista_de_productos =[]
           
@@ -60,8 +58,10 @@ def consulta_productos(criterio = ""):
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
 @login_required
 def consulta_presupuestos(criterio=""):
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
     form = BusquedaForm()
-    cabecera = CabecerasPresupuestos.get_all_estado("1")
+    cabecera = CabecerasPresupuestos.get_all_estado("1", page, per_page)
     now = datetime.now()
 
     if form.validate_on_submit():
@@ -73,7 +73,9 @@ def consulta_presupuestos(criterio=""):
     elif criterio == "":
         pass
     else:
-        cabecera = CabecerasPresupuestos.get_like_descripcion(criterio)
+        cabecera = CabecerasPresupuestos.get_like_descripcion_all_paginated(criterio, page, per_page)
+        if len(cabecera.items) == 0:
+            cabecera =[]
     return render_template("consultas/consulta_presupuestos.html", form = form, cabecera = cabecera, now = now)
 
 @consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])

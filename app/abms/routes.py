@@ -1,25 +1,25 @@
-from fcntl import F_SEAL_SEAL
-from genericpath import exists
-from itertools import product
+# from fcntl import F_SEAL_SEAL
+# from genericpath import exists
+# from itertools import product
 import logging
-from math import fabs
-from operator import truediv
+# from math import fabs
+# from operator import truediv
 import os
-from types import TracebackType
+#from types import TracebackType
 
-from flask import render_template, redirect, url_for, abort, current_app
+from flask import render_template, redirect, url_for, request, current_app, abort
 from flask.helpers import flash
 from flask_login import login_required, current_user
 
 from werkzeug.utils import secure_filename
 
-from app.auth.decorators import admin_required
+#from app.auth.decorators import admin_required
 from app.auth.models import User
 from app.models import Productos, Proveedores
 from . import abms_bp
-from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, ProveedoresConsultaForm
+from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm #, ProveedoresConsultaForm
 
-from app.common.mail import send_email
+#from app.common.mail import send_email
 from time import strftime, gmtime
 
 from rq import Worker
@@ -83,6 +83,8 @@ def alta_individual():
 def busqueda_productos(criterio = ""):
     form = BusquedaForm()
     lista_de_productos = []
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
     if form.validate_on_submit():
         buscar = form.buscar.data
         return redirect(url_for("abms.busqueda_productos", criterio = buscar))
@@ -92,9 +94,10 @@ def busqueda_productos(criterio = ""):
     elif criterio == "":
         pass
     else:
-        lista_de_productos = Productos.get_like_descripcion(criterio)
-        
-    return render_template("abms/busqueda_productos.html", form = form, lista_de_productos=lista_de_productos )
+        lista_de_productos = Productos.get_like_descripcion_all_paginated(criterio, page, per_page)
+        if len(lista_de_productos.items) == 0:
+            lista_de_productos =[] 
+    return render_template("abms/busqueda_productos.html", form = form, lista_de_productos=lista_de_productos, criterio = criterio )
 
 @abms_bp.route("/abms/modificacionproducto/<int:id_producto>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/modificacionproducto", methods = ['GET', 'POST'])
