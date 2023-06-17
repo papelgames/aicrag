@@ -62,6 +62,8 @@ def consulta_presupuestos(criterio=""):
     per_page = current_app.config['ITEMS_PER_PAGE']
     form = BusquedaForm()
     cabecera = CabecerasPresupuestos.get_all_estado("1", page, per_page)
+    if len(cabecera.items) == 0:
+            cabecera =[]
     now = datetime.now()
 
     if form.validate_on_submit():

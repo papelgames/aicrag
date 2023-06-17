@@ -82,20 +82,23 @@ def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
     form = ProductosPresupuestoForm()
     page = int(request.args.get('page', 1))
     per_page = current_app.config['ITEMS_PER_PAGE']
-        
+     
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
     if criterio.isdigit() == True:
-                producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
-                lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
+        producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
+        if producto_caro: 
+            lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
+        else:
+            lista_productos_seleccion = []
     elif criterio == "":
         lista_productos_seleccion = []
     else:
         lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(criterio, page, per_page)
         if len(lista_productos_seleccion.items) == 0:
             lista_productos_seleccion =[]
-
+            
     if cabecera.estado != 1 and cabecera.estado != 4:
         flash ("El presupuesto no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
@@ -116,7 +119,8 @@ def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
         
         elif form.condicion.data == "buscarproductos":
             buscar = form.buscar.data
-            return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto, criterio =  buscar)) 
+            if buscar:
+                return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto, criterio =  buscar)) 
                
         elif form.condicion.data == "agregarproducto":
             nuevo_producto = Presupuestos(id_cabecera_presupuesto = cabecera.id,
