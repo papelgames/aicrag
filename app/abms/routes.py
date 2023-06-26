@@ -252,10 +252,10 @@ def alta_masiva():
         #falta validar que sea un proveedor que actualiza por archivo
         proveedor = Proveedores.get_by_id(id_proveedor)
         if archivo:
-            archivo_name = secure_filename(archivo.filename)
+            archivo_name = secure_filename(proveedor.nombre +".xlsx")
             archivo_dir = current_app.config['ARCHIVOS_DIR']
             os.makedirs(archivo_dir, exist_ok=True)
-            file_path = os.path.join(archivo_dir, proveedor.nombre +".xlsx" )
+            file_path = os.path.join(archivo_dir, archivo_name )
             archivo.save(file_path)
 
             #abro documento excel
