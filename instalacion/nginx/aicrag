@@ -1,0 +1,22 @@
+server {
+    listen 80;
+    server_name 192.168.0.411 aicrag;
+    
+    access_log /var/log/aicrag_access.log;
+    error_log /var/log/aicrag_error.log;
+
+    location /static {
+        alias /home/fuente/prod/aicrag/app/static;
+    }
+
+    location /media {
+        alias /home/fuente/prod/aicrag/media;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_read_timeout 6000;
+        proxy_pass http://unix:/home/fuente/prod/aicrag/app.sock;
+    }
+
+}

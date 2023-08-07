@@ -1,0 +1,13 @@
+[Unit]
+Description=Worker fo AicragApp
+After=network.target redis-server.service
+
+[Service]
+User=jose
+Group=www-data
+WorkingDirectory=/home/fuente/prod/aicrag
+Environment="PATH=/home/fuente/prod/aicrag/env/bin"
+ExecStart=/home/fuente/prod/aicrag/env/bin/rq worker aicrag-tareas  
+
+[Install]
+WantedBy=multi-user.target

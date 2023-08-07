@@ -1,0 +1,13 @@
+[Unit]
+Description=AicragApp
+After=network.target
+
+[Service]
+User=jose
+Group=www-data
+WorkingDirectory=/home/fuente/prod/aicrag
+Environment="PATH=/home/fuente/prod/aicrag/env/bin"
+ExecStart=/home/fuente/prod/aicrag/env/bin/gunicorn --workers 1 --timeout 6000 --bind unix:app.sock -m 007 entrypoint:app  --error-logfile /home/fuente/prod/aicrag/log/gunicorn.error.log --log-level debug 
+
+[Install]
+WantedBy=multi-user.target

@@ -33,7 +33,7 @@ flask db init
 flask db migrate -m "Initial database"
 flask db upgrade
 
-flask db stamp head
+flask db stamp head solo para sqlite
 ## Ejecución con el servidor que trae Flask
 
 Una vez que hayas descargado el proyecto, creado las variables de entorno e instalado las dependencias,
