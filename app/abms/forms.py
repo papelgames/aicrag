@@ -3,7 +3,7 @@ from ast import Str
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, IntegerField, DateField, SelectField)
-from wtforms.fields.core import FloatField, IntegerField
+from wtforms.fields import FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, ValidationError
 
 

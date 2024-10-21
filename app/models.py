@@ -5,7 +5,6 @@ from itertools import product
 from types import ClassMethodDescriptorType
 from typing import Text
 
-from slugify import slugify
 from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash

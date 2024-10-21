@@ -2,7 +2,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, PasswordField, IntegerField)
-from wtforms.fields.core import FloatField, IntegerField
+from wtforms.fields import FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email
 
 
@@ -17,6 +17,5 @@ class InicioOfertaForm(FlaskForm):
 class OfertaForm(FlaskForm):
     dni = IntegerField('DNI o CUIT', validators=[DataRequired()])
     correo_electronico = StringField('Email', validators=[DataRequired(), Email()])
-    importe_a_ofertar = FloatField('Importe a ofertar', validators=[DataRequired()])
     pin_temporal = PasswordField('Pin temporal', validators=[DataRequired()])
     submit = SubmitField('Enviar')
