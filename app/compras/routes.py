@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required
-from app.auth.models import User
+from app.auth.models import Users
 from app.models import Compras
 from . import compras_bp
 from .forms import InicioOfertaForm, OfertaForm

@@ -11,7 +11,7 @@ from flask_login import login_required, current_user
 
 from app.controles import get_tarea_corriendo
 # from app.auth.decorators import admin_required
-from app.auth.models import User
+from app.auth.models import Users
 from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros #, Proveedores
 from . import gestiones_bp 
 from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm #, BusquedaForm 

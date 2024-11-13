@@ -1,7 +1,7 @@
 {% extends "base_template.html" %}
 {% from "_render_elements.html" import render_input %}
 
-{% block title %}Registro de usuarios{% endblock %}
+{% block title %}Groma|Registro de usuarios{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -10,8 +10,12 @@
                 {{ form.hidden_tag() }}
                 
                 {{ render_input(form.name,'', id= "name" , class="form-control", placeholder="Nombre y apellido" ) }}
-                {{ render_input(form.email,'', id= "email" , class="form-control", placeholder="Correo electronico" ) }}
-                {{ render_input(form.password,'', id= "password" , class="form-control", placeholder="Elija un password" ) }}
+                {{ render_input(form.username,'', id= "username" , class="form-control", placeholder="Nombre de usuario" ) }}
+                {{ render_input(form.cuit,'', id= "cuit" , class="form-control", placeholder="CUIT" ) }}
+                {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
+                {{ render_input(form.is_admin,'', id= "is_admin" , class="form-control") }}
+                {{ render_input(form.es_dibujante,'', id= "es_dibujante" , class="form-control") }}
+                
                 <button type="submmit" class="btn btn-primary" >Guardar</button>
         </div>
     </div>

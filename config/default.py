@@ -1,5 +1,5 @@
 from os.path import abspath, dirname, join
-
+import os
 
 # Define the application directory
 BASE_DIR = dirname(dirname(abspath(__file__)))
@@ -23,13 +23,15 @@ APP_ENV_PRODUCTION = 'production'
 APP_ENV = ''
 
 # Configuración del email
-MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 587
-MAIL_USERNAME = ''
-MAIL_PASSWORD = ''
-DONT_REPLY_FROM_EMAIL = '(no responder, @gmail.com)'
-ADMINS = ('@gmail.com', )
-MAIL_USE_TLS = True
+MAIL_SERVER = os.getenv('MAIL_SERVER')
+MAIL_PORT = os.getenv('MAIL_PORT')
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+DONT_REPLY_FROM_EMAIL = os.getenv('DONT_REPLY_FROM_EMAIL')
+MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER') 
+ADMINS = (os.getenv('ADMINS'),)
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True
 MAIL_DEBUG = False
 
 ITEMS_PER_PAGE = 10

@@ -1,0 +1,20 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}Blanqueo de contraseña | Groma{% endblock %}
+
+
+{% block content %}
+<div class="row">
+        <div class="offset-md-3 col-md-6">
+            <form action="" method="post" enctype="multipart/form-data" novalidate>	
+                {{ form.hidden_tag() }}
+                                
+                                 
+                {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
+                <button type="submmit" class="btn btn-primary" >Buscar</button>
+                <div> <a href="{{ url_for('auth.forgot_username') }}">¿Olvidó su contraseña?</a></div>
+        </div>
+    </div>
+    
+{% endblock %}
