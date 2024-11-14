@@ -1,0 +1,53 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Groma | Alta de permisos
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="offset-md-3 col-md-6">
+		<h1>Alta de permisos</h1>
+
+		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+			{{ render_input(form.proceso,'', id= "proceso" , class="btn btn-primary") }}
+		</form>
+	</div>
+
+</div>
+{% if permisos %}
+	<div class="offset-md-3 col-md-6">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">NOMBRE</th>
+					<th scope="col">ACCION</th>
+					
+				</tr>
+			</thead>
+			
+			<tbody>
+				{% for permiso in permisos %}
+					<tr>
+						<th scope="row">{{ permiso.id }}</th>
+						<td> {{ permiso.descripcion }}</td>
+					
+						<td>
+							<div class="dropdown">
+								<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Acción
+							</button> 
+							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+								<a class="dropdown-item"  href="#">Anular</a>
+							</div>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+{% endblock %}

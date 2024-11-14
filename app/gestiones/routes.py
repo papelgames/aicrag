@@ -10,9 +10,9 @@ from flask_login import login_required, current_user
 # from werkzeug.utils import secure_filename
 
 from app.controles import get_tarea_corriendo
-# from app.auth.decorators import admin_required
+from app.auth.decorators import admin_required, nocache, not_initial_status
 from app.auth.models import Users
-from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros #, Proveedores
+from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Estados #, Proveedores
 from . import gestiones_bp 
 from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm #, BusquedaForm 
 # from app.funciones import to_precios_dbf
@@ -24,6 +24,8 @@ def control_vencimiento (fecha):
 
 @gestiones_bp.route("/gestiones/altapresupuesto/", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
+@nocache
 def alta_presupuesto():
     form = CabeceraPresupuestoForm()
     dias_a_vancer = timedelta(days = int(Parametros.get_by_tabla("dias_vencimiento").tipo_parametro))
@@ -33,14 +35,14 @@ def alta_presupuesto():
         fecha_vencimiento = form.fecha_vencimiento.data
         nombre_cliente = form.nombre_cliente.data
         correo_electronico = form.correo_electronico.data
-        
+        estado_iniciado = Estados.get_first_by_clave_tabla(4,'estado_presupuesto')
         cabecera = CabecerasPresupuestos(fecha_vencimiento = fecha_vencimiento,
                                             nombre_cliente = nombre_cliente,
                                             correo_electronico = correo_electronico,
-                                            estado = 4,
+                                            id_estado = estado_iniciado.id,
                                             importe_total = 0.00,
-                                            usuario_alta = current_user.email,
-                                            usuario_modificacion = current_user.email
+                                            usuario_alta = current_user.username,
+                                            usuario_modificacion = current_user.username
                                             )           
         cabecera.save()
         return redirect(url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id))
@@ -50,11 +52,13 @@ def alta_presupuesto():
    
 @gestiones_bp.route("/gestiones/modificaciondatoscliente/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
+@nocache
 def modificacion_datos_cliente(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     form = CabeceraPresupuestoForm()
     
-    if cabecera.estado != 1 and cabecera.estado != 4:
+    if cabecera.estado_presupuestos.clave != 1 and cabecera.estado_presupuestos.clave != 4:
         flash ("El presupuesto no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
 
@@ -62,7 +66,7 @@ def modificacion_datos_cliente(id_presupuesto):
         cabecera.correo_electronico = form.correo_electronico.data
         cabecera.fecha_vencimiento = form.fecha_vencimiento.data
         cabecera.nombre_cliente = form.nombre_cliente.data
-        cabecera.usuario_modificacion = current_user.email
+        cabecera.usuario_modificacion = current_user.username
 
         if form.fecha_vencimiento.data < date.today():
                 flash("La fecha de vencimiento no puede ser anterior a hoy", "alert-warning")
@@ -76,8 +80,11 @@ def modificacion_datos_cliente(id_presupuesto):
 @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/<int:id_presupuesto>/<criterio>", methods = ['GET', 'POST'])
 @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
+@nocache
 def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
+    
     producto = Presupuestos.get_by_id_presupuesto_paquete(id_presupuesto)
     form = ProductosPresupuestoForm()
     page = int(request.args.get('page', 1))
@@ -99,7 +106,7 @@ def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
         if len(lista_productos_seleccion.items) == 0:
             lista_productos_seleccion =[]
             
-    if cabecera.estado != 1 and cabecera.estado != 4:
+    if cabecera.estado_presupuestos.clave != 1 and cabecera.estado_presupuestos.clave != 4:
         flash ("El presupuesto no se puede modificar", "alert-warning" )
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
 
@@ -108,7 +115,7 @@ def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
             productos_presupuesto = Presupuestos.get_by_id_producto(form.id.data)
             productos_presupuesto.cantidad = form.cantidad.data
             productos_presupuesto.importe = form.importe.data
-            productos_presupuesto.usuario_modificacion = current_user.email        
+            productos_presupuesto.usuario_modificacion = current_user.username        
             productos_presupuesto.save()
             total_presupuesto = Presupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
             cabecera.importe_total = total_presupuesto[1]
@@ -123,17 +130,18 @@ def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
                 return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto, criterio =  buscar)) 
                
         elif form.condicion.data == "agregarproducto":
+            estado_pendiente = Estados.get_first_by_clave_tabla(1,"estado_presupuesto")
             nuevo_producto = Presupuestos(id_cabecera_presupuesto = cabecera.id,
                                           id_producto = form.id.data, 
                                           cantidad = form.cantidad.data,
                                           descripcion = form.descripcion.data, 
                                           importe = form.importe.data,
-                                          usuario_alta = current_user.email,
-                                          usuario_modificacion = current_user.email) 
+                                          usuario_alta = current_user.username,
+                                          usuario_modificacion = current_user.username) 
             nuevo_producto.save()
             total_presupuesto = Presupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
             cabecera.importe_total = total_presupuesto[1]
-            cabecera.estado = 1
+            cabecera.id_estado = estado_pendiente.id
             cabecera.save()     
             flash ("Se incorporó un nuevo producto", "alert-success")
             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
@@ -144,6 +152,7 @@ def modificacion_productos_presupuesto(id_presupuesto, criterio = ""):
 
 @gestiones_bp.route("/gestiones/eliminaprooductospresupuesto/<int:id_producto>", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def elimina_productos_presupuesto(id_producto):
     producto = Presupuestos.get_by_id_producto(id_producto)
     id_presupuesto = producto.id_cabecera_presupuesto
@@ -160,17 +169,20 @@ def elimina_productos_presupuesto(id_producto):
 
 @gestiones_bp.route("/gestiones/anulapresupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def anula_presupuesto(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
-    if cabecera.estado == 2:
+    if cabecera.estado_presupuestos.clave == 2:
         flash ("El presupuesto ya está vencido no se puede anular", "alert-danger") 
         return redirect(url_for("consultas.consulta_presupuestos"))
-    cabecera.estado = 3
+    estado_anulado = Estados.get_first_by_clave_tabla(3,'estado_presupuesto')
+    cabecera.id_estado = estado_anulado.id
     cabecera.save()
     return redirect(url_for("consultas.consulta_presupuestos"))
 
 @gestiones_bp.route("/gestiones/exportardatos")
 @login_required
+@not_initial_status
 def exportar_datos():
     archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
     archivos = os.listdir(archivo_dir)
@@ -183,6 +195,7 @@ def exportar_datos():
 
 @gestiones_bp.route("/gestiones/exportarprecios")
 @login_required
+@not_initial_status
 def exportar_precios():
     job = current_app.task_queue.enqueue("app.tareas.to_precios_dbf", job_timeout = 3600)
     job.get_id()
@@ -192,6 +205,7 @@ def exportar_precios():
 
 @gestiones_bp.route("/gestiones/exportarcodigosbarrasfaltante")
 @login_required
+@not_initial_status
 def exportar_codigos_de_barra_faltantes():
     job = current_app.task_queue.enqueue("app.tareas.sin_codigo_barras_to_excel", job_timeout = 3600)
     job.get_id()
@@ -201,6 +215,7 @@ def exportar_codigos_de_barra_faltantes():
 
 @gestiones_bp.route("/gestiones/descargararchivos/<archivo>")
 @login_required
+@not_initial_status
 def descarga_archivo(archivo):
     archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
     archivos = os.listdir(archivo_dir)

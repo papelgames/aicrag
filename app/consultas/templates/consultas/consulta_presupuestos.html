@@ -39,36 +39,36 @@
        
         {% for presupuesto in cabecera.items %}
             <tr>
-                <th scope="row">{{ presupuesto.CabecerasPresupuestos.id }}</th>
-                <td> {{ presupuesto.CabecerasPresupuestos.created.strftime('%d-%m-%Y') }}</td>
-                <td> {{ presupuesto.CabecerasPresupuestos.nombre_cliente }} </td>
-                <td> {{ presupuesto.CabecerasPresupuestos.importe_total|round(2) }}</td>
-                <td> {{ presupuesto.Parametros.descripcion }}</td>
-                {% if now < presupuesto.CabecerasPresupuestos.fecha_vencimiento %}
+                <th scope="row">{{ presupuesto.id }}</th>
+                <td> {{ presupuesto.created.strftime('%d-%m-%Y') }}</td>
+                <td> {{ presupuesto.nombre_cliente }} </td>
+                <td> {{ presupuesto.importe_total|round(2) }}</td>
+                <td> {{ presupuesto.estado_presupuestos.descripcion }}</td>
+                {% if now < presupuesto.fecha_vencimiento %}
                 
-                <td> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Acción
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
-                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar datos del cliente</a>
-                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar productos del presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = presupuesto.id) }}">Modificar datos del cliente</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = presupuesto.id) }}">Modificar productos del presupuesto</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item"  href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Anular presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = presupuesto.id) }}">Anular presupuesto</a>
                     </div>
                 </td>
                 {% else %}
-                <td class="text-danger"> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td class="text-danger"> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
                 <td >
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Acción
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a>
                     </div>
                 </td>
                 {% endif %}
@@ -120,43 +120,43 @@
     
     <tbody>
          
-        {% for presupuesto in cabecera %}
+       
             <tr>
-                <th scope="row">{{ presupuesto.CabecerasPresupuestos.id }}</th>
-                <td> {{ presupuesto.CabecerasPresupuestos.created.strftime('%d-%m-%Y') }}</td>
-                <td> {{ presupuesto.CabecerasPresupuestos.nombre_cliente }} </td>
-                <td> {{ presupuesto.CabecerasPresupuestos.importe_total|round(2) }}</td>
-                <td> {{ presupuesto.Parametros.descripcion }}</td>
-                {% if now < presupuesto.CabecerasPresupuestos.fecha_vencimiento %}
+                <th scope="row">{{ cabecera.id }}</th>
+                <td> {{ cabecera.created.strftime('%d-%m-%Y') }}</td>
+                <td> {{ cabecera.nombre_cliente }} </td>
+                <td> {{ cabecera.importe_total|round(2) }}</td>
+                <td> {{ cabecera.estado_presupuestos.descripcion }}</td>
+                {% if now < cabecera.fecha_vencimiento %}
                 
-                <td> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td> {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Acción
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
-                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar datos del cliente</a>
-                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Modificar productos del presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = cabecera.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">Modificar datos del cliente</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">Modificar productos del presupuesto</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item"  href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Anular presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = cabecera.id) }}">Anular presupuesto</a>
                     </div>
                 </td>
                 {% else %}
-                <td class="text-danger"> {{ presupuesto.CabecerasPresupuestos.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
+                <td class="text-danger"> {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
                 <td >
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Acción
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.CabecerasPresupuestos.id) }}">Consultar presupuesto</a>
+                        <a class="dropdown-item"  href="{{ url_for('consultas.presupuesto', id_presupuesto = cabecera.id) }}">Consultar presupuesto</a>
                     </div>
                 </td>
                 {% endif %}
             </tr>
-        {% endfor %}
+        
     </tbody>
 </table>
 {% endif %}

@@ -6,6 +6,7 @@ from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, Inte
 from wtforms.fields import FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, ValidationError
 
+from app.models import Personas
 
 class ProveedoresForm(FlaskForm):
     nombre = StringField('Nombre del proveedor',validators=[DataRequired('Complete el nombre del proveedor')])
@@ -71,3 +72,34 @@ class ProductosMasivosForm(FlaskForm):
 class BusquedaForm(FlaskForm):
     buscar = StringField('Buscar', validators=[DataRequired('Escriba la descripción de un producto o su código de barras' )])
  
+ 
+class AltaPersonasForm(FlaskForm):
+    descripcion_nombre = StringField("Nombre/Razón Social", validators=[DataRequired('Debe cargar el nombre o la razón social' )])
+    correo_electronico = StringField('Correo electrónico', validators=[Email()])
+    telefono = StringField('Telefono')
+    cuit = StringField('CUIT', validators=[DataRequired(), Length(max=11)])
+    tipo_persona = SelectField('Tipo de persona', choices =[( '','Seleccionar acción'),( "fisica",'Persona Física'),( "juridica",'Persona Jurídica')], coerce = str, default = None, validators=[DataRequired('Seleccione tipo de persona')])
+    #estado = SelectField('Tipo de persona', choices =[], coerce = str, default = None)
+    nota = TextAreaField('Nota', validators=[Length(max=256)])
+
+        
+    def validate_correo_electronico(self, correo_electronico):
+        correo_persona = Personas.get_by_correo(correo_electronico.data)
+        if correo_persona:
+            raise ValidationError('El correo electrónico pertenece a otra persona.')
+
+class PermisosForm(FlaskForm):
+    proceso = SubmitField('Procesar permisos')
+
+class EstadosForm(FlaskForm):
+    clave = IntegerField('Clave', validators=[DataRequired('Escriba una clave')])
+    descripcion = StringField('Nuevo estado', validators=[DataRequired('Escriba una descripción'),Length(max=50)])
+    tabla = StringField('Tabla de referencia', validators=[DataRequired('Escriba una descripción'),Length(max=50)])
+    inicial = BooleanField('¿Es inicial?')
+    final = BooleanField('¿Es final?')
+
+class RolesForm(FlaskForm):
+    descripcion = StringField('Rol',validators=[DataRequired('Debe ingresar un rol'),Length(max=15)])
+
+class PermisosSelectForm(FlaskForm):
+    id_permiso = SelectField('Permiso', choices =[], coerce = str, default = None, validators=[DataRequired('Seleccione un permiso')])

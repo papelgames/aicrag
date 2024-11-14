@@ -1,0 +1,30 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Groma | Alta de personas
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="offset-md-2 col-md-8">
+		<h1>Datos de persona</h1> 
+        
+		<form action="" method="post" class = "form-horizontal" enctype="multipart/form-data" novalidate>	
+			{{ form.hidden_tag() }}
+			{{ render_input(form.descripcion_nombre,'', id= "descripcion_nombre" , class="form-control", placeholder="Ingrese el nombre/razón social" ) }}
+			{{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Ingrese correo electronico del cliente" ) }}
+			{{ render_input(form.telefono,'', id= "telefono" , class="form-control", placeholder = "Telefono" ) }}
+			{{ render_input(form.cuit,'', id= "cuit" , class="form-control", placeholder="CUIT" ) }}
+			{{ render_input(form.tipo_persona,'', id= "tipo_persona" , class="form-control" ) }}
+			{{ render_input(form.nota,'', id= "nota" , class="form-control", placeholder = "Ingrese nota" ) }}
+
+			<button type="submmit" class="btn btn-primary">Guardar</button>
+			
+		</form>
+            
+	</div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Groma | Alta de tipos de gestiones
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="offset-md-3 col-md-6">
+		<h1>Alta estados</h1>
+
+		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+			{{ render_input(form.clave,'', id= "clave" , class="form-control", placeholder="Clave de estado" ) }}
+			{{ render_input(form.descripcion,'', id= "tipo" , class="form-control", placeholder="Descripción de estado" ) }}
+			{{ render_input(form.tabla,'', id= "tabla" , class="form-control", placeholder="Elija la tabla de referencia" ) }}
+			{{ render_input(form.inicial,'', id= "inicial" , class="form-control" ) }}
+			{{ render_input(form.final,'', id= "final" , class="form-control" ) }}
+
+			<button type="submmit" class="btn btn-primary" >Guardar</button>
+			
+		</form>
+	</div>
+
+</div>
+{% if estados %}
+	<div class="offset-md-3 col-md-6">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">CLAVE</th>
+					<th scope="col">NOMBRE</th>
+					<th scope="col">TABLA</th>
+					<th scope="col">¿INICIAL?</th>
+					<th scope="col">¿FINAL?</th>
+					<th scope="col">ACCION</th>
+					
+				</tr>
+			</thead>
+			
+			<tbody>
+				{% for estado in estados %}
+					<tr>
+						<th scope="row">{{ estado.id }}</th>
+						<td> {{ estado.clave }}</td>
+						<td> {{ estado.descripcion }}</td>
+						<td> {{ estado.tabla }}</td>
+						<td> {{ estado.inicial }}</td>
+						<td> {{ estado.final }}</td>
+					
+						<td>
+							<div class="dropdown">
+								<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Acción
+							</button>
+							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+								<a class="dropdown-item"  href="">Modificar</a>
+							</div>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+{% endblock %}

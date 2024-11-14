@@ -9,9 +9,9 @@ from flask import render_template, redirect, url_for, abort, current_app, flash,
 from flask_login import login_required, current_user
 #from werkzeug.utils import secure_filename
 
-#from app.auth.decorators import admin_required
+from app.auth.decorators import admin_required, not_initial_status, nocache
 from app.auth.models import Users
-from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros #, Proveedores
+from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Estados #, Proveedores
 from app.controles import get_tarea_corriendo
 
 from . import consultas_bp 
@@ -27,6 +27,8 @@ def control_vencimiento (fecha):
 @consultas_bp.route("/consultas/consultaproducto/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultaproducto/", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
+@nocache
 def consulta_productos(criterio = ""):
     form = BusquedaForm()
     lista_de_productos = []
@@ -54,14 +56,20 @@ def consulta_productos(criterio = ""):
         flash('Los precios se están actualizando', 'alert-warning')
     return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, criterio = criterio, fecha_tope = fecha_tope )
 
-@consultas_bp.route("/consultas/consultapresupuestos/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])
 @login_required
-def consulta_presupuestos(criterio=""):
+@not_initial_status
+@nocache
+def consulta_presupuestos():
+    criterio = request.args.get('criterio','')
     page = int(request.args.get('page', 1))
     per_page = current_app.config['ITEMS_PER_PAGE']
     form = BusquedaForm()
-    cabecera = CabecerasPresupuestos.get_all_estado("1", page, per_page)
+
+    estado_pendiente = Estados.get_first_by_clave_tabla(1,"estado_presupuesto")
+
+    cabecera = CabecerasPresupuestos.get_all_estado(estado_pendiente.id, page, per_page)
+    
     if len(cabecera.items) == 0:
             cabecera =[]
     now = datetime.now()
@@ -71,7 +79,7 @@ def consulta_presupuestos(criterio=""):
         return redirect(url_for("consultas.consulta_presupuestos", criterio = buscar))
     
     if criterio.isdigit() == True:
-        cabecera = CabecerasPresupuestos.get_all_by_id(criterio)
+        cabecera = CabecerasPresupuestos.get_by_id(criterio)
     elif criterio == "":
         pass
     else:
@@ -82,6 +90,8 @@ def consulta_presupuestos(criterio=""):
 
 @consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
+@nocache
 def presupuesto(id_presupuesto):
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     productos = Presupuestos.get_by_id_presupuesto(id_presupuesto)

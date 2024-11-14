@@ -1,31 +1,57 @@
 {% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
 
-{% block title %}
-    {{ user.name }}
-{% endblock %}
+{% block title %}Groma|Administración de usuarios{% endblock %}
 
 {% block content %}
-    <h2>Detalle del usuario</h2>
-    <div>
-    Nombre: {{ user.name }}
-    </div>
-    <div>
-    Email: {{ user.email }}
-    </div>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.is_admin.label }}
-            {{ form.is_admin }}<br>
-            {% for error in form.is_admin.errors %}
-            <span style="color: red;">{{ error }}</span>
-            {% endfor %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">       
+            <div class="card-body">
+                <h2>Detalle del usuario</h2>
+                <div>
+                    Nombre: <strong>{{ user.persona.descripcion_nombre }}</strong> 
+                </div>
+                <div>
+                    Email: <strong>{{ user.persona.correo_electronico }}</strong>
+                </div>
+                <div>
+                    Username: <strong>{{ user.username }}</strong>
+                </div>
+                <a href="{{ url_for('auth.forgot_password_by_admin', username=user.username) }}" >
+                    <button class="btn btn-primary mt-2">Restablecer contraseña</button>
+                </a>
+            </div>
         </div>
-        <div>
-            {{ form.submit() }}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">       
+            <div class="card-body">
+                <form action="" method="post" enctype="multipart/form-data" novalidate>	
+                    {{ form.hidden_tag() }}
+                
+                    {{ render_input(form.is_admin,'', id= "is_admin" , class="form-control" ) }}
+                    <button type="submmit" class="btn btn-primary" >Guardar cambios</button>
+                </form>
+                <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" >
+                    <button class="btn btn-primary mt-2">Desactivar Usuario</button>
+                </a>
+            </div>
         </div>
-    </form>
-    <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post" novalidate>
-        <input type="submit" value="Eliminar" />
-    </form>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">       
+            <div class="card-body">
+                <a href="{{ url_for('admin.asignacion_permisos', user_id=user.id) }}" >
+                    <button class="btn btn-primary mt-2">Asignar permisos</button>
+                </a>
+                <a href="{{ url_for('admin.asignacion_roles', user_id=user.id) }}" >
+                    <button class="btn btn-primary mt-2">Asignar roles</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

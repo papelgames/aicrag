@@ -1,0 +1,62 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Groma | Asignacion de permisos en roles
+{% endblock %}
+
+{% block content %}
+<h1>Asignacion de permisos en roles</h1>
+<div class="row">
+	
+
+	<div class="col-md-6">
+		<div class="offset-md-3 col-md-6">
+			
+			<form action="" method="post" enctype="multipart/form-data" novalidate>	
+				{{ form.hidden_tag() }}
+				{{ render_input(form.id_permiso,'', id= "id_permiso" , class="form-control", size=30) }}
+				<button type="submmit" class="btn btn-primary" >Asignar</button>
+				
+			</form>
+		</div>
+	</div>
+
+	<div class="col-md-6">
+		{% if permisos_en_rol %}
+			<div class="offset-md-3 col-md-6">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">NOMBRE</th>
+							<th scope="col">ACCION</th>
+							
+						</tr>
+					</thead>
+					
+					<tbody>
+						{% for permiso in permisos_en_rol.permisos %}
+							<tr>
+								<th scope="row">{{ permiso.id }}</th>
+								<td> {{ permiso.descripcion }}</td>
+							
+								<td>
+									<div class="dropdown">
+										<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											Acción
+									</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+										<a class="dropdown-item"  href="#">Asignar permisos</a>
+									</div>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+
+	</div>
+</div>
+{% endblock %}

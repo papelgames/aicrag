@@ -80,9 +80,7 @@ class Productos (Base):
                
     @staticmethod
     def get_all():
-        query_str = db.session.query(Productos, Users, Proveedores)\
-            .filter(Productos.usuario_alta == Users.email)\
-            .filter(Productos.usuario_modificacion == Users.email)\
+        query_str = db.session.query(Productos, Proveedores)\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .all()
         return query_str
@@ -133,9 +131,7 @@ class Productos (Base):
     @staticmethod
     def get_by_codigo_de_barras(codigo_barras):
         valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        query_str = db.session.query(Productos, Users, Proveedores, valor_calculado.label('importe_calculado'))\
-            .filter(Productos.usuario_alta == Users.email)\
-            .filter(Productos.usuario_modificacion == Users.email)\
+        query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
             .all()
@@ -144,9 +140,7 @@ class Productos (Base):
     @staticmethod
     def get_by_id_completo(id_producto):
         valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        query_str = db.session.query(Productos, Users, Proveedores, valor_calculado.label('importe_calculado'))\
-            .filter(Productos.usuario_alta == Users.email)\
-            .filter(Productos.usuario_modificacion == Users.email)\
+        query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.id == id_producto)\
             .all()
@@ -159,9 +153,7 @@ class Productos (Base):
     @staticmethod
     def get_like_descripcion(descripcion_):
         valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        query_str = db.session.query(Productos, Users, Proveedores, valor_calculado.label('importe_calculado'))\
-            .filter(Productos.usuario_alta == Users.email)\
-            .filter(Productos.usuario_modificacion == Users.email)\
+        query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.descripcion.contains(descripcion_))\
             .all()
@@ -171,9 +163,7 @@ class Productos (Base):
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
         descripcion_ = descripcion_.replace(' ','%')
         valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        return db.session.query(Productos, Users, Proveedores, valor_calculado.label('importe_calculado'))\
-            .filter(Productos.usuario_alta == Users.email)\
-            .filter(Productos.usuario_modificacion == Users.email)\
+        return db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.descripcion.contains(descripcion_))\
             .paginate(page=page, per_page=per_page, error_out=False)
@@ -189,9 +179,10 @@ class Productos (Base):
 class CabecerasPresupuestos (Base):
     __tablename__ = "cabeceraspresupuestos"
     fecha_vencimiento = db.Column(db.DateTime, nullable = False)
-    id_persona = db.Column(db.Integer, db.ForeignKey('personas.id'))
+    nombre_cliente = db.Column(db.String(256))
+    correo_electronico = db.Column(db.String(256))
     importe_total = db.Column(db.Numeric(precision=15, scale=2))
-    estado = db.Column(db.Integer)
+    id_estado = db.Column(db.Integer, db.ForeignKey('estados.id'))
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
     
@@ -205,16 +196,16 @@ class CabecerasPresupuestos (Base):
 
     @staticmethod
     def get_by_id(id_presupuesto):
-        return CabecerasPresupuestos.query.filter_by(id = id_presupuesto)\
-                                          .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-                                          .first()
+        return CabecerasPresupuestos.query.filter_by(id = id_presupuesto).first()
     
-    @staticmethod
-    def get_all_by_id(id_presupuesto):
-        return db.session.query(CabecerasPresupuestos,Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
-                                                                 .filter_by(id = id_presupuesto)\
-                                                                 .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-                                                                 .all()
+    # @staticmethod
+    # def get_all_by_id(id_presupuesto):
+    #     return db.session.query(CabecerasPresupuestos,Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
+    #                                                              .filter_by(id = id_presupuesto)\
+    #                                                              .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+    #                                                              .all()
+    def get_by_all_id(id):
+        return CabecerasPresupuestos.query.get(id)
 
     @staticmethod
     def get_like_descripcion(descripcion_):
@@ -226,23 +217,27 @@ class CabecerasPresupuestos (Base):
 
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
-        return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
-                                                           .filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
+        return db.session.query(CabecerasPresupuestos).filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
                                                            .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
                                                            .paginate(page=page, per_page=per_page, error_out=False)
-        
-
+   
     @staticmethod
     def get_all():
         return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
 
-    @staticmethod
-    def get_all_estado(estado_cabecera, page=1, per_page=20): #1 es esado activo 
-        return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
-                                                                  .filter(CabecerasPresupuestos.estado == estado_cabecera)\
-                                                                  .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-                                                                  .paginate(page=page, per_page=per_page, error_out=False)
+    # @staticmethod
+    # def get_all_estado(estado_cabecera, page=1, per_page=20): #1 es esado activo 
+    #     return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
+    #                                                               .filter(CabecerasPresupuestos.estado == estado_cabecera)\
+    #                                                               .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
+    #                                                               .paginate(page=page, per_page=per_page, error_out=False)
 
+    @staticmethod
+    def get_all_estado(id_estado, page=1, per_page=20):
+        return CabecerasPresupuestos.query.filter_by(id_estado = id_estado)\
+            .paginate(page=page, per_page=per_page, error_out=False)
+    
+    
 class Presupuestos (Base):
     __tablename__ = "presupuestos"
     id_cabecera_presupuesto = db.Column(db.Integer)
@@ -333,7 +328,6 @@ class Personas (Base):
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
     id_usuario = db.Column(db.Integer, db.ForeignKey('users.id'))
-    cabecerapresupuesto = db.relationship('CabecerasPresupuestos', backref='cabeceraspresupuestos', uselist=False)
     
     def save(self):
         if not self.id:
@@ -372,7 +366,8 @@ class Estados(Base):
     final = db.Column(db.Boolean)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
-    
+    cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='estado_presupuestos', uselist=False)
+   
     def save(self):
         if not self.id:
             db.session.add(self)

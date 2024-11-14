@@ -1,0 +1,62 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    Groma | Permisos por usuario
+{% endblock %}
+
+{% block content %}
+<h1>Alta de por usuarios</h1>
+<h4>Usuario: {{ user.persona.descripcion_nombre}}</h4>
+<div class="row">
+	
+	<div class="col-md-6">
+        <div class="card">       
+            <div class="card-body">
+				<form action="" method="post" enctype="multipart/form-data" novalidate>	
+					{{ form.hidden_tag() }}
+					{{ render_input(form.rol,'', id= "rol" , class="form-control" ) }}
+					<button type="submmit" class="btn btn-primary" >Guardar</button>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6">
+        <div class="card">       
+            <div class="card-body">
+				{% if user %}
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th scope="col">PERMISO</th>
+								<th scope="col">ACCION</th>
+								
+							</tr>
+						</thead>
+						
+						{% for permiso in user.permisos %}
+							<tbody>
+								<tr>
+									<td>{{ permiso.descripcion }}</td>
+									
+									<td>
+										<div class="dropdown">
+											<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												Acción
+										</button>
+										<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+											<a class="dropdown-item"  href="{{ url_for('admin.eliminar_permiso_usuario', user_id = user.id, id_permiso = permiso.id) }}">Eliminar Permiso</a>
+											
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						{% endfor %}
+					</table>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
