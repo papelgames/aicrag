@@ -23,7 +23,7 @@ def sin_codigo_barras_to_excel():
    hoja = wb.active
    hoja.append(('Codigo_de_barras', 'Id_proveedores', 'Descripcion', 'Importe', 'Nombre_proveedor'))
    for row in productos_incompletos:
-      hoja.append(row)
+      hoja.append((row[0],row[1],row[2],row[3],row[4]))
    wb.save(archivo_dir + '/productos_sin_codigo_barra.xlsx')
 
 
@@ -42,7 +42,7 @@ def to_precios_dbf():
       if len(str(round(row[2]))) > 10:
          errores.append(f'{row[0][:13]}\t{row[1][:56]}\t{row[2]}')
       else:
-         table.append(f'{row[0][:13]}\t{row[1][:56]}\t{locale.format("%.2f", row[2], grouping=True, monetary=True)}')
+         table.append(f'{row[0][:13]}\t{row[1][:56]}\t{locale._format("%.2f", row[2], grouping=True, monetary=True)}')
    # Inserto los importes no soportados en el archivo precios_elevados.txt siempre y cuando haya.
    if errores:
       with open(archivo_dir + '/precios_elevados.txt', 'w') as errores_file:
@@ -87,9 +87,10 @@ def in_lista_masiva(file_path, id_proveedor, email):
    #inserto los registros que no existen
    producto_nuevo = Productos()
    for id in mat:
-      if id[0].value != None and str(id[0].value).upper() != str(columnas[1]).upper(): 
+      if id[0].value != None and str(id[0].value).upper() != str(columnas[1]).upper():
          producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value)
          registros_total += 1
+         #si es un producto nuevo
          if not producto_por_id:
             if id[4].value == None:
                   utilidad_ = 100
@@ -128,6 +129,15 @@ def in_lista_masiva(file_path, id_proveedor, email):
          
          #actualizo productos que existe si es que tienen un importe distinto al cargado.    
          if producto_por_id:
+            #chequeo si el codigo de barras cambió o si lo agregron
+            if producto_por_id.codigo_de_barras == None and id[1].value != None:
+               producto_por_id.codigo_de_barras = id[1].value
+               producto_por_id.id_ingreso = id_ingreso
+               producto_por_id.only_add()
+            elif producto_por_id.codigo_de_barras != str(id[1].value) and id[1].value != None:
+               producto_por_id.codigo_de_barras = id[1].value
+               producto_por_id.id_ingreso = id_ingreso
+               producto_por_id.only_add()
             if proveedor.incluye_iva == True:
                if float(producto_por_id.importe) != round(id[3].value,2):    
                   producto_por_id.importe = round(id[3].value,2)
@@ -137,11 +147,12 @@ def in_lista_masiva(file_path, id_proveedor, email):
                   producto_por_id.only_add()
                else:
                   registros_ignorados += 1 
+            #si el proveedor pasa la lista sin iva
             else:
                if float(producto_por_id.importe) != round(id[3].value * 1.21 ,2):
                   producto_por_id.importe = round(id[3].value * 1.21 ,2)
                   producto_por_id.usuario_modificacion = email
-                  producto_por_id.id_ingreso = id_ingreso 
+                  producto_por_id.id_ingreso = id_ingreso
                   registros_actualizados += 1
                   producto_por_id.only_add()
                else:

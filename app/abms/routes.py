@@ -77,8 +77,8 @@ def alta_individual():
                               id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime())),
                               utilidad = utilidad,
                               es_servicio = bool(es_servicio),
-                              usuario_alta = current_user.email,
-                              usuario_modificacion = current_user.email
+                              usuario_alta = current_user.username,
+                              usuario_modificacion = current_user.username
                               )
         
         producto.save()
@@ -217,16 +217,16 @@ def modificacion_proveedor(id_proveedor= ""):
 
     #modifico los valores booleanos por int porque no me toma boolean para el selectfield
     if proveedor.archivo_si_no == True:
-        proveedor.archivo_si_no = '1'
+        proveedor.archivo_si_no = 1
     elif proveedor.archivo_si_no == False:
-        proveedor.archivo_si_no = '0'
+        proveedor.archivo_si_no = 0
     else:
         proveedor.archivo_si_no = ''
 
     if proveedor.incluye_iva == True:
-        proveedor.incluye_iva = '1'
+        proveedor.incluye_iva = 1
     elif proveedor.incluye_iva == False:
-        proveedor.incluye_iva = '0'
+        proveedor.incluye_iva = 0
     else:
         proveedor.incluye_iva = ''
 
@@ -241,7 +241,7 @@ def modificacion_proveedor(id_proveedor= ""):
         proveedor.columna_importe = form.columna_importe.data
         proveedor.columna_utilidad = form.columna_utilidad.data
         proveedor.incluye_iva = int(form.incluye_iva.data)
-        proveedor.usuario_modificacion = current_user.email
+        proveedor.usuario_modificacion = current_user.username
         
         proveedor.save()
         flash("Proveedor actualizado correctamente", "alert-success")
@@ -295,7 +295,7 @@ def alta_masiva():
                         break
                 secuencia +=1
             if control_proveedor == True:
-                email = 'papelgames@hotmail.com'#current_user.email
+                email = current_user.username
                 job = current_app.task_queue.enqueue('app.tareas.in_lista_masiva', file_path = file_path, id_proveedor = id_proveedor, email= email, job_timeout = 3600)
                 job.get_id()
                 
