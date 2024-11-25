@@ -66,13 +66,14 @@ def show_signup_form():
                                 usuario_alta = current_user.username)
                 user.persona = persona
                 user.save()
-            
             # Enviamos un email de bienvenida
             send_email(subject='Bienvenid@ AICRAG',
-                        sender=current_app.config['DONT_REPLY_FROM_EMAIL'],
+                        sender=(current_app.config['DONT_REPLY_FROM_EMAIL'], 
+                                current_app.config['MAIL_USERNAME'] ),
                         recipients=[correo_electronico, ],
                         text_body=f'Hola {name}, eres nuevo usuairo de aicrag',
                         html_body=f'<p>Hola <strong>{name}</strong>, ya tienes usuario en aicrag: <br>Usuario: <strong>{username}</strong> <br>Contraseña: <strong>{new_password}</strong></p>')
+           
             flash("El usuario ha sido creado correctamente.", "alert-success")
             return redirect(url_for('admin.list_users'))
     return render_template("auth/signup_form.html", form=form)
@@ -130,7 +131,8 @@ def forgot_password():
             url_login = url_for('auth.login', _external=True)
 
             send_email(subject='Aicrag | Blanqueo de contraseña',
-                        sender=(current_app.config['MAIL_DEFAULT_SENDER'], current_app.config['MAIL_USERNAME'] ),
+                        sender=(current_app.config['MAIL_DEFAULT_SENDER'], 
+                                current_app.config['MAIL_USERNAME'] ),
                         recipients=[correo_electronico, ],
                         text_body=f'Hola {name}, te enviamos un correo para poder blanquear la contraseña',
                         html_body=f'<p>Hola <strong>{name}</strong>, ingresando al siguiente link podrás generar una nueva contraseña <a href="{url_login}">Link</a> tu contraseña temporal es: <br><strong>{new_password}</strong> </p>')
@@ -157,7 +159,8 @@ def forgot_password_by_admin():
         url_login = url_for('auth.login', _external=True)
 
         send_email(subject='Aicrag | Blanqueo de contraseña',
-                    sender=(current_app.config['MAIL_DEFAULT_SENDER'], current_app.config['MAIL_USERNAME'] ),
+                    sender=(current_app.config['MAIL_DEFAULT_SENDER'], 
+                            current_app.config['MAIL_USERNAME'] ),
                     recipients=[correo_electronico, ],
                     text_body=f'Hola {name}, te enviamos un correo para poder blanquear la contraseña',
                     html_body=f'<p>Hola <strong>{name}</strong>, ingresando al siguiente link podrás generar una nueva contraseña <a href="{url_login}">Link</a> tu contraseña temporal es: <br><strong>{new_password}</strong> </p>')
@@ -179,7 +182,8 @@ def forgot_username():
                 url_login = url_for('auth.login', _external=True)
 
                 send_email(subject='Aicrag | Usuario',
-                            sender=(current_app.config['MAIL_DEFAULT_SENDER'], current_app.config['MAIL_USERNAME'] ),
+                            sender=(current_app.config['MAIL_DEFAULT_SENDER'], 
+                                    current_app.config['MAIL_USERNAME'] ),
                             recipients=[correo_electronico, ],
                             text_body=f'Hola {name}, te enviamos un correo para poder informarte tu nombre de usuario',
                             html_body=f'<p>Hola <strong>{name}</strong>, su nombre de usuario es: <strong>{username}</strong>. Puede ingresar <a href="{url_login}">Link</a></p>')
@@ -221,7 +225,7 @@ def firstin():
                     id_estado=1, 
                     is_admin=True
                     )
-        password = "Groma"
+        password = "Aicrag"
         user.set_password(password)
         
         user.save()
