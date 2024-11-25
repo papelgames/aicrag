@@ -11,7 +11,7 @@ from flask_login import login_required, current_user
 
 from app.auth.decorators import admin_required, not_initial_status, nocache
 from app.auth.models import Users
-from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Estados #, Proveedores
+from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Estados, Personas #, Proveedores
 from app.controles import get_tarea_corriendo
 
 from . import consultas_bp 
@@ -100,3 +100,27 @@ def presupuesto(id_presupuesto):
         cabecera.estado = 2
         cabecera.save()
     return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
+
+@consultas_bp.route("/consultas/consultapersonas/", methods = ['GET', 'POST'])
+@login_required
+@not_initial_status
+@nocache
+def consulta_personas():
+    criterio = request.args.get('criterio','')
+    form = BusquedaForm()
+    lista_de_personas = []
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
+    if form.validate_on_submit():
+        buscar = form.buscar.data
+        return redirect(url_for("consultas.consulta_personas", criterio = buscar))
+    if criterio.isdigit() == True:
+        lista_de_personas = Personas.get_by_cuit(criterio)
+    elif criterio == "":
+        pass
+    else:
+        lista_de_personas = Personas.get_like_descripcion_all_paginated(criterio, page, per_page)
+        if len(lista_de_personas.items) == 0:
+            lista_de_personas =[]
+
+    return render_template("consultas/consulta_personas.html", form = form, criterio = criterio, lista_de_personas= lista_de_personas )
