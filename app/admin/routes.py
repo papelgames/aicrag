@@ -34,12 +34,14 @@ def roles_select():
 @admin_bp.route("/admin/")
 @login_required
 @admin_required
+@not_initial_status
 def index():
     return render_template("admin/index.html")
 
 @admin_bp.route("/admin/users/")
 @login_required
 @admin_required
+@not_initial_status
 def list_users():
     users = Users.get_all()
     return render_template("admin/users.html", users=users)
@@ -72,6 +74,7 @@ def update_user_form():
 @admin_bp.route("/admin/user/delete/<int:user_id>/", methods=['POST', ])
 @login_required
 @admin_required
+@not_initial_status
 def delete_user(user_id):
     logger.info(f'Se va a eliminar al usuario {user_id}')
     user = Users.get_by_id(user_id)

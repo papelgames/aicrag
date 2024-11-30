@@ -37,20 +37,20 @@ function evitarCaracter(event, caracterProhibido) {
   return true;
 }
 
-window.addEventListener('load', () => {
-  // Elemento HTML donde se muestra el QR
-  const contenedorQR = document.getElementById('contenedorQR');
+// window.addEventListener('load', () => {
+//   // Elemento HTML donde se muestra el QR
+//   const contenedorQR = document.getElementById('contenedorQR');
 
-  // Obtiene el valor del div contenedorQR
-  const valorParaQR = contenedorQR.textContent;
+//   // Obtiene el valor del div contenedorQR
+//   const valorParaQR = contenedorQR.textContent;
 
-  // Opciones para el tamaño del QR
-  const opcionesQR = {
-    text: valorParaQR,
-    width: 175, // Ancho en píxeles
-    height: 175 // Alto en píxeles
-  };
+//   // Opciones para el tamaño del QR
+//   const opcionesQR = {
+//     text: valorParaQR,
+//     width: 175, // Ancho en píxeles
+//     height: 175 // Alto en píxeles
+//   };
 
-  // Crea una instancia de QRCode con el valor obtenido y las opciones
-  const QR = new QRCode(contenedorQR, opcionesQR);
-});
+//   // Crea una instancia de QRCode con el valor obtenido y las opciones
+//   const QR = new QRCode(contenedorQR, opcionesQR);
+// });

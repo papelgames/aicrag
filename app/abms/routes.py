@@ -7,7 +7,7 @@ import logging
 import os
 #from types import TracebackType
 
-from flask import render_template, redirect, url_for, request, current_app, abort
+from flask import render_template, redirect, url_for, request, current_app, abort, make_response
 from flask.helpers import flash
 from flask_login import login_required, current_user
 
@@ -54,6 +54,7 @@ def permisos_select(id_rol):
 
 @abms_bp.route("/abms/altaindividual", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def alta_individual():
     form=ProductosForm()
     form.id_proveedor.choices = proveedores_select()
@@ -89,6 +90,7 @@ def alta_individual():
 @abms_bp.route("/abms/busquedaproducto/<criterio>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/busquedaproducto/", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def busqueda_productos(criterio = ""):
     form = BusquedaForm()
     lista_de_productos = []
@@ -111,6 +113,7 @@ def busqueda_productos(criterio = ""):
 @abms_bp.route("/abms/modificacionproducto/<int:id_producto>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/modificacionproducto", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def modificacion_producto(id_producto = ""):
     if id_producto == "":
         return redirect(url_for("abms.busqueda_productos"))
@@ -152,6 +155,7 @@ def eliminar_producto_id(id_producto):
 
 @abms_bp.route("/abms/altaproveedor", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def alta_proveedor():
     form = ProveedoresForm()
     form.columna_id_lista_proveedor.choices = columnas_excel()
@@ -194,6 +198,7 @@ def alta_proveedor():
 
 @abms_bp.route("/abms/busquedaproveedor/", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def busqueda_proveedores(criterio = ""):
   
     lista_de_proveedores = Proveedores.get_all()
@@ -203,6 +208,7 @@ def busqueda_proveedores(criterio = ""):
 @abms_bp.route("/abms/modificacionproveedor/<id_proveedor>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/modificacionproveedor", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def modificacion_proveedor(id_proveedor= ""):
     if id_proveedor == "":
         return redirect(url_for("abms.busqueda_proveedores"))
@@ -251,6 +257,7 @@ def modificacion_proveedor(id_proveedor= ""):
 
 @abms_bp.route("/abms/altamasiva", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def alta_masiva():
     form = ProductosMasivosForm()
     form.id_proveedor.choices = proveedores_select(True)
@@ -307,6 +314,7 @@ def alta_masiva():
 
 @abms_bp.route("/abms/agenda", methods = ['GET', 'POST'])
 @login_required
+@not_initial_status
 def agenda():
     queue = current_app.task_queue
     

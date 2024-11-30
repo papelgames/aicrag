@@ -13,7 +13,6 @@ load_dotenv()
 settings_module = os.getenv('APP_SETTINGS_MODULE')
 app = create_app(settings_module)
 
-
 @app.route('/media/posts/<filename>')
 def media_posts(filename):
     dir_path = os.path.join(
@@ -31,11 +30,10 @@ def verificar_permisos():
     # Ignorar la verificación de permisos para los endpoints en ignorar_endpoint
     if endpoint in ignorar_endpoint:
         return
-
     # Verificar si ya hemos almacenado los permisos en la sesión
     if current_user.is_authenticated and 'permisos_del_usuario' not in session:
-        session['permisos_del_usuario'] = [permiso.descripcion for permiso in current_user.permisos]
-    
+        session['permisos_del_usuario'] = [permiso_user.descripcion for permiso_user in current_user.permisos]
+        session.modified = True
     # Verificar si el endpoint actual está en la lista de permisos del usuario no sos admin
     if current_user.is_authenticated and endpoint not in session['permisos_del_usuario'] and not current_user.is_admin:
         return abort(403)  # Prohibido

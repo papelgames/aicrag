@@ -1,5 +1,5 @@
 from flask import (render_template, redirect, url_for,
-                   request, current_app)
+                   request, current_app, session)
 from flask_login import current_user, login_user, logout_user, login_required
 from sqlalchemy import true
 #from werkzeug.urls import url_parse
@@ -198,6 +198,7 @@ def forgot_username():
 @auth_bp.route('/logout')
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for('public.index'))
 
 @login_manager.user_loader
