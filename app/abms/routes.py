@@ -87,11 +87,12 @@ def alta_individual():
         return redirect(url_for("public.index"))
     return render_template("abms/alta_individual.html", form=form)
 
-@abms_bp.route("/abms/busquedaproducto/<criterio>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/busquedaproducto/", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
 def busqueda_productos(criterio = ""):
+    criterio = request.args.get('criterio','')
+
     form = BusquedaForm()
     lista_de_productos = []
     page = int(request.args.get('page', 1))
@@ -110,11 +111,12 @@ def busqueda_productos(criterio = ""):
             lista_de_productos =[] 
     return render_template("abms/busqueda_productos.html", form = form, lista_de_productos=lista_de_productos, criterio = criterio )
 
-@abms_bp.route("/abms/modificacionproducto/<int:id_producto>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/modificacionproducto", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
-def modificacion_producto(id_producto = ""):
+def modificacion_producto():
+    id_producto = request.args.get('id_producto','')
+    
     if id_producto == "":
         return redirect(url_for("abms.busqueda_productos"))
 
@@ -124,9 +126,9 @@ def modificacion_producto(id_producto = ""):
     producto = Productos.get_by_id(id_producto)
 
     if producto.es_servicio == True:
-        producto.es_servicio = '1'
+        producto.es_servicio = 1
     else: 
-        producto.es_servicio = '0'
+        producto.es_servicio = 0
 
     if form.validate_on_submit():
         producto.codigo_de_barras = form.codigo_de_barras.data
@@ -138,7 +140,7 @@ def modificacion_producto(id_producto = ""):
         producto.es_servicio = bool(form.es_servicio.data)
         producto.cantidad_presentacion = form.cantidad_presentacion.data
         producto.id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
-        producto.usuario_modificacion = current_user.email
+        producto.usuario_modificacion = current_user.username
 
         producto.save()
         flash("Producto actualizado correctamente", "alert-success")
@@ -205,11 +207,12 @@ def busqueda_proveedores(criterio = ""):
      
     return render_template("abms/busqueda_proveedores.html", lista_de_proveedores=lista_de_proveedores )
 
-@abms_bp.route("/abms/modificacionproveedor/<id_proveedor>", methods = ['GET', 'POST'])
 @abms_bp.route("/abms/modificacionproveedor", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
-def modificacion_proveedor(id_proveedor= ""):
+def modificacion_proveedor():
+    id_proveedor = request.args.get('id_proveedor','')
+
     if id_proveedor == "":
         return redirect(url_for("abms.busqueda_proveedores"))
 
