@@ -88,7 +88,7 @@ def in_lista_masiva(file_path, id_proveedor, email):
    producto_nuevo = Productos()
    for id in mat:
       if id[0].value != None and str(id[0].value).upper() != str(columnas[1]).upper():
-         producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value)
+         producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value, id_proveedor ) #corregir esta consulta
          registros_total += 1
          #si es un producto nuevo
          if not producto_por_id:
