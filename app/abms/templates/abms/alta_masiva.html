@@ -8,16 +8,19 @@
 {% block content %}
 <div class="row">
 	<div class="offset-md-3 col-md-6">
-		<h1>Alta individual de productos</h1>
-
-		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+		<h1 class="display-4">Alta masiva de productos</h1>
+		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
             {{ form.hidden_tag() }}
-			{{ render_input(form.id_proveedor,'', id= "id_proveedor" , class="form-control" ) }}
-			{{ render_input(form.archivo,'', id= "archivo" , class="form-control", placeholder="Seleccione un archivo", accept = ".xlsx" ) }}
-            <button type="submmit" class="btn btn-primary" >Crear archivo</button>
-			
+			<div class="row mb-3">
+				<div class="col-md-6">	
+					{{ render_input(form.id_proveedor,'', id= "id_proveedor" , class="form-control" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.archivo,'', id= "archivo" , class="form-control", placeholder="Seleccione un archivo", accept = ".xlsx" ) }}
+				</div>
+			</div>
+			<button type="submmit" class="btn btn-primary" >Crear archivo</button>
 		</form>
 	</div>
 </div>
-
 {% endblock %}

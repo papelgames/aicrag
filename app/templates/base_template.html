@@ -1,10 +1,10 @@
 {% from "_render_elements.html" import render_messages %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{% block title %}
         {% endblock %}</title>
     {% block styles %}
@@ -14,121 +14,90 @@
     {% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('public.index') }}">Home <span class="sr-only">(current)</span></a>
-            </li>
+      <!-- Offcanvas Sidebar -->
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">MENU</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            {% if current_user.is_anonymous %}
+            <div class="mt-auto">
+                <a href="{{ url_for('auth.login') }}" class="list-group-item list-group-item-action text-success">Ingresar</a>
+            </div>
+            
+        {% else %}
+            <div class="list-group">
+                {% if current_user.is_admin %}
+                    <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#menu1" aria-expanded="false">
+                        GESTION DE USUARIOS
+                        <span>⮟</span>
+                    </a>
+                    <div class="collapse" id="menu1">
+                        <a href="{{ url_for('admin.list_users') }}" class="list-group-item list-group-item-action ms-3">Admin</a>
+                        <a href="{{ url_for('auth.show_signup_form') }}" class="list-group-item list-group-item-action ms-3">Registro de usuarios</a>
+                    </div>
+                    <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#menu2" aria-expanded="false">
+                        ABM SISTEMA
+                        <span>⮟</span>
+                    </a>
+                    <div class="collapse" id="menu2">
+                        <a href="{{ url_for('abms.alta_permiso') }}" class="list-group-item list-group-item-action ms-3">Permisos</a>
+                        <a href="{{ url_for('abms.crear_roles') }}" class="list-group-item list-group-item-action ms-3">Roles</a>
+                        <a href="{{ url_for('abms.alta_estados') }}" class="list-group-item list-group-item-action ms-3">Estados</a>
+                    </div>
+                {% endif %}
+                <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#menu3" aria-expanded="false">
+                    ABM PRODUCTOS
+                    <span>⮟</span>
+                </a>
+                <div class="collapse" id="menu3">
+                    <a href="{{ url_for('abms.alta_individual') }}" class="list-group-item list-group-item-action ms-3">Alta individual de productos</a>
+                    <a href="{{ url_for('abms.alta_masiva') }}" class="list-group-item list-group-item-action ms-3">Alta masiva de productos</a>
+                    <a href="{{ url_for('abms.busqueda_productos') }}" class="list-group-item list-group-item-action ms-3">Modificación de productos</a>
+                    <a href="{{ url_for('abms.alta_proveedor') }}" class="list-group-item list-group-item-action ms-3">Alta de proveedores</a>
+                    <a href="{{ url_for('abms.modificacion_proveedor') }}" class="list-group-item list-group-item-action ms-3">Modificación de proveedores</a>
+                    <a href="{{ url_for('abms.agenda') }}" class="list-group-item list-group-item-action ms-3">Agenda</a>
+                </div>
+                <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#menu4" aria-expanded="false">
+                    CONSULTAS
+                    <span>⮟</span>
+                </a>
+                <div class="collapse" id="menu4">
+                    <a href="{{ url_for('consultas.consulta_productos') }}" class="list-group-item list-group-item-action ms-3">Consulta de precio</a>
+                    <a href="{{ url_for('consultas.consulta_presupuestos') }}" class="list-group-item list-group-item-action ms-3">Consultar presupuestos</a>
+                    <a href="{{ url_for('consultas.consulta_personas') }}" class="list-group-item list-group-item-action ms-3">Consulta de personas</a>
+                </div>
+                <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#menu5" aria-expanded="false">
+                    GESTIONES
+                    <span>⮟</span>
+                </a>
+                <div class="collapse" id="menu5">
+                    <a href="{{ url_for('gestiones.alta_presupuesto') }}" class="list-group-item list-group-item-action ms-3">Crear nuevo presupuesto</a>
+                    <a href="{{ url_for('gestiones.exportar_datos') }}" class="list-group-item list-group-item-action ms-3">Exportar tablas</a>
+                </div>
+                    <div class="mt-auto">
+                    <a href="{{ url_for('auth.logout') }}" class="list-group-item list-group-item-action text-danger">Salir</a>
+                </div>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+    <div class="content">
+        <nav class="navbar navbar-light bg-light mb-4 fixed-top">
+            <button class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">☰</button>
             
             {% if current_user.is_anonymous %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.login') }}">Ingresar <span class="sr-only">(current)</span></a>
-                </li>
             {% else %}
-                <li class="nav-item">
-                    <a class="nav-link">{{ current_user.persona.descripcion_nombre }} <span class="sr-only">(current)</span></a>
-                </li>
-                {% if current_user.is_admin %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        GESTION DE USUARIOS
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="nav-link" href="{{ url_for('admin.list_users') }}">Admin <span class="sr-only">(current)</span></a>
-                            <a class="nav-link" href="{{ url_for('auth.show_signup_form') }}">Registro de usuarios <span class="sr-only">(current)</span></a>          
-                        </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        ABM SISTEMA
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="nav-link" href="{{ url_for('abms.alta_permiso') }}">Permisos<span class="sr-only">(current)</span></a>
-                        <a class="nav-link" href="{{ url_for('abms.crear_roles') }}">Roles<span class="sr-only">(current)</span></a>
-                        <a class="nav-link" href="{{ url_for('abms.alta_estados') }}">Estados<span class="sr-only">(current)</span></a>
-                    </div>
-                </li>
+            <a class="nav-link" href="{{ url_for('public.index') }}"> <span class="navbar-brand mb-0 h1 ms-3">{{ current_user.persona.descripcion_nombre }}</span></a>
             {% endif %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        ABM PRODUCTOS
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        
-                        <a class="dropdown-item" href="{{ url_for('abms.alta_individual') }}">Alta individual de productos</a>
-                        <a class="dropdown-item" href="{{ url_for('abms.alta_masiva') }}">Alta masiva de productos</a>
-                        <a class="dropdown-item" href="{{ url_for('abms.busqueda_productos') }}">Modificación de productos</a>
-                        <a class="dropdown-item" href='#'>Baja de productos</a>
-                        <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('abms.alta_proveedor') }}">Alta de proveedores</a>
-                            <a class="dropdown-item" href="{{ url_for('abms.modificacion_proveedor') }}">Modificación de proveedores</a>
-                        <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('abms.agenda') }}">Agenda</a>
-                        <div class="dropdown-divider"></div>    
-                            <a class="dropdown-item" href='#'>Manual del modulo</a>
-                       
-                      </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        CONSULTAS
-                    </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('consultas.consulta_productos') }}">Consulta de precio</a>
-                                <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('consultas.consulta_presupuestos') }}">Consultar presupuestos</a>
-                            <a class="dropdown-item" href="{{ url_for('consultas.consulta_personas') }}">Consulta de personas</a>    
-                                <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href='#'>Manual del modulo</a>
-                        </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        GESTIONES
-                    </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('gestiones.alta_presupuesto') }}">Crear nuevo presupuesto</a>
-                                <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('gestiones.exportar_datos') }}">Exportar tablas</a>
-                                <div class="dropdown-divider"></div>    
-                            <a class="dropdown-item" href='#'>Manual del modulo</a>
-                        </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        COMPRAS
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Cargar productos</a>
-                        <a class="dropdown-item" href="#">Generar orden de compra</a>
-                            <div class="dropdown-divider"></div>    
-                        <a class="dropdown-item" href="#">Consultar ordenes de compra</a>
-                            <div class="dropdown-divider"></div>    
-                        <a class="dropdown-item" href='#'>Manual del modulo</a>
-                    </div>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Salir <span class="sr-only">(current)</span></a>            
-                </li>
-            {% endif %}
-            </li>
-        </ul>
-    </div>
-  </nav>
-  <div class="container-fluid mt-2 pt-5">
- {{ render_messages(messages) }}
+        </nav>
+{{ render_messages(messages) }}
 {% block content %}{% endblock %}
+    </div>
 </div>
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap/bootstrap.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/print.js') }}"></script>
 {% endblock %}
 

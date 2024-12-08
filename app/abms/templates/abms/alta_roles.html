@@ -6,42 +6,42 @@
 {% endblock %}
 
 {% block content %}
-<h1>Creacion de roles</h1>
-<div class="row">
 
+<div class="row">
 	<div class="offset-md-3 col-md-6">
-        		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+		<h1 class="display-4">Creacion de roles</h1>
+        		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
 					{{ form.hidden_tag() }}
-					{{ render_input(form.descripcion,'', id= "descripcion" , value= descripcion_rol, class="form-control", placeholder="Nombre del Rol" ) }}
-					<button type="submmit" class="btn btn-primary" >Guardar</button>
-					
+					<div class="row mb-3">
+						{{ render_input(form.descripcion,'', id= "descripcion" , value= descripcion_rol, class="form-control", placeholder="Nombre del Rol" ) }}
+					</div>
+					<button type="submit" class="btn btn-primary">Guardar</button>
 				</form>
-		
 	</div>
 	<div class="offset-md-3 col-md-6">
 		{% if todos_los_roles %}
-		<div class="offset-md-1 col-md-9">
-			<table class="table table-striped">
+		<div class="offset-md-3 col-md-6">
+			<table class="table table-striped table-hover mb-4">
 				<thead>
 					<tr>
-						<th scope="col">ID</th>
-						<th scope="col">ROL</th>
-						<th scope="col">ACCION</th>
+						<th>ID</th>
+						<th>ROL</th>
+						<th>ACCION</th>
 					</tr>
 				</thead>
 				<tbody>
 					{% for rol in todos_los_roles %}
 						<tr>
-							<th scope="row">{{ rol.id }}</th>
-							<th scope="row">{{ rol.descripcion }}</th>
+							<th>{{ rol.id }}</th>
+							<th>{{ rol.descripcion }}</th>
 							<td>
 								<div class="dropdown">
-									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
 										Acción
-								</button>
-								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-									<a class="dropdown-item"  href="{{ url_for('abms.asignar_permisos_roles', id_rol = rol.id) }}">Asignar permisos</a>
-								</div>
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="dropdown-item"  href="{{ url_for('abms.asignar_permisos_roles', id_rol = rol.id) }}">Asignar permisos</a></li>
+									</ul>
 							</td>
 						</tr>
 					{% endfor %}
@@ -50,7 +50,5 @@
 		</div>	
 		{% endif %}
 	</div>
-
-
 </div>
 {% endblock %}

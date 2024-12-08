@@ -440,6 +440,10 @@ class Permisos(Base):
         db.session.bulk_save_objects(lista)
         db.session.commit()
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     @staticmethod
     def get_all():
         return Permisos.query.all()

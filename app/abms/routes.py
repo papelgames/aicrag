@@ -361,7 +361,7 @@ def alta_persona():
                            usuario_alta = current_user.username)
         persona.save()
         flash("Se ha creado la persona correctamente.", "alert-success")
-        return redirect(url_for('gestiones.gestiones'))
+        return redirect(url_for('consultas.consulta_personas'))
     return render_template("abms/alta_datos_persona.html", form = form)
 
 
@@ -464,10 +464,26 @@ def asignar_permisos_roles():
 @not_initial_status
 def eliminar_permisos_roles():
     id_rol = request.args.get('id_rol','')
-    rol = Roles.get_all_by_id(id_rol)
-    rol.delete()    
+    id_permiso = request.args.get('id_permiso','')
+    rol = Roles.get_by_id(id_rol)
+    permiso = Permisos.get_by_id(id_permiso)
+    rol.permisos.remove(permiso)
+    rol.save()  
+    
     flash ('Permiso eliminado correctamente del rol', 'alert-success')
-    return redirect(url_for('abms.crear_roles', rol = rol.descripcion))
+    return redirect(url_for('abms.asignar_permisos_roles', id_rol = id_rol))
+
+@abms_bp.route("/abms/eliminarpermisos/", methods=['GET', 'POST'])
+@login_required
+@admin_required
+@not_initial_status
+def eliminar_permiso():
+    id_permiso = request.args.get('id_permiso','')
+    permiso = Permisos.get_by_id(id_permiso)
+    permiso.delete()
+    
+    flash ('Permiso eliminado correctamente', 'alert-success')
+    return redirect(url_for('abms.alta_permiso'))
 
 @abms_bp.route("/abms/altaestados/", methods = ['GET', 'POST'])
 @login_required

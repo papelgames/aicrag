@@ -8,56 +8,55 @@
 {% block content %}
 <div class="row">
 	<div class="offset-md-3 col-md-6">
-		<h1>Alta estados</h1>
-
-		<form action="" method="post" enctype="multipart/form-data" novalidate>	
+		<h1 class="display-4">Alta estados</h1>
+		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
             {{ form.hidden_tag() }}
-			{{ render_input(form.clave,'', id= "clave" , class="form-control", placeholder="Clave de estado" ) }}
-			{{ render_input(form.descripcion,'', id= "tipo" , class="form-control", placeholder="Descripción de estado" ) }}
-			{{ render_input(form.tabla,'', id= "tabla" , class="form-control", placeholder="Elija la tabla de referencia" ) }}
-			{{ render_input(form.inicial,'', id= "inicial" , class="form-control" ) }}
-			{{ render_input(form.final,'', id= "final" , class="form-control" ) }}
-
-			<button type="submmit" class="btn btn-primary" >Guardar</button>
-			
+			<div class="row mb-3">
+				{{ render_input(form.clave,'', id= "clave" , placeholder="Clave de estado" ) }}
+				{{ render_input(form.descripcion,'', id= "tipo" , placeholder="Nombre del estado" ) }}
+				{{ render_input(form.tabla,'', id= "tabla" , class="form-control", placeholder="Elija la tabla de referencia" ) }}
+				<div class="col-md-6">
+					{{ render_input(form.inicial,'', id= "inicial" , class="form-check-input" ) }}
+				</div>
+				<div class="col-md-6">						
+					{{ render_input(form.final,'', id= "final", class="form-check-input"  ) }}
+				</div>
+			</div>
+			<button type="submit" class="btn btn-primary">Guardar</button>
 		</form>
 	</div>
-
 </div>
 {% if estados %}
 	<div class="offset-md-3 col-md-6">
-		<table class="table table-striped">
+		<table class="table table-striped table-hover mb-4">
 			<thead>
 				<tr>
-					<th scope="col">ID</th>
-					<th scope="col">CLAVE</th>
-					<th scope="col">NOMBRE</th>
-					<th scope="col">TABLA</th>
-					<th scope="col">¿INICIAL?</th>
-					<th scope="col">¿FINAL?</th>
-					<th scope="col">ACCION</th>
-					
+					<th>ID</th>
+					<th>CLAVE</th>
+					<th>NOMBRE</th>
+					<th>TABLA</th>
+					<th>¿INICIAL?</th>
+					<th>¿FINAL?</th>
+					<th>ACCION</th>
 				</tr>
 			</thead>
-			
 			<tbody>
 				{% for estado in estados %}
 					<tr>
-						<th scope="row">{{ estado.id }}</th>
+						<th> {{ estado.id }}</th>
 						<td> {{ estado.clave }}</td>
 						<td> {{ estado.descripcion }}</td>
 						<td> {{ estado.tabla }}</td>
 						<td> {{ estado.inicial }}</td>
 						<td> {{ estado.final }}</td>
-					
 						<td>
 							<div class="dropdown">
-								<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
 									Acción
-							</button>
-							<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-								<a class="dropdown-item"  href="">Modificar</a>
-							</div>
+								</button>
+								<ul class="dropdown-menu">
+									<li><a class="dropdown-item" href="#">Modificar</a></li>
+								</ul>
 						</td>
 					</tr>
 				{% endfor %}

@@ -2,22 +2,17 @@
 
 	{% if field_name.errors %}
 		{% for error in field_name.errors %}
-			<div class="alert-warning alert alert-dismissible fade show" role="alert">
-				<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-				</button>
-				{{ error }}
-			</div>
+				<span class="badge rounded-pill text-bg-danger">{{ error }}</span>	
+			
 		{% endfor %}
 	{% endif %}
-	
 	{% if os %}
 		<td> {{field_name.label}}
-			<div class="form-group">
+			<div class="mb-1">
 				<select name ="{{field_name.name}}"  id = "{{field_name.name}}" class=" form-control"  >
 					{% for desc in field_name %}
 						{% if os|safe == desc.data|safe %}
-							<option selected = {{ os }} value = {{ os }}> {{ desc.label }} </option>
+							<option selected = "{{ os }}" value = "{{ os }}"> {{ desc.label }} </option>
 						{% else %}
 							{{ desc }} 
 						{% endif %}
@@ -25,11 +20,13 @@
 				</select>
 			</div>
 	{% else %}
-		<td> {{field_name.label}}
-			<div class="form-group">
-				{{field_name(**kwargs)|safe}} 
+		<td> <label for="{{field_name.name}}" class="form-label">{{field_name.label}}</label>
+			
+			<div class="mb-1">
+				{{ field_name(class="form-control", **kwargs)|safe }}
 			</div>
 	{% endif %}
+
 {% endmacro %}
 
 {% macro render_messages(messages) %}
@@ -37,9 +34,9 @@
 		{% if messages %}
 			{% for category, message in messages %}
 				<div class="{{ category }} alert alert-dismissible fade show" role="alert">
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<!-- <button type="button" class="close" data-dismiss="alert" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
-					</button>
+					</button> -->
 					{{ message }}
 				</div>
 			{% endfor %}
