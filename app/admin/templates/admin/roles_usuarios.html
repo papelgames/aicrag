@@ -30,8 +30,8 @@
 							<th>ACCION</th>
 						</tr>
 					</thead>
-					{% for permiso in user.permisos %}
-						<tbody>
+					<tbody>
+						{% for permiso in user.permisos %}
 							<tr>
 								<td>{{ permiso.descripcion }}</td>
 								<td>
@@ -40,8 +40,8 @@
 									</a>
 								</td>
 							</tr>
-						</tbody>
-					{% endfor %}
+						{% endfor %}
+					</tbody>
 				</table>
 			</div>
 		{% endif %}
