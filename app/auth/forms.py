@@ -15,7 +15,7 @@ class SignupForm(FlaskForm):
     cuit = StringField('CUIT', validators=[DataRequired(), Length(max=11)])
 
 class UsernameForm(FlaskForm):
-    username = StringField('Nombre de usuario', validators=[DataRequired(), Length(max=15)])
+    username = StringField('Nombre de usuario', validators=[DataRequired('Debe ingresar su usuario'), Length(max=15)])
     
 class LoginForm(UsernameForm):
     password = PasswordField('Password', validators=[DataRequired('Debe ingresar una contraseña')])
