@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block content %}
-    <ul>
-        <li><a href="{{ url_for('admin.list_posts') }}">Posts</a></li>
-        <li><a href="{{ url_for('admin.list_users') }}">Usuarios</a></li>
-    </ul>
+<a href="{{ url_for('admin.list_users') }}">
+    <button class="btn btn-sm btn-primary">Usuarios</button>
+</a>    
+
 {% endblock %}

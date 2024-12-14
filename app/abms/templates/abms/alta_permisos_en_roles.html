@@ -6,48 +6,48 @@
 {% endblock %}
 
 {% block content %}
-
+ 
 <div class="row">
 	<div class="offset-md-3 col-md-6">
 		<h1 class="display-6">Asignacion de permisos en roles</h1>
 	</div>
-		<div class="col-md-6">
+	<div class="col-md-6">
+		<div class="offset-md-3 col-md-6">
+			<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
+				{{ form.hidden_tag() }}
+				{{ render_input(form.id_permiso,'', id= "id_permiso" , class="form-control", size=30) }}
+				<button type="submit" class="btn btn-primary" >Asignar</button>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-6">
+		{% if permisos_en_rol %}
 			<div class="offset-md-3 col-md-6">
-				<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
-					{{ form.hidden_tag() }}
-					{{ render_input(form.id_permiso,'', id= "id_permiso" , class="form-control", size=30) }}
-					<button type="submmit" class="btn btn-primary" >Asignar</button>
-				</form>
-			</div>
-		</div>
-		<div class="col-md-6">
-			{% if permisos_en_rol %}
-				<div class="offset-md-3 col-md-6">
-					<table class="table table-striped table-hover mb-4">
-						<thead>
+				<table class="table table-striped table-hover mb-4">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>NOMBRE</th>
+							<th>ACCION</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for permiso in permisos_en_rol.permisos %}
 							<tr>
-								<th>ID</th>
-								<th>NOMBRE</th>
-								<th>ACCION</th>
+								<th>{{ permiso.id }}</th>
+								<td> {{ permiso.descripcion }}</td>
+								<td>
+									<a href="{{ url_for('abms.eliminar_permisos_roles', id_rol = permisos_en_rol.id, id_permiso = permiso.id) }}">
+										<button class="btn btn-sm btn-danger">Eliminar</button>
+									</a>
+								</td>
 							</tr>
-						</thead>
-						<tbody>
-							{% for permiso in permisos_en_rol.permisos %}
-								<tr>
-									<th>{{ permiso.id }}</th>
-									<td> {{ permiso.descripcion }}</td>
-									<td>
-										<a href="{{ url_for('abms.eliminar_permisos_roles', id_rol = permisos_en_rol.id, id_permiso = permiso.id) }}">
-											<button class="btn btn-sm btn-danger">Eliminar</button>
-										</a>
-									</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-				</div>
-			{% endif %}
-		</div>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+	</div>
 	
 </div>
 {% endblock %}

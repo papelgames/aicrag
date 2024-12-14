@@ -19,19 +19,17 @@
                     Username: <strong>{{ user.username }}</strong>
                 </div>
                 <a href="{{ url_for('auth.forgot_password_by_admin', username=user.username) }}" >
-                    <button class="btn btn-primary mt-2">Restablecer contraseña</button>
+                    <button class="btn btn-primary ">Restablecer contraseña</button>
                 </a>
             </div>
         </div>
     </div>
-    
     <div class="col-md-4">
         <div class="card">       
             <div class="card-body">
-                <form action="" method="post" enctype="multipart/form-data" novalidate>	
+                <form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
                     {{ form.hidden_tag() }}
-                
-                    {{ render_input(form.is_admin,'', id= "is_admin" , class="form-control" ) }}
+                    {{ render_input(form.is_admin,'', id= "is_admin" , class="form-check-input" ) }}
                     <button type="submmit" class="btn btn-primary" >Guardar cambios</button>
                 </form>
                 <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" >
@@ -40,7 +38,6 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-4">
         <div class="card">       
             <div class="card-body">

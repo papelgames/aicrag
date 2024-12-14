@@ -147,10 +147,15 @@ def asignacion_roles():
 def eliminar_permiso_usuario():
     user_id = request.args.get('user_id','')
     id_permiso = request.args.get('id_permiso','')
+    pantalla = request.args.get('pantalla','')
     user = Users.get_by_id(user_id)
     permiso = Permisos.get_by_id(id_permiso)
     
     user.permisos.remove(permiso)
     user.save()
-    flash ('Permiso eliminado correctamente', 'alert-success')
-    return redirect(url_for('admin.asignacion_permisos', user_id = user_id))
+    if pantalla == 'roles':
+        flash ('Permiso eliminado correctamente', 'alert-success')
+        return redirect(url_for('admin.asignacion_roles', user_id = user_id))
+    elif pantalla == 'permisos':
+        flash ('Permiso eliminado correctamente', 'alert-success')
+        return redirect(url_for('admin.asignacion_permisos', user_id = user_id))
