@@ -98,6 +98,7 @@ def login():
 
 @auth_bp.route('/changepassword', methods=['GET', 'POST'])
 @login_required
+@nocache
 def change_password():
     user = Users.get_by_username(current_user.username)
     form = ChangePasswordForm()

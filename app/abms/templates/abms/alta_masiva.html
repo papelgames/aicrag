@@ -9,6 +9,8 @@
 <div class="row">
 	<div class="offset-md-3 col-md-6">
 		<h1 class="display-4">Alta masiva de productos</h1>
+	</div>
+	<div class="offset-md-3 col-md-6">
 		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
             {{ form.hidden_tag() }}
 			<div class="row mb-3">
@@ -19,7 +21,7 @@
 					{{ render_input(form.archivo,'', id= "archivo" , class="form-control", placeholder="Seleccione un archivo", accept = ".xlsx" ) }}
 				</div>
 			</div>
-			<button type="submmit" class="btn btn-primary" >Crear archivo</button>
+			<button type="submit" class="btn btn-primary" >Crear archivo</button>
 		</form>
 	</div>
 </div>

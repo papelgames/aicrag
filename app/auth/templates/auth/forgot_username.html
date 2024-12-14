@@ -1,22 +1,18 @@
-{% extends "base_template.html" %}
+{% extends "base_template_login.html" %}
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
     aicrag | Blanqueo de contraseña
 {% endblock %}
 
-
 {% block content %}
-<div class="row">
-        <div class="offset-md-3 col-md-6">
-            <form action="" method="post" enctype="multipart/form-data" novalidate>	
-                {{ form.hidden_tag() }}
-                                
-                                 
-                {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
-                <button type="submmit" class="btn btn-primary" >Buscar</button>
-                <div> <a href="{{ url_for('auth.forgot_username') }}">¿Olvidó su contraseña?</a></div>
-        </div>
+<form action="" method="post" class="login-form" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+    <h3 class="text-center mb-4">Blanqueo de usuario</h3>
+    <div class="mb-3">                  
+        {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
     </div>
-    
+    <button type="submit" class="btn btn-primary w-100" >Buscar</button>
+    <div> <a href="{{ url_for('auth.forgot_password') }}">¿Olvidó su contraseña?</a></div>
+</form>
 {% endblock %}

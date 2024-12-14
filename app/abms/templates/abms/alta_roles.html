@@ -10,13 +10,15 @@
 <div class="row">
 	<div class="offset-md-3 col-md-6">
 		<h1 class="display-4">Creacion de roles</h1>
-        		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
-					{{ form.hidden_tag() }}
-					<div class="row mb-3">
-						{{ render_input(form.descripcion,'', id= "descripcion" , value= descripcion_rol, class="form-control", placeholder="Nombre del Rol" ) }}
-					</div>
-					<button type="submit" class="btn btn-primary">Guardar</button>
-				</form>
+	</div>
+	<div class="offset-md-3 col-md-6">		
+		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
+			{{ form.hidden_tag() }}
+			<div class="row mb-3">
+				{{ render_input(form.descripcion,'', id= "descripcion" , value= descripcion_rol, class="form-control", placeholder="Nombre del Rol" ) }}
+			</div>
+			<button type="submit" class="btn btn-primary">Guardar</button>
+		</form>
 	</div>
 	<div class="offset-md-3 col-md-6">
 		{% if todos_los_roles %}

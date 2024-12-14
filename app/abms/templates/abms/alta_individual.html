@@ -9,6 +9,8 @@
 <div class="row">
 	<div class="offset-md-3 col-md-6">
 		<h1 class="display-5">Alta individual de productos</h1>
+	</div>
+	<div class="offset-md-3 col-md-6">
 		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
             {{ form.hidden_tag() }}
 			<div class="row mb-3">
@@ -37,7 +39,7 @@
 					{{ render_input(form.cantidad_presentacion,'', id= "cantidad_presentacion" , class="form-control", placeholder="Cantidad del producto por presntación" ) }}
 				</div>
 			</div>
-			<button type="submmit" class="btn btn-primary" >Crear producto</button>
+			<button type="submit" class="btn btn-primary" >Crear producto</button>
 		</form>
 	</div>
 </div>

@@ -1,25 +1,39 @@
-{% extends "base_template.html" %}
+{% extends "base_template_login.html" %}
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-	aicrag | Registro de usuarios
+	aicrag | Alta de usuarios
 {% endblock %}
 
 {% block content %}
 <div class="row">
-        <div class="offset-md-3 col-md-6">
-            <form action="" method="post" enctype="multipart/form-data" novalidate>	
-                {{ form.hidden_tag() }}
-                
-                {{ render_input(form.name,'', id= "name" , class="form-control", placeholder="Nombre y apellido" ) }}
-                {{ render_input(form.username,'', id= "username" , class="form-control", placeholder="Nombre de usuario" ) }}
-                {{ render_input(form.cuit,'', id= "cuit" , class="form-control", placeholder="CUIT" ) }}
-                {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
-                {{ render_input(form.is_admin,'', id= "is_admin" , class="form-control") }}
-                {{ render_input(form.es_dibujante,'', id= "es_dibujante" , class="form-control") }}
-                
-                <button type="submmit" class="btn btn-primary" >Guardar</button>
-        </div>
+    <div class="offset-md-3 col-md-6">
+		<h1 class="display-6">Alta de usuarios</h1>
+	</div>
+    <div class="offset-md-3 col-md-6">
+        <form action="" method="post" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    {{ render_input(form.name,'', id= "name" , class="form-control", placeholder="Nombre y apellido" ) }}
+                </div>
+                <div class="col-md-6">
+                    {{ render_input(form.username,'', id= "username" , class="form-control", placeholder="Nombre de usuario" ) }}
+                </div>
+                <div class="col-md-6">
+                    {{ render_input(form.cuit,'', id= "cuit" , class="form-control", placeholder="CUIT" ) }}
+                </div>
+                <div class="col-md-6">
+                    {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
+                </div>
+                <div class="col-md-6">
+                    {{ render_input(form.is_admin,'', id= "is_admin" , class="form-check-input") }}
+                </div>
+                <div class="col-md-6">
+                    {{ render_input(form.es_dibujante,'', id= "es_dibujante" , class="form-check-input") }}
+                </div>
+            <button type="submit" class="btn btn-primary" >Guardar</button>
+        </form>
     </div>
-    
+</div>
 {% endblock %}

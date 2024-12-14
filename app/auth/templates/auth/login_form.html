@@ -1,38 +1,10 @@
+{% extends "base_template_login.html" %}
 {% from "_render_elements.html" import render_input %}
+{% block title %}
+	aicrag | Login
+{% endblock %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <!-- Bootstrap CSS -->
-    <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-image: url("{{ url_for('static', filename='imgs/fondo.jpg') }}"); /* Ruta de la imagen */
-            background-size: cover; /* Escala la imagen para que cubra toda la pantalla */
-            background-repeat: no-repeat; /* Evita que la imagen se repita */
-            background-attachment: fixed; /* Fija la imagen al hacer scroll */
-            background-position: center; /* Centra la imagen */
-        }
-        .login-form {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-</head>
-<body>
+{% block content %}
     <form action="" method="post" class="login-form" enctype="multipart/form-data" novalidate>	
         {{ form.hidden_tag() }}
         <h3 class="text-center mb-4">Iniciar Sesión</h3>
@@ -45,8 +17,4 @@
         <button type="submit" class="btn btn-primary w-100">Ingresar</button>
         <div> <a href="{{ url_for('auth.forgot_password') }}">¿Olvidó su contraseña?</a></div>
     </form>
-    
-
-    
-</body>
-</html>
+{% endblock %}
