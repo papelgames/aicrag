@@ -2,37 +2,38 @@
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-    Groma | Consulta de personas
+    aicrag | Consulta de personas
 {% endblock %}
 
 {% block content %}
 <div class="row mb-3">
-	<div class="col-md-12 d-flex justify-content-between align-items-center">
-		<h5 class="mb-0">Consulta de personas</h5>
-		<form action="" class="form-inline mt-3" method="post" enctype="multipart/form-data" novalidate>	
+    <div class="offset-md-3 col-md-6">
+		<h1 class="display-4">Consulta de personas</h1>
+    </div>
+    <div class="offset-md-3 col-md-6">
+		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
             {{ form.hidden_tag() }}
             {{ render_input(form.buscar,'', id= "buscar" , class="form-control mr-sm-3", placeholder="Ingrese nombre/razón social o número de gestión" ) }}
-            <button class="btn btn-light my-2 my-sm-0" type="submit">Buscar</button>
+            <button type="submit" class="btn btn-primary">Buscar</button>
         </form>
 	</div>
 </div>
 {% if lista_de_personas.items %}
-<table class="table table-striped">
+<table class="table table-striped table-hover mb-4">
     <thead>
         <tr>
-            <th scope="col">ID</th>
-            <th scope="col">NOMBRE</th>
-            <th scope="col">CUIT</th>
-            <th scope="col">CORREO ELECTRONICO</th>
-            <th scope="col">TIPO DE PERSONA</th>
-            <th scope="col">ACCION</th> 
+            <th>ID</th>
+            <th>NOMBRE</th>
+            <th>CUIT</th>
+            <th>CORREO ELECTRONICO</th>
+            <th>TIPO DE PERSONA</th>
+            <th>ACCION</th> 
         </tr>
     </thead>
-    
     <tbody>
         {% for persona in lista_de_personas.items %}
             <tr>
-                <th scope="row">{{ persona.id }}</th>
+                <th>{{ persona.id }}</th>
                 <td> {{ persona.descripcion_nombre }}</td>
                 <td> {{ persona.cuit  }} </td>
                 <td> {{ persona.correo_electronico }}</td>
@@ -50,7 +51,6 @@
 	<ul class="pagination justify-content-center">
         {%- for page in lista_de_personas.iter_pages() %}
 			{% if page %}
-
 				{% if page != lista_de_personas.page %}
 					<li class="page-item"><a class="page-link" href="{{ url_for('consultas.consulta_personas', criterio= criterio, page=page) }}">{{ page }}</a>
 				{% else %}
@@ -64,23 +64,18 @@
 		{%- endfor %}
     </ul>
 </nav>
-
-
 {% elif lista_de_personas %}
-
 <table class="table table-striped">
     <thead>
         <tr>
-            <th scope="col">ID</th>
-            <th scope="col">NOMBRE</th>
-            <th scope="col">CUIT</th>
-            <th scope="col">CORREO ELECTRONICO</th>
-            <th scope="col">TIPO DE PERSONA</th>
-            <th scope="col">ACCION</th>
-            
+            <th>ID</th>
+            <th>NOMBRE</th>
+            <th>CUIT</th>
+            <th>CORREO ELECTRONICO</th>
+            <th>TIPO DE PERSONA</th>
+            <th>ACCION</th>
         </tr>
     </thead>
-    
     <tbody>
         <tr>
             <th scope="row">{{ lista_de_personas.id }}</th>
@@ -89,19 +84,12 @@
             <td> {{ lista_de_personas.correo_electronico }}</td>
             <td> {{ lista_de_personas.tipo_persona }}</td>
             <td>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Acción
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item"  href="{{ url_for('abms.actualizacion_persona', id_persona = lista_de_personas.id ) }}">Modificar</a>
-                    <a class="dropdown-item"  href="#">Seleccionar</a>
-                </div>
+                <a href="{{ url_for('abms.actualizacion_persona', id_persona = lista_de_personas.id ) }}">
+                    <button class="btn btn-sm btn-primary">Editar</button>
+                </a>    
             </td>
         </tr>
     </tbody>
 </table>
-
 {% endif %}
-
 {% endblock %}

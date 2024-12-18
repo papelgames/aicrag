@@ -88,16 +88,20 @@ def consulta_presupuestos():
             cabecera =[]
     return render_template("consultas/consulta_presupuestos.html", form = form, cabecera = cabecera, now = now)
 
-@consultas_bp.route("/consultas/presupuesto/<int:id_presupuesto>", methods = ['GET', 'POST'])
+@consultas_bp.route("/consultas/presupuesto/", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
 @nocache
-def presupuesto(id_presupuesto):
+def presupuesto():
+    id_presupuesto = request.args.get('id_presupuesto','')
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
     productos = Presupuestos.get_by_id_presupuesto(id_presupuesto)
     vencimiento_si_no = control_vencimiento(cabecera.fecha_vencimiento)
-    if vencimiento_si_no == "VENCIDO" and cabecera.estado == 1:
-        cabecera.estado = 2
+    estado_pendiente = Estados.get_first_by_clave_tabla(1,"estado_presupuesto")
+    estado_vencido = Estados.get_first_by_clave_tabla(2,"estado_presupuesto")
+    
+    if vencimiento_si_no == 'VENCIDO'and cabecera.id_estado == estado_pendiente.id:
+        cabecera.id_estado = estado_vencido.id
         cabecera.save()
     return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
 
