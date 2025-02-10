@@ -5,45 +5,40 @@
 {% endblock %}
 
 {% block content %}
-<div>
-    <a href="{{ url_for('gestiones.exportar_precios') }}">
-        <button class="btn btn-primary">Exportar Precios</button>
-    </a>
-</div>
-<div>
-    <a href="{{ url_for('gestiones.exportar_codigos_de_barra_faltantes') }}">
-        <button class="btn btn-primary">Exportar codigos de barras faltantes</button>
-    </a>
+<div class="d-flex align-items-center gap-3">
+    <div>
+        <a href="{{ url_for('gestiones.exportar_precios') }}">
+            <button class="btn btn-primary">Crear archivo de Precios</button>
+        </a>
+    </div>
+    <div>
+        <a href="{{ url_for('gestiones.exportar_codigos_de_barra_faltantes') }}">
+            <button class="btn btn-primary">Crear archivo codigos de barras faltantes</button>
+        </a>
+    </div>
 </div>
 {% if archivos_dict%}
-<table class="table table-striped">
+<table class="table table-striped table-hover mb-4">
     <thead>
         <tr>
-            <th scope="col">ARCHIVO</th>
-            <th scope="col">FECHA DE CREACION</th>
-            <th scope="col">ACCION</th>
+            <th>ARCHIVO</th>
+            <th>FECHA DE CREACION</th>
+            <th>ACCION</th>
         </tr>
     </thead>
-    
     <tbody>
         {% for archivo in archivos_dict %}
          <tr >
-            <th scope="row">{{ archivo }}</th>
+            <th>{{ archivo }}</th>
             <td> {{ archivos_dict[archivo] }}</td>
             <td>
-                <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Acción
-                </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="{{ url_for('gestiones.descarga_archivo', archivo=archivo) }}">Descargar</a>
-                        
-                    </div>
-                </div>
+                <td>
+                    <a href="{{ url_for('gestiones.descarga_archivo', archivo=archivo) }}">
+                        <button class="btn btn-sm btn-success">Descargar</button>
+                    </a>
+                </td>
             </td>
-            
         </tr>
-        
         {% endfor %}
     </tbody>
 </table>
