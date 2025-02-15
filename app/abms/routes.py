@@ -17,7 +17,7 @@ from app.auth.decorators import admin_required, nocache, not_initial_status
 from app.auth.models import Users
 from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles
 from . import abms_bp
-from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, AltaPersonasForm, RolesForm, PermisosForm, PermisosSelectForm, EstadosForm
+from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, AltaDatosPersonasForm, RolesForm, PermisosForm, PermisosSelectForm, EstadosForm, DatosPersonasForm
 #from app.common.mail import send_email
 from time import strftime, gmtime
 
@@ -85,7 +85,7 @@ def alta_individual():
         producto.save()
         flash("Producto dado de alta correctamente", "alert-success")
         return redirect(url_for("public.index"))
-    return render_template("abms/alta_individual.html", form=form)
+    return render_template("abms/administracion_producto.html", form=form)
 
 @abms_bp.route("/abms/busquedaproducto/", methods = ['GET', 'POST'])
 @login_required
@@ -119,33 +119,20 @@ def modificacion_producto():
     
     if id_producto == "":
         return redirect(url_for("abms.busqueda_productos"))
-
-    form=ProductosForm()
-    form.id_proveedor.choices = proveedores_select()
-    
     producto = Productos.get_by_id(id_producto)
-
-    if producto.es_servicio == True:
-        producto.es_servicio = 1
-    else: 
-        producto.es_servicio = 0
+    print(producto.es_servicio)
+    form=ProductosForm(obj=producto)
+    form.id_proveedor.choices = proveedores_select()
 
     if form.validate_on_submit():
-        producto.codigo_de_barras = form.codigo_de_barras.data
-        producto.id_proveedor = form.id_proveedor.data
-        producto.id_lista_proveedor = form.id_lista_proveedor.data
-        producto.descripcion = form.descripcion.data
-        producto.importe = form.importe.data
-        producto.utilidad = form.utilidad.data
-        producto.es_servicio = bool(form.es_servicio.data)
-        producto.cantidad_presentacion = form.cantidad_presentacion.data
+        form.populate_obj(producto)
         producto.id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
         producto.usuario_modificacion = current_user.username
 
         producto.save()
         flash("Producto actualizado correctamente", "alert-success")
         return redirect(url_for("public.index"))
-    return render_template("abms/modificacion_producto.html", form=form, producto = producto)
+    return render_template("abms/administracion_producto.html", form=form, producto = producto)
 
 @abms_bp.route("/abms/eliminarproducto/<int:id_producto>", methods = ['GET', 'POST'])
 @login_required
@@ -196,7 +183,7 @@ def alta_proveedor():
         flash("Proveedor dado de alta correctamente", "alert-success")
         return redirect(url_for("public.index"))
 
-    return render_template("abms/alta_proveedor.html", form = form)
+    return render_template("abms/administrcion_proveedor.html", form = form)
 
 @abms_bp.route("/abms/busquedaproveedor/", methods = ['GET', 'POST'])
 @login_required
@@ -215,48 +202,22 @@ def modificacion_proveedor():
 
     if id_proveedor == "":
         return redirect(url_for("abms.busqueda_proveedores"))
-
-    form= ProveedoresForm()
     proveedor = Proveedores.get_by_id(id_proveedor)
+    form= ProveedoresForm(obj=proveedor)
     form.columna_id_lista_proveedor.choices = columnas_excel()
     form.columna_codigo_de_barras.choices = columnas_excel()
     form.columna_descripcion.choices = columnas_excel()
     form.columna_importe.choices = columnas_excel()
     form.columna_utilidad.choices = columnas_excel()
 
-    #modifico los valores booleanos por int porque no me toma boolean para el selectfield
-    if proveedor.archivo_si_no == True:
-        proveedor.archivo_si_no = 1
-    elif proveedor.archivo_si_no == False:
-        proveedor.archivo_si_no = 0
-    else:
-        proveedor.archivo_si_no = ''
-
-    if proveedor.incluye_iva == True:
-        proveedor.incluye_iva = 1
-    elif proveedor.incluye_iva == False:
-        proveedor.incluye_iva = 0
-    else:
-        proveedor.incluye_iva = ''
-
     if form.validate_on_submit():
-        proveedor.nombre = form.nombre.data
-        proveedor.correo_electronico = form.correo_electronico.data
-        proveedor.archivo_si_no = int(form.archivo_si_no.data)
-        proveedor.formato_id = form.formato_id.data
-        proveedor.columna_id_lista_proveedor = form.columna_id_lista_proveedor.data
-        proveedor.columna_codigo_de_barras = form.columna_codigo_de_barras.data
-        proveedor.columna_descripcion = form.columna_descripcion.data
-        proveedor.columna_importe = form.columna_importe.data
-        proveedor.columna_utilidad = form.columna_utilidad.data
-        proveedor.incluye_iva = int(form.incluye_iva.data)
+        form.populate_obj(proveedor)
         proveedor.usuario_modificacion = current_user.username
-        
         proveedor.save()
         flash("Proveedor actualizado correctamente", "alert-success")
         return redirect(url_for("public.index"))
 
-    return render_template("abms/modificacion_proveedor.html", form = form, proveedor = proveedor)
+    return render_template("abms/administrcion_proveedor.html", form = form, proveedor = proveedor)
 
 @abms_bp.route("/abms/altamasiva", methods = ['GET', 'POST'])
 @login_required
@@ -338,7 +299,7 @@ def agenda():
 @not_initial_status
 @nocache
 def alta_persona():
-    form = AltaPersonasForm()                                                                                                                   
+    form = AltaDatosPersonasForm()                                                                                                                   
 
     if form.validate_on_submit():
         descripcion_nombre = form.descripcion_nombre.data
@@ -362,7 +323,7 @@ def alta_persona():
         persona.save()
         flash("Se ha creado la persona correctamente.", "alert-success")
         return redirect(url_for('consultas.consulta_personas'))
-    return render_template("abms/alta_datos_persona.html", form = form)
+    return render_template("abms/datos_persona.html", form = form)
 
 
 @abms_bp.route("/abms/actualizacionpersona/", methods = ['GET', 'POST'])
@@ -370,12 +331,16 @@ def alta_persona():
 @not_initial_status
 def actualizacion_persona():
     id_persona = request.args.get('id_persona','')
-    form=AltaPersonasForm()
     persona = Personas.get_by_id(id_persona)
+    form=DatosPersonasForm(obj=persona)
+    persona_original =persona.cuit
     if form.validate_on_submit():
+        persona_por_cuit = Personas.get_by_cuit(form.cuit.data)
         form.populate_obj(persona)
         persona.usuario_modificacion = current_user.username
-        
+        if persona_por_cuit and persona_por_cuit.cuit != persona_original:
+            flash ("Ya existe la persona","alert-warning")
+            return redirect(url_for('public.index'))
         persona.save()
         flash("Se ha actualizado la persona correctamente.", "alert-success")
         return redirect(url_for('consultas.consulta_personas'))
@@ -383,8 +348,7 @@ def actualizacion_persona():
     for campo in list(request.form.items())[1:]:
         data_campo = getattr(form,campo[0]).data
         setattr(persona,campo[0], data_campo)
-
-    return render_template("abms/modificacion_datos_persona.html", form=form, persona = persona)
+    return render_template("abms/datos_persona.html", form=form, persona = persona)
 
 
 @abms_bp.route("/abms/altapermisos/", methods = ['GET', 'POST'])
@@ -399,7 +363,6 @@ def alta_permiso():
         
         for item in listar_endpoints(current_app):
             check_permiso = Permisos.get_by_descripcion(item.get('descripcion'))
-            #print (check_permiso.descripcion)
             if not check_permiso:
                 permiso = Permisos(**item)
                 permisos_obj.append(permiso)
@@ -442,7 +405,6 @@ def asignar_permisos_roles():
     
     form = PermisosSelectForm()
     form.id_permiso.choices=permisos_select(id_rol)
-    
     
     if form.validate_on_submit():
         permiso = Permisos.get_by_id(form.id_permiso.data)

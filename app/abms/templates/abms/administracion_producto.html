@@ -1,0 +1,47 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    aicrag | Productos
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<div class="offset-md-3 col-md-6">
+		<h1 class="display-5">Productos</h1>
+	</div>
+	<div class="offset-md-3 col-md-6">	
+		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
+            {{ form.hidden_tag() }}
+			<div class="row mb-3">
+				<div class="col-md-6">
+					{{ render_input(form.codigo_de_barras,'', id= "codigo_de_barras", class="form-control", placeholder="Ingrese el código de barras" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.id_proveedor, id= "id_proveedor" , class="form-control" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.id_lista_proveedor,'', id= "id_lista_proveedor", class="form-control", placeholder="Id del producto para el proveedor" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.descripcion,'', id= "descripcion", class="form-control", placeholder="Descripcion del producto" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.importe,'', id= "importe", class="form-control", placeholder="Valor del producto sin iva" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.utilidad,'', id= "utilidad", class="form-control", placeholder="Elija el porcentaje que quiere cargarle al producto/servicio" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.cantidad_presentacion,'', id= "cantidad_presentacion",  class="form-control", placeholder="Cantidad del producto por presntación" ) }}
+				</div>
+				<div class="col-md-6">
+					{{ render_input(form.es_servicio, '' , id="es_servicio",  class="form-check-input")}}
+				</div>
+				<button type="submit" class="btn btn-primary" >Guardar</button>
+			</div>	
+		</form>
+	</div>
+</div>
+
+{% endblock %}

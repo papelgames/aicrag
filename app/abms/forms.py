@@ -8,17 +8,22 @@ from wtforms.validators import DataRequired, Length, Email, ValidationError
 
 from app.models import Personas
 
+# def validar_opcion(form, field):
+#     """ Valida que el campo no tenga el valor '2' """
+#     if field.data == 2:
+#         raise ValidationError('Debes seleccionar "Sí" o "No".')
+    
 class ProveedoresForm(FlaskForm):
     nombre = StringField('Nombre del proveedor',validators=[DataRequired('Complete el nombre del proveedor')])
     correo_electronico = StringField('Correo electrónico', validators=[DataRequired(), Email()])
-    archivo_si_no = SelectField('¿Actualiza por archivo?', choices =[( '' ,'Seleccionar acción'),( '1','Si'),( '0','NO')],coerce = str,  validators=[DataRequired('Completar si o no')])
+    archivo_si_no = BooleanField('¿Actualiza por archivo?')
     formato_id = StringField('Formato de ID del proveedor')
     columna_id_lista_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None)
     columna_codigo_de_barras = SelectField('Código de barras', choices =[], coerce = str, default = None)
     columna_descripcion = SelectField('Descripción del producto', choices =[], coerce = str, default = None)
     columna_importe = SelectField('Importe', choices =[], coerce = str, default = None)
     columna_utilidad = SelectField('Utilidad', choices =[], coerce = str, default = None)
-    incluye_iva = SelectField('¿Lista con iva?', choices =[( '','Seleccionar acción'),( '1','Si'),( '0','NO')], coerce = str, default = None, validators=[DataRequired('Completar si o no')])
+    incluye_iva = BooleanField('¿Lista con iva?')
 
     def validate_formato_id(self, formato_id):
         if self.archivo_si_no.data == "1" and not formato_id.data:
@@ -56,10 +61,10 @@ class ProductosForm(FlaskForm):
     importe = FloatField('Importe del producto', validators=[DataRequired('Ingrese el importe del producto sin iva' )] )
     utilidad = StringField('Porcentaje de utilidad', default = 0 )
     cantidad_presentacion = FloatField('Cantidad de productos por presentación')
-    es_servicio = SelectField('¿Es servicio?', choices =[( '','Seleccionar acción'),( "1",'Si'),( "0",'NO')], coerce = str, default = None, validators=[DataRequired('Completar si o no')])
+    es_servicio = BooleanField('¿Es servicio?')
 
     def validate_utilidad(self, utilidad):
-        if self.es_servicio.data == "0" and utilidad.data == "0":
+        if self.es_servicio.data == False and utilidad.data == 0:
             raise ValidationError('Debe cargar la utilidad del producto.')
 
 class ProductosMasivosForm(FlaskForm):
@@ -73,7 +78,7 @@ class BusquedaForm(FlaskForm):
     buscar = StringField('Buscar', validators=[DataRequired('Escriba la descripción de un producto o su código de barras' )])
  
  
-class AltaPersonasForm(FlaskForm):
+class DatosPersonasForm(FlaskForm):
     descripcion_nombre = StringField("Nombre/Razón Social", validators=[DataRequired('Debe cargar el nombre o la razón social' )])
     correo_electronico = StringField('Correo electrónico', validators=[Email()])
     telefono = StringField('Telefono')
@@ -82,11 +87,12 @@ class AltaPersonasForm(FlaskForm):
     #estado = SelectField('Tipo de persona', choices =[], coerce = str, default = None)
     nota = TextAreaField('Nota', validators=[Length(max=256)])
 
-        
+class AltaDatosPersonasForm(DatosPersonasForm):
     def validate_correo_electronico(self, correo_electronico):
         correo_persona = Personas.get_by_correo(correo_electronico.data)
         if correo_persona:
             raise ValidationError('El correo electrónico pertenece a otra persona.')
+
 
 class PermisosForm(FlaskForm):
     proceso = SubmitField('Procesar permisos')
