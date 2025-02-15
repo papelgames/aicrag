@@ -2,11 +2,10 @@
 from ast import Str
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, IntegerField, DateField, SelectField)
+from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, IntegerField, DateField, SelectField, HiddenField)
 from wtforms.fields import FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, ValidationError
-
-from app.models import Personas
+from app.controles import validar_correo, validar_cuit
 
 # def validar_opcion(form, field):
 #     """ Valida que el campo no tenga el valor '2' """
@@ -76,23 +75,15 @@ class ProductosMasivosForm(FlaskForm):
 
 class BusquedaForm(FlaskForm):
     buscar = StringField('Buscar', validators=[DataRequired('Escriba la descripción de un producto o su código de barras' )])
- 
- 
+
 class DatosPersonasForm(FlaskForm):
+    id = HiddenField('id')
     descripcion_nombre = StringField("Nombre/Razón Social", validators=[DataRequired('Debe cargar el nombre o la razón social' )])
-    correo_electronico = StringField('Correo electrónico', validators=[Email()])
+    correo_electronico = StringField('Correo electrónico', validators=[Email(), validar_correo])
     telefono = StringField('Telefono')
-    cuit = StringField('CUIT', validators=[DataRequired('Debe completar el numero de cuit'), Length(max=11)])
+    cuit = StringField('CUIT', validators=[DataRequired('Debe completar el numero de cuit'), Length(max=11), validar_cuit])
     tipo_persona = SelectField('Tipo de persona', choices =[( '','Seleccionar acción'),( "fisica",'Persona Física'),( "juridica",'Persona Jurídica')], coerce = str, default = None, validators=[DataRequired('Seleccione tipo de persona')])
-    #estado = SelectField('Tipo de persona', choices =[], coerce = str, default = None)
     nota = TextAreaField('Nota', validators=[Length(max=256)])
-
-class AltaDatosPersonasForm(DatosPersonasForm):
-    def validate_correo_electronico(self, correo_electronico):
-        correo_persona = Personas.get_by_correo(correo_electronico.data)
-        if correo_persona:
-            raise ValidationError('El correo electrónico pertenece a otra persona.')
-
 
 class PermisosForm(FlaskForm):
     proceso = SubmitField('Procesar permisos')
