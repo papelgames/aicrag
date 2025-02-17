@@ -11,7 +11,7 @@ from app.common.mail import send_email
 from . import auth_bp
 from .forms import SignupForm, LoginForm, ChangePasswordForm, UsernameForm, FindUserForm
 from .models import Users
-from app.models import Personas
+from app.models import Personas, Estados
 from time import strftime, gmtime
 from app.auth.decorators import admin_required, not_initial_status, nocache
 
@@ -41,11 +41,14 @@ def show_signup_form():
             flash ("Ya existe un usuario con ese correo " + check_correo.descripcion_nombre,"alert-warning")
         else:
             # Creamos el usuario y la persona relacionada al usuario y lo guardamos
+            #inicia con el estado temporal que es el 1
+            estado = Estados.get_first_by_clave_tabla('1','users')
+           
             user = Users(username=username, 
-                        id_estado=1, 
                         is_admin=is_admin
                         )
             
+            user.id_estado = estado.id
             user.set_password(new_password)
             
             #valido si la persona y si ya tiene usuario.
@@ -106,8 +109,10 @@ def change_password():
         
         password_actual = user.check_password(form.password_actual.data)
         if password_actual:
+            estado = Estados.get_first_by_clave_tabla(2,'users')
+
             user.set_password(form.password_nuevo.data)
-            user.id_estado = 2
+            user.id_estado = estado.id
             user.save()
             flash('La contraseña ha sido actualizada correctamente','alert-success')
             return redirect(url_for('public.index'))
@@ -122,9 +127,10 @@ def forgot_password():
         user = Users.get_by_username(form.username.data)
         
         if user:
+            estado = Estados.get_first_by_clave_tabla(1,'users')
             new_password = 'aicrag' + str(strftime('%d%m%y%H%m%s', gmtime()))
             user.set_password(new_password)
-            user.id_estado = 1
+            user.id_estado = estado.id
             user.save()
 
             correo_electronico = user.persona.correo_electronico        
@@ -150,9 +156,10 @@ def forgot_password_by_admin():
     user = Users.get_by_username(username)
     
     if user:
+        estado = Estados.get_first_by_clave_tabla(1,'users')
         new_password = 'aicrag' + str(strftime('%d%m%y%H%m%s', gmtime()))
         user.set_password(new_password)
-        user.id_estado = 1
+        user.id_estado = estado.id
         user.save()
 
         correo_electronico = user.persona.correo_electronico        
@@ -223,12 +230,12 @@ def firstin():
         
     else:
         # Creamos el usuario admin
+        estado = Estados.get_first_by_clave_tabla(1,'users')
         user = Users(username=username, 
-                    id_estado=1, 
                     is_admin=True
                     )
         password = "Aicrag"
         user.set_password(password)
-        
+        user.id_estado = estado.id
         user.save()
     return redirect(url_for('auth.show_signup_form'))

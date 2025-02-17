@@ -35,6 +35,8 @@ class Proveedores (Base):
     incluye_iva = db.Column(db.Boolean, default=False)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
+    producto = db.relationship('Productos', backref='productos', uselist=False)
+
 
     def save(self):
         if not self.id:
@@ -56,7 +58,7 @@ class Proveedores (Base):
 class Productos (Base):
     __tablename__ = "productos"
     codigo_de_barras = db.Column(db.String(256))
-    id_proveedor = db.Column(db.Integer)
+    id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores.id'))
     id_lista_proveedor = db.Column(db.String(256))
     descripcion = db.Column(db.String(256))
     importe = db.Column(db.Numeric(precision=15, scale=2))
@@ -66,6 +68,7 @@ class Productos (Base):
     usuario_modificacion = db.Column(db.String(256))
     es_servicio = db.Column(db.Boolean)
     utilidad = db.Column(db.Float)
+    producto_presupuesto = db.relationship('ProductosPresupuestos', backref='productos_en_presupuestos', uselist=False)
 
     def save(self):
         if not self.id:
@@ -176,6 +179,12 @@ class Productos (Base):
     def get_by_id(id_producto):
         return Productos.query.filter_by(id = id_producto).first()
 
+class TiposVentas(Base):
+    __tablename__ ="tiposventas"
+    clave = db.Column(db.Integer)
+    descripcion = db.Column(db.String(25))
+    cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='cabeceras_presupuestos', uselist=False)
+
 class CabecerasPresupuestos (Base):
     __tablename__ = "cabeceraspresupuestos"
     fecha_vencimiento = db.Column(db.DateTime, nullable = False)
@@ -183,8 +192,10 @@ class CabecerasPresupuestos (Base):
     correo_electronico = db.Column(db.String(256))
     importe_total = db.Column(db.Numeric(precision=15, scale=2))
     id_estado = db.Column(db.Integer, db.ForeignKey('estados.id'))
+    id_tp_ventas = db.Column(db.Integer, db.ForeignKey('tiposventas.id'))
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
+    producto_presupuesto = db.relationship('ProductosPresupuestos', backref='productos_presupuestos', uselist=False)
     
     def only_add(self):
         db.session.add(self)
@@ -236,12 +247,21 @@ class CabecerasPresupuestos (Base):
     def get_all_estado(id_estado, page=1, per_page=20):
         return CabecerasPresupuestos.query.filter_by(id_estado = id_estado)\
             .paginate(page=page, per_page=per_page, error_out=False)
-    
-    
+
 class Presupuestos (Base):
     __tablename__ = "presupuestos"
     id_cabecera_presupuesto = db.Column(db.Integer)
     id_producto = db.Column(db.Integer)
+    cantidad = db.Column(db.Integer)
+    descripcion = db.Column(db.String(256))
+    importe = db.Column(db.Numeric(precision=15, scale=2))
+    usuario_alta = db.Column(db.String(256))
+    usuario_modificacion = db.Column(db.String(256))    
+    
+class ProductosPresupuestos (Base):
+    __tablename__ = "productospresupuestos"
+    id_cabecera_presupuesto = db.Column(db.Integer, db.ForeignKey('cabeceraspresupuestos.id'))
+    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id'))
     cantidad = db.Column(db.Integer)
     descripcion = db.Column(db.String(256))
     importe = db.Column(db.Numeric(precision=15, scale=2))
@@ -265,33 +285,33 @@ class Presupuestos (Base):
 
     @staticmethod
     def get_by_id_producto(id):
-        return Presupuestos.query.filter_by(id = id).first()
+        return ProductosPresupuestos.query.filter_by(id = id).first()
 
     @staticmethod
     def get_by_id_presupuesto(id_presupuesto):
-        return Presupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).all()
+        return ProductosPresupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).all()
 
     @staticmethod
     def get_q_by_id_presupuesto(id_presupuesto):
-        return Presupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).count()
+        return ProductosPresupuestos.query.filter_by(id_cabecera_presupuesto = id_presupuesto).count()
     
     @staticmethod
     def get_importe_total_by_id_presupuesto(id_presupuesto):
-        return db.session.query(Presupuestos.id_cabecera_presupuesto, func.sum(Presupuestos.importe * Presupuestos.cantidad)).\
-            filter(Presupuestos.id_cabecera_presupuesto == id_presupuesto).first()
+        return db.session.query(ProductosPresupuestos.id_cabecera_presupuesto, func.sum(ProductosPresupuestos.importe * ProductosPresupuestos.cantidad)).\
+            filter(ProductosPresupuestos.id_cabecera_presupuesto == id_presupuesto).first()
             
     @staticmethod
     def get_by_id_presupuesto_paquete(id_presupuesto):
         valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        query_str = db.session.query(Presupuestos, Productos, valor_calculado.label('importe_calculado'))\
-            .filter(Presupuestos.id_cabecera_presupuesto == id_presupuesto)\
-            .filter(Presupuestos.id_producto == Productos.id)\
+        query_str = db.session.query(ProductosPresupuestos, Productos, valor_calculado.label('importe_calculado'))\
+            .filter(ProductosPresupuestos.id_cabecera_presupuesto == id_presupuesto)\
+            .filter(ProductosPresupuestos.id_producto == Productos.id)\
             .all()
         return query_str
 
     @staticmethod
     def get_by_id_producto(id):
-        return Presupuestos.query.filter_by(id= id).first()
+        return ProductosPresupuestos.query.filter_by(id= id).first()
 
 class Compras (Base):
     __tablename__ = "compras"
@@ -323,7 +343,7 @@ class Personas (Base):
     correo_electronico = db.Column(db.String(256))
     telefono = db.Column(db.String(256))
     tipo_persona = db.Column(db.String(50))
-    id_estado = db.Column(db.Integer)
+    id_estado = db.Column(db.Integer, db.ForeignKey('estados.id')) #revisar integridad en bdd
     nota = db.Column(db.String(256))
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
@@ -367,6 +387,8 @@ class Estados(Base):
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
     cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='estado_presupuestos', uselist=False)
+    persona = db.relationship('Personas', backref='estado_personas', uselist=False)
+    user = db.relationship('Users', backref='estado_users', uselist=False)
    
     def save(self):
         if not self.id:

@@ -3,7 +3,7 @@ from functools import wraps
 from flask import abort, make_response, redirect, url_for
 
 from flask_login import current_user
-
+from app.models import Estados
 
 def admin_required(f):
     @wraps(f)
@@ -18,7 +18,8 @@ def admin_required(f):
 def not_initial_status(f):
     @wraps(f)
     def decorated_function(*args, **kws):
-        if current_user.id_estado ==1:
+        estado = Estados.get_first_by_clave_tabla(1,'users')
+        if current_user.id_estado ==estado.id:
             return redirect(url_for('auth.change_password'))
         return f(*args, **kws)
     return decorated_function
