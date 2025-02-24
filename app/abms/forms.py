@@ -100,3 +100,8 @@ class RolesForm(FlaskForm):
 
 class PermisosSelectForm(FlaskForm):
     id_permiso = SelectField('Permiso', choices =[], coerce = str, default = None, validators=[DataRequired('Seleccione un permiso')])
+
+class TiposVentasForm(FlaskForm):
+    clave = IntegerField('Clave', validators=[DataRequired('Escriba una clave')])
+    descripcion = StringField('Nuevo estado', validators=[DataRequired('Escriba una descripción'),Length(max=50)])
+    

@@ -197,23 +197,24 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% for item in producto %}
+					{% for item in cabecera.producto_presupuesto %}
 						<form action="" method="post" enctype="multipart/form-data" novalidate>	
 							{{ form.hidden_tag() }}
 							<tr>
 								{{ form.condicion(type = "hidden", value = "modificarproducto") }}
-								{{ form.id(type = "hidden", value = item.Presupuestos.id) }} 
-								{{ form.descripcion(type = "hidden", value = item.Presupuestos.descripcion) }} 
-								<th>{{ item.Presupuestos.id_producto }}</th>
-								<td> {{ item.Productos.id_proveedor}} </td>
-								<td> {{ item.Presupuestos.descripcion }}</td>
-								<td> {{ form.cantidad(value = item.Presupuestos.cantidad) }} </td>
-								<td> {{ form.importe(value = item.Presupuestos.importe|round(2)) }} </td>
-								<td> {{ item.Presupuestos.importe * item.Presupuestos.cantidad }} </td>
-								{% if item.importe_calculado - 0.001 > item.Presupuestos.importe %}
-									<td class="text-danger"> {{ item.importe_calculado }}</td>
+								{{ form.id(type = "hidden", value = item.id) }} 
+								{{ form.descripcion(type = "hidden", value = item.descripcion) }} 
+								<th>{{ item.id_producto }}</th>
+								<td> {{ item.productos_en_presupuestos.id_proveedor}} </td>
+								<td> {{ item.descripcion }}</td>
+								<td> {{ form.cantidad(value = item.cantidad) }} </td>
+								<td> {{ form.importe(value = item.importe|round(2)) }} </td>
+								<td> {{ item.importe * item.cantidad }} </td>
+								{% set importe_calculado =  ((((item.productos_en_presupuestos.importe | float* item.productos_en_presupuestos.utilidad)/100) + item.productos_en_presupuestos.importe | float) / item.productos_en_presupuestos.cantidad_presentacion) %}
+								{% if importe_calculado - 0.001 > item.importe %}
+									<td class="text-danger"> {{ importe_calculado }}</td>
 								{% else %}
-									<td> {{ item.importe_calculado }}</td>
+									<td> {{ importe_calculado }}</td>
 								{% endif %}
 								<td>
 									<div class="dropdown">
@@ -222,7 +223,7 @@
 										</button>
 										<ul class="dropdown-menu">
 											<button class="dropdown-item"  type="submit">Guardar</button>
-											<a class="dropdown-item"  href="{{ url_for('gestiones.elimina_productos_presupuesto', id_producto = item.Presupuestos.id) }}">Eliminar</a>
+											<a class="dropdown-item"  href="{{ url_for('gestiones.elimina_productos_presupuesto', id_producto = item.id) }}">Eliminar</a>
 										</ul>
 									</div>
 								</td>
@@ -265,7 +266,7 @@
 				</div>
 				<div class="col-8 text-end">
 					<!-- Total presupuesto -->
-					<h1>TOTAL PRESUPUESTO: ${{ cabecera.importe_total|round(2) }}</h1>
+					<h1>TOTAL: ${{ cabecera.importe_total|round(2) }}</h1>
 				</div>
 			</div>
 		</div>

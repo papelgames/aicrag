@@ -7,7 +7,7 @@
 {% block content %}
 <div class="col-12">  
     {% if vencimiento_si_no %}
-      <h1 class="text-danger">Presupuesto {{ vencimiento_si_no }}</h1>
+      <h1 class="text-danger">{{cabecera.cabeceras_presupuestos.descripcion}} {{ vencimiento_si_no }}</h1>
     {% else %} 
     <a href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">
       <button class="btn btn-primary">Modificar datos del cliente</button>
@@ -16,7 +16,7 @@
       <button class="btn btn-primary">Modificar datos del presupuesto</button>
     </a>  
       
-      <h1 class="text-success">Presupuesto VIGENTE</h1>
+      <h1 class="text-success">{{cabecera.cabeceras_presupuestos.descripcion}} VIGENTE</h1>
     {% endif %}
     <div id="zona_print">
       <div class="row my-3">
@@ -94,21 +94,6 @@
           </tfoot>
         </table>
       </div>
-    
-      <!-- <div class="row">
-        <div class="col-12 mt-3">
-          <h4>Condiciones y formas de pago</h4>
-          <p>El pago se debe realizar en un plazo de 15 dias.</p>
-          <p>
-            Banco Banreserva
-            <br />
-            IBAN: DO XX 0075 XXXX XX XX XXXX XXXX
-            <br />
-            Código SWIFT: BPDODOSXXXX
-          </p>
-        </div>
-      </div> -->
-       
     </div>
   <a href="javascript:imprSelec('zona_print','Presupuesto')" >
     <button class="btn btn-primary">Imprimir</button>

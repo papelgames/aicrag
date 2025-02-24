@@ -15,9 +15,9 @@ from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required, nocache, not_initial_status
 from app.auth.models import Users
-from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles
+from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles, TiposVentas
 from . import abms_bp
-from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, RolesForm, PermisosForm, PermisosSelectForm, EstadosForm, DatosPersonasForm
+from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, RolesForm, PermisosForm, PermisosSelectForm, EstadosForm, DatosPersonasForm, TiposVentasForm
 #from app.common.mail import send_email
 from time import strftime, gmtime
 
@@ -474,3 +474,25 @@ def alta_estados():
     #falta paginar tareas
     estados = Estados.get_all()    
     return render_template("abms/alta_estados.html", form=form, estados=estados)
+
+@abms_bp.route("/abms/altatiposventas/", methods = ['GET', 'POST'])
+@login_required
+@admin_required
+@not_initial_status
+def alta_tipos_ventas():
+    form = TiposVentasForm()
+    
+    if form.validate_on_submit():
+        clave = form.clave.data
+        descripcion = form.descripcion.data
+        
+        tipos_ventas = TiposVentas(clave=clave,
+                         descripcion=descripcion,
+                         usuario_alta=current_user.username)
+        
+        tipos_ventas.save()
+        flash("Nuevo tipo de venta creado", "alert-success")
+        return redirect(url_for('abms.alta_tipos_ventas'))
+    #falta paginar tareas
+    tipos_ventas = TiposVentas.get_all()    
+    return render_template("abms/alta_tipos_ventas.html", form=form, tipos_ventas=tipos_ventas)

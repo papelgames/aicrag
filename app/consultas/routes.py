@@ -11,7 +11,7 @@ from flask_login import login_required, current_user
 
 from app.auth.decorators import admin_required, not_initial_status, nocache
 from app.auth.models import Users
-from app.models import Productos, CabecerasPresupuestos, Presupuestos, Parametros, Estados, Personas #, Proveedores
+from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas #, Proveedores
 from app.controles import get_tarea_corriendo
 
 from . import consultas_bp 
@@ -21,15 +21,15 @@ from .forms import BusquedaForm
 logger = logging.getLogger(__name__)
 
 def control_vencimiento (fecha):
-    if fecha < datetime.now():
+    if fecha < date.today():
         return "VENCIDO"
 
-@consultas_bp.route("/consultas/consultaproducto/<criterio>", methods = ['GET', 'POST'])
 @consultas_bp.route("/consultas/consultaproducto/", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
 @nocache
-def consulta_productos(criterio = ""):
+def consulta_productos():
+    criterio = request.args.get('criterio','')
     form = BusquedaForm()
     lista_de_productos = []
     page = int(request.args.get('page', 1))
@@ -95,8 +95,8 @@ def consulta_presupuestos():
 def presupuesto():
     id_presupuesto = request.args.get('id_presupuesto','')
     cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
-    productos = Presupuestos.get_by_id_presupuesto(id_presupuesto)
-    vencimiento_si_no = control_vencimiento(cabecera.fecha_vencimiento)
+    productos = ProductosPresupuestos.get_by_id_presupuesto(id_presupuesto)
+    vencimiento_si_no = control_vencimiento(cabecera.fecha_vencimiento.date())
     estado_pendiente = Estados.get_first_by_clave_tabla(1,"estado_presupuesto")
     estado_vencido = Estados.get_first_by_clave_tabla(2,"estado_presupuesto")
     

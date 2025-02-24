@@ -2,13 +2,13 @@
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-	aicrag | Alta de tipos de estados
+	aicrag | Alta de tipos de ventas
 {% endblock %}
 
 {% block content %}
 <div class="row">
 	<div class="offset-md-3 col-md-6">
-		<h1 class="display-4">Alta estados</h1>
+		<h1 class="display-4">Alta tipos de ventas</h1>
 	</div>
 	<div class="offset-md-3 col-md-6">
 		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
@@ -16,19 +16,12 @@
 			<div class="row mb-3">
 				{{ render_input(form.clave,'', id= "clave" , placeholder="Clave de estado" ) }}
 				{{ render_input(form.descripcion,'', id= "tipo" , placeholder="Nombre del estado" ) }}
-				{{ render_input(form.tabla,'', id= "tabla" , class="form-control", placeholder="Elija la tabla de referencia" ) }}
-				<div class="col-md-6">
-					{{ render_input(form.inicial,'', id= "inicial" , class="form-check-input" ) }}
-				</div>
-				<div class="col-md-6">						
-					{{ render_input(form.final,'', id= "final", class="form-check-input"  ) }}
-				</div>
 			</div>
 			<button type="submit" class="btn btn-primary">Guardar</button>
 		</form>
 	</div>
 </div>
-{% if estados %}
+{% if tipos_ventas %}
 	<div class="offset-md-3 col-md-6">
 		<table class="table table-striped table-hover mb-4">
 			<thead>
@@ -36,21 +29,15 @@
 					<th>ID</th>
 					<th>CLAVE</th>
 					<th>NOMBRE</th>
-					<th>TABLA</th>
-					<th>¿INICIAL?</th>
-					<th>¿FINAL?</th>
 					<th>ACCION</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for estado in estados %}
+				{% for tipo_venta in tipos_ventas %}
 					<tr>
-						<th> {{ estado.id }}</th>
-						<td> {{ estado.clave }}</td>
-						<td> {{ estado.descripcion }}</td>
-						<td> {{ estado.tabla }}</td>
-						<td> {{ estado.inicial }}</td>
-						<td> {{ estado.final }}</td>
+						<th> {{ tipo_venta.id }}</th>
+						<td> {{ tipo_venta.clave }}</td>
+						<td> {{ tipo_venta.descripcion }}</td>
 						<td>
 							<div class="dropdown">
 								<button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">

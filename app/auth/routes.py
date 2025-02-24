@@ -30,7 +30,6 @@ def show_signup_form():
         correo_electronico = form.correo_electronico.data
         new_password = 'aicrag' + str(strftime('%d%m%y%H%m%s', gmtime()))
         is_admin = form.is_admin.data
-        
         # Comprobamos que no hay ya un usuario con ese nombre de usuario
         user = Users.get_by_username(username)
         check_correo = Personas.get_by_correo(correo_electronico)
@@ -42,33 +41,35 @@ def show_signup_form():
         else:
             # Creamos el usuario y la persona relacionada al usuario y lo guardamos
             #inicia con el estado temporal que es el 1
+            #creo el objeto estado temporal para agregarle un user nuevo
             estado = Estados.get_first_by_clave_tabla('1','users')
-           
+            #creo el user con los datos del formulario
             user = Users(username=username, 
                         is_admin=is_admin
                         )
-            
-            user.id_estado = estado.id
             user.set_password(new_password)
-            
-            #valido si la persona y si ya tiene usuario.
+            #valido si la persona y si ya tiene usuario con los datos cargados en el formulario.
             check_persona = Personas.get_by_cuit(cuit)
-
+            #si la persona existe pero no tiene usuario uso ese id para asignarselo al user que estoy agreagando al estado.
             if check_persona and check_persona.id_usuario == None:
                 user.check_persona = check_persona
-                user.save()
+                estado.user.append(user)
+                estado.save()
                 check_persona.id_usuario = user.id
                 check_persona.save()
+            #si ya tiene user cancelo la creacion de todo 
             elif check_persona and check_persona.id_usuario != None:
                 flash("La persona elegida ya tiene usuario.", "alert-warning")
                 return redirect(url_for('admin.list_users'))
             else:
+            #sino creo la persona con los datos del formulario mas el user que ya tengo y se los agrego al estado.
                 persona = Personas(descripcion_nombre=name,
                                 cuit=cuit,
                                 correo_electronico=correo_electronico,
                                 usuario_alta = current_user.username)
                 user.persona = persona
-                user.save()
+                estado.user.append(user)
+                estado.save()
             # Enviamos un email de bienvenida
             send_email(subject='Bienvenid@ AICRAG',
                         sender=(current_app.config['DONT_REPLY_FROM_EMAIL'], 
@@ -76,7 +77,6 @@ def show_signup_form():
                         recipients=[correo_electronico, ],
                         text_body=f'Hola {name}, eres nuevo usuairo de aicrag',
                         html_body=f'<p>Hola <strong>{name}</strong>, ya tienes usuario en aicrag: <br>Usuario: <strong>{username}</strong> <br>Contraseña: <strong>{new_password}</strong></p>')
-           
             flash("El usuario ha sido creado correctamente.", "alert-success")
             return redirect(url_for('admin.list_users'))
     return render_template("auth/signup_form.html", form=form)
@@ -89,10 +89,7 @@ def login():
     if form.validate_on_submit():
         user = Users.get_by_username(form.username.data)
         if user is not None and user.check_password(form.password.data):
-            print (user.id_estado)
             login_user(user, remember=form.remember_me.data)
-            # if user.id_estado == 1:
-            #     return redirect(url_for('auth.change_password'))
             next_page = request.args.get('next')
             if not next_page or urlparse(next_page).netloc != '':
                 next_page = url_for('public.index')

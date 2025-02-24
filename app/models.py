@@ -35,7 +35,7 @@ class Proveedores (Base):
     incluye_iva = db.Column(db.Boolean, default=False)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
-    producto = db.relationship('Productos', backref='productos', uselist=False)
+    producto = db.relationship('Productos', backref='productos', uselist=True)
 
 
     def save(self):
@@ -68,7 +68,7 @@ class Productos (Base):
     usuario_modificacion = db.Column(db.String(256))
     es_servicio = db.Column(db.Boolean)
     utilidad = db.Column(db.Float)
-    producto_presupuesto = db.relationship('ProductosPresupuestos', backref='productos_en_presupuestos', uselist=False)
+    producto_presupuesto = db.relationship('ProductosPresupuestos', backref='productos_en_presupuestos', uselist=True)
 
     def save(self):
         if not self.id:
@@ -183,7 +183,22 @@ class TiposVentas(Base):
     __tablename__ ="tiposventas"
     clave = db.Column(db.Integer)
     descripcion = db.Column(db.String(25))
-    cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='cabeceras_presupuestos', uselist=False)
+    cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='cabeceras_presupuestos', uselist=True)
+    usuario_alta = db.Column(db.String(256))
+    usuario_modificacion = db.Column(db.String(256))
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_all():
+        return TiposVentas.query.all()
+    
+    @staticmethod
+    def get_first_by_clave_tabla(clave):
+        return TiposVentas.query.filter_by(clave = clave).first()
 
 class CabecerasPresupuestos (Base):
     __tablename__ = "cabeceraspresupuestos"
@@ -195,7 +210,7 @@ class CabecerasPresupuestos (Base):
     id_tp_ventas = db.Column(db.Integer, db.ForeignKey('tiposventas.id'))
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
-    producto_presupuesto = db.relationship('ProductosPresupuestos', backref='productos_presupuestos', uselist=False)
+    producto_presupuesto = db.relationship('ProductosPresupuestos', backref='productos_presupuestos', uselist=True)
     
     def only_add(self):
         db.session.add(self)
@@ -208,40 +223,16 @@ class CabecerasPresupuestos (Base):
     @staticmethod
     def get_by_id(id_presupuesto):
         return CabecerasPresupuestos.query.filter_by(id = id_presupuesto).first()
-    
-    # @staticmethod
-    # def get_all_by_id(id_presupuesto):
-    #     return db.session.query(CabecerasPresupuestos,Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
-    #                                                              .filter_by(id = id_presupuesto)\
-    #                                                              .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-    #                                                              .all()
-    def get_by_all_id(id):
-        return CabecerasPresupuestos.query.get(id)
-
-    @staticmethod
-    def get_like_descripcion(descripcion_):
-        query_str = db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
-                                                           .filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
-                                                           .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-                                                           .all()
-        return query_str
 
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
-        return db.session.query(CabecerasPresupuestos).filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
+        return CabecerasPresupuestos.query.filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
                                                            .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
                                                            .paginate(page=page, per_page=per_page, error_out=False)
-   
+    
     @staticmethod
     def get_all():
         return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
-
-    # @staticmethod
-    # def get_all_estado(estado_cabecera, page=1, per_page=20): #1 es esado activo 
-    #     return db.session.query(CabecerasPresupuestos, Parametros).filter(CabecerasPresupuestos.estado == Parametros.tipo_parametro)\
-    #                                                               .filter(CabecerasPresupuestos.estado == estado_cabecera)\
-    #                                                               .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
-    #                                                               .paginate(page=page, per_page=per_page, error_out=False)
 
     @staticmethod
     def get_all_estado(id_estado, page=1, per_page=20):
@@ -300,15 +291,6 @@ class ProductosPresupuestos (Base):
         return db.session.query(ProductosPresupuestos.id_cabecera_presupuesto, func.sum(ProductosPresupuestos.importe * ProductosPresupuestos.cantidad)).\
             filter(ProductosPresupuestos.id_cabecera_presupuesto == id_presupuesto).first()
             
-    @staticmethod
-    def get_by_id_presupuesto_paquete(id_presupuesto):
-        valor_calculado =  ((((Productos.importe * Productos.utilidad)/100) + Productos.importe) / Productos.cantidad_presentacion)
-        query_str = db.session.query(ProductosPresupuestos, Productos, valor_calculado.label('importe_calculado'))\
-            .filter(ProductosPresupuestos.id_cabecera_presupuesto == id_presupuesto)\
-            .filter(ProductosPresupuestos.id_producto == Productos.id)\
-            .all()
-        return query_str
-
     @staticmethod
     def get_by_id_producto(id):
         return ProductosPresupuestos.query.filter_by(id= id).first()
@@ -386,9 +368,9 @@ class Estados(Base):
     final = db.Column(db.Boolean)
     usuario_alta = db.Column(db.String(256))
     usuario_modificacion = db.Column(db.String(256))
-    cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='estado_presupuestos', uselist=False)
-    persona = db.relationship('Personas', backref='estado_personas', uselist=False)
-    user = db.relationship('Users', backref='estado_users', uselist=False)
+    cabecera_presupuesto = db.relationship('CabecerasPresupuestos', backref='estado_presupuestos', uselist=True)
+    persona = db.relationship('Personas', backref='estado_personas', uselist=True)
+    user = db.relationship('Users', backref='estado_users', uselist=True)
    
     def save(self):
         if not self.id:
