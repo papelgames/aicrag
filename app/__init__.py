@@ -54,9 +54,6 @@ def create_app(settings_module):
     from .public import public_bp
     app.register_blueprint(public_bp)
 
-    from .compras import compras_bp
-    app.register_blueprint(compras_bp)
-
     from .consultas import consultas_bp
     app.register_blueprint(consultas_bp)
 
@@ -65,6 +62,9 @@ def create_app(settings_module):
 
     from .gestiones import gestiones_bp
     app.register_blueprint(gestiones_bp)
+
+    from .contable import contable_bp
+    app.register_blueprint(contable_bp)
 
     # Custom error handlers
     register_error_handlers(app)

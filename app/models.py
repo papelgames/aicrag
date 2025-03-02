@@ -239,16 +239,6 @@ class CabecerasPresupuestos (Base):
         return CabecerasPresupuestos.query.filter_by(id_estado = id_estado)\
             .paginate(page=page, per_page=per_page, error_out=False)
 
-class Presupuestos (Base):
-    __tablename__ = "presupuestos"
-    id_cabecera_presupuesto = db.Column(db.Integer)
-    id_producto = db.Column(db.Integer)
-    cantidad = db.Column(db.Integer)
-    descripcion = db.Column(db.String(256))
-    importe = db.Column(db.Numeric(precision=15, scale=2))
-    usuario_alta = db.Column(db.String(256))
-    usuario_modificacion = db.Column(db.String(256))    
-    
 class ProductosPresupuestos (Base):
     __tablename__ = "productospresupuestos"
     id_cabecera_presupuesto = db.Column(db.Integer, db.ForeignKey('cabeceraspresupuestos.id'))
@@ -468,3 +458,15 @@ class Permisos(Base):
     def get_permisos_no_relacionadas_personas(id_persona): 
         return  Permisos.query.filter(~Permisos.users.any(id = id_persona)).all()
     
+class Egresos (Base):
+    __tablename__ = "egresos"
+    descripcion = db.Column(db.String(100), nullable = False)
+    importe = db.Column(db.Numeric(precision=15, scale=2))
+    nota = db.Column(db.String(256))
+    usuario_alta = db.Column(db.String(256))
+    usuario_modificacion = db.Column(db.String(256))
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
