@@ -5,11 +5,12 @@ from itertools import product
 from types import ClassMethodDescriptorType
 from typing import Text
 
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, cast, Date
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 #from .models import Users
 import locale
+
 
 from app import db
 
@@ -230,6 +231,12 @@ class CabecerasPresupuestos (Base):
                                                            .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
                                                            .paginate(page=page, per_page=per_page, error_out=False)
     
+    @staticmethod
+    def get_by_fecha(fecha,id_tp_ventas, page=1, per_page=20):
+        return CabecerasPresupuestos.query.filter(cast(CabecerasPresupuestos.created, Date) == fecha)\
+                                          .filter(CabecerasPresupuestos.id_tp_ventas==id_tp_ventas)\
+                                          .paginate(page=page, per_page=per_page, error_out=False)
+
     @staticmethod
     def get_all():
         return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
@@ -470,3 +477,9 @@ class Egresos (Base):
         if not self.id:
             db.session.add(self)
         db.session.commit()
+    
+    @staticmethod
+    def get_by_fecha(fecha, page=1, per_page=20):
+        return Egresos.query.filter(cast(Egresos.created, Date) == fecha)\
+            .paginate(page=page, per_page=per_page, error_out=False)
+        

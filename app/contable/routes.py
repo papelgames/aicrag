@@ -6,18 +6,13 @@ from flask import render_template, redirect, url_for, request, current_app, abor
 from flask.helpers import flash
 from flask_login import login_required, current_user
 
-from werkzeug.utils import secure_filename
-
 from app.auth.decorators import admin_required, nocache, not_initial_status
-from app.auth.models import Users
-from app.models import Egresos
+from app.models import Egresos, CabecerasPresupuestos, TiposVentas
 from . import contable_bp
 from .forms import EgresosForm
-from time import strftime, gmtime
 
-from app.common.funciones import listar_endpoints
-from rq import Worker
 
+from datetime import date, datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -43,4 +38,16 @@ def alta_egreso():
         flash("Nuevo egreso ingresado", "alert-success")
         return redirect(url_for("contable.alta_egreso"))
     return render_template("contable/alta_egreso.html", form=form)
+
+@contable_bp.route("/contable/diario", methods = ['GET', 'POST'])
+@login_required
+@not_initial_status
+def diario():
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
+    tipo_venta=TiposVentas.get_first_by_clave_tabla(2)
+    egresos=Egresos.get_by_fecha(date.today(), page, per_page)
+    ventas=CabecerasPresupuestos.get_by_fecha(date.today(), tipo_venta.id, page, per_page)
+
+    return render_template("contable/diario.html", egresos=egresos, ventas=ventas)
 

@@ -1,0 +1,102 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+	aicrag | Diario
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center">
+        <h1 class="display-6">Diario</h1>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        {% if egresos.items %}
+            <table class="table table-striped table-hover mb-4">
+                <thead>
+                    <tr>
+                        <th>DESCRIPCION</th>
+                        <th>IMPORTE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for egreso in egresos %}
+                        <tr>
+                            <td>{{ egreso.descripcion }}</td>
+                            <td>{{ egreso.importe }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Agregar la paginación debajo de la tabla de egresos -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {%- for page in egresos.iter_pages() %}
+                        {% if page %}
+                            {% if page != egresos.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('contable.diario', page=page) }}">{{ page }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {{ page }}
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {%- endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+
+    <div class="col-md-5">
+        {% if ventas.items %}
+            <table class="table table-striped table-hover mb-4">
+                <thead>
+                    <tr>
+                        <th>DESCRIPCION</th>
+                        <th>IMPORTE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                        <tr>
+                            <td>{{ venta.nombre_cliente }}</td>
+                            <td>{{ venta.importe_total }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Agregar la paginación debajo de la tabla de ventas -->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {%- for page in ventas.iter_pages() %}
+                        {% if page %}
+                            {% if page != ventas.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('contable.diario', page=page) }}">{{ page }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {{ page }}
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {%- endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}
