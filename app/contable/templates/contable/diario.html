@@ -6,95 +6,108 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12 text-center">
-        <h1 class="display-6">Diario</h1>
+<div class="container-fluid mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10 d-flex justify-content-between align-items-center">
+            <h3 class="m-0">Diario de {{ dia.strftime('%d-%m-%Y') }}</h3>
+            <form action="" method="post" class="d-flex align-items-center gap-2" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
+                {{ render_input(form.dia,'', id= "dia", class="form-control" ) }}
+                <button type="submit" class="btn btn-primary">Ir</button>
+            </form>
+        </div>
     </div>
 </div>
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        {% if egresos.items %}
-            <table class="table table-striped table-hover mb-4">
-                <thead>
-                    <tr>
-                        <th>DESCRIPCION</th>
-                        <th>IMPORTE</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for egreso in egresos %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            {% if egresos.items %}
+                <table class="table table-striped table-hover mb-4">
+                    <thead>
                         <tr>
-                            <td>{{ egreso.descripcion }}</td>
-                            <td>{{ egreso.importe }}</td>
+                            <th>DESCRIPCION</th>
+                            <th>IMPORTE</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Agregar la paginación debajo de la tabla de egresos -->
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    {%- for page in egresos.iter_pages() %}
-                        {% if page %}
-                            {% if page != egresos.page %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('contable.diario', page=page) }}">{{ page }}</a>
-                                </li>
-                            {% else %}
-                                <li class="page-item active">
-                                    <span class="page-link">
-                                        {{ page }}
-                                    </span>
-                                </li>
+                    </thead>
+                    <tbody>
+                        {% for egreso in egresos %}
+                            <tr>
+                                <td>{{ egreso.descripcion }}</td>
+                                <td>{{ egreso.importe }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        {%- for page in egresos.iter_pages() %}
+                            {% if page %}
+                                {% if page != egresos.page %}
+                                    <li class="page-item">
+                                        {% if page_v %}
+                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=page, page_v=page_v) }}">{{ page }}</a>
+                                        {% else %}
+                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=page) }}">{{ page }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            {{ page }}
+                                        </span>
+                                    </li>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    {%- endfor %}
-                </ul>
-            </nav>
-        {% endif %}
-    </div>
+                        {%- endfor %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
 
-    <div class="col-md-5">
-        {% if ventas.items %}
-            <table class="table table-striped table-hover mb-4">
-                <thead>
-                    <tr>
-                        <th>DESCRIPCION</th>
-                        <th>IMPORTE</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for venta in ventas %}
+        <div class="col-md-5">
+            {% if ventas.items %}
+                <table class="table table-striped table-hover mb-4">
+                    <thead>
                         <tr>
-                            <td>{{ venta.nombre_cliente }}</td>
-                            <td>{{ venta.importe_total }}</td>
+                            <th>DESCRIPCION</th>
+                            <th>IMPORTE</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Agregar la paginación debajo de la tabla de ventas -->
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    {%- for page in ventas.iter_pages() %}
-                        {% if page %}
-                            {% if page != ventas.page %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('contable.diario', page=page) }}">{{ page }}</a>
-                                </li>
-                            {% else %}
-                                <li class="page-item active">
-                                    <span class="page-link">
-                                        {{ page }}
-                                    </span>
-                                </li>
+                    </thead>
+                    <tbody>
+                        {% for venta in ventas %}
+                            <tr>
+                                <td>{{ venta.nombre_cliente }}</td>
+                                <td>{{ venta.importe_total }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        {%- for page in ventas.iter_pages() %}
+                            {% if page %}
+                                {% if page != ventas.page %}
+                                    <li class="page-item">
+                                        {% if page_e %}
+                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=page, page_e=page_e) }}">{{ page }}</a>
+                                        {% else %}
+                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=page) }}">{{ page }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            {{ page }}
+                                        </span>
+                                    </li>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    {%- endfor %}
-                </ul>
-            </nav>
-        {% endif %}
+                        {%- endfor %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
     </div>
 </div>
 

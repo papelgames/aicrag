@@ -11,3 +11,6 @@ class EgresosForm(FlaskForm):
     descripcion = StringField('Nombre del proveedor',validators=[DataRequired('Complete una descripción')])
     importe = FloatField('Importe del producto', validators=[DataRequired('Ingrese el importe del egreso' )] )
     nota = TextAreaField('Nota', validators=[Length(max=256)])
+
+class DiarioForm(FlaskForm):
+    dia = DateField('Elije un día: ', validators=[DataRequired('Debe seleccionar un día')])
