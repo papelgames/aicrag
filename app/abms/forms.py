@@ -5,7 +5,7 @@ from flask_wtf.file import FileField, FileAllowed
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, IntegerField, DateField, SelectField, HiddenField)
 from wtforms.fields import FloatField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, ValidationError
-from app.controles import validar_correo, validar_cuit
+from app.common.controles import validar_correo, validar_cuit
 
 # def validar_opcion(form, field):
 #     """ Valida que el campo no tenga el valor '2' """

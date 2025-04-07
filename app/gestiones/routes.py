@@ -9,7 +9,7 @@ from flask import render_template, redirect, url_for, current_app, flash, send_f
 from flask_login import login_required, current_user
 # from werkzeug.utils import secure_filename
 
-from app.controles import get_tarea_corriendo
+from app.common.controles import get_tarea_corriendo
 from app.auth.decorators import admin_required, nocache, not_initial_status
 from app.auth.models import Users
 from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas #, Proveedores

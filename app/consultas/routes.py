@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 from app.auth.decorators import admin_required, not_initial_status, nocache
 from app.auth.models import Users
 from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas #, Proveedores
-from app.controles import get_tarea_corriendo
+from app.common.controles import get_tarea_corriendo
 
 from . import consultas_bp 
 from .forms import BusquedaForm

@@ -308,10 +308,6 @@ def alta_persona():
         cuit = form.cuit.data
         tipo_persona = form.tipo_persona.data 
         nota = form.nota.data
-        persona_por_cuit = Personas.get_by_cuit(cuit)
-        # if persona_por_cuit:
-        #     flash ("Ya existe la persona","alert-warning")
-        #     return redirect(url_for('public.index'))
 
         persona = Personas(descripcion_nombre= descripcion_nombre,
                            correo_electronico = correo_electronico,
@@ -335,12 +331,7 @@ def actualizacion_persona():
     form=DatosPersonasForm(obj=persona)
     persona_original =persona.cuit
     if form.validate_on_submit():
-        # persona_por_cuit = Personas.get_by_cuit(form.cuit.data)
         form.populate_obj(persona)
-        # persona.usuario_modificacion = current_user.username
-        # if persona_por_cuit and persona_por_cuit.cuit != persona_original:
-        #     flash ("Ya existe la persona","alert-warning")
-        #     return redirect(url_for('public.index'))
         persona.save()
         flash("Se ha actualizado la persona correctamente.", "alert-success")
         return redirect(url_for('consultas.consulta_personas'))
