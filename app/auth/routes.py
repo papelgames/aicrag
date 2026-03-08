@@ -2,7 +2,7 @@ from flask import (render_template, redirect, url_for,
                    request, current_app, session)
 from flask_login import current_user, login_user, logout_user, login_required
 from sqlalchemy import true
-#from werkzeug.urls import url_parse
+
 from urllib.parse import urlparse 
 from flask.helpers import flash
 
@@ -10,8 +10,8 @@ from app import login_manager
 from app.common.mail import send_email
 from . import auth_bp
 from .forms import SignupForm, LoginForm, ChangePasswordForm, UsernameForm, FindUserForm
-from .models import Users
-from app.models import Personas, Estados
+
+from app.models import Personas, Estados, Users
 from time import strftime, gmtime
 from app.auth.decorators import admin_required, not_initial_status, nocache
 

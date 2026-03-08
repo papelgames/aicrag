@@ -6,8 +6,8 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required, not_initial_status
-from app.auth.models import Users
-from app.models import Roles, Permisos
+# from app.auth.models import Users
+from app.models import Roles, Permisos, Users 
 from . import admin_bp
 from .forms import UserAdminForm, PermisosUserForm, RolesUserForm
 

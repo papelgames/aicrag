@@ -1,16 +1,12 @@
 import logging
-# from operator import setitem
-# import os
-# import dbf 
+
 from datetime import date, datetime, timedelta
-# from string import capwords
 
 from flask import render_template, redirect, url_for, abort, current_app, flash, request
 from flask_login import login_required, current_user
-#from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required, not_initial_status, nocache
-from app.auth.models import Users
+
 from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas #, Proveedores
 from app.common.controles import get_tarea_corriendo
 

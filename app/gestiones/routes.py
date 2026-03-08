@@ -1,21 +1,21 @@
 import logging
-# from operator import setitem
+
 import os
 from time import ctime
 from datetime import date, datetime, timedelta
-# from string import capwords
 
-from flask import render_template, redirect, url_for, current_app, flash, send_file, request #, make_response, abort
+
+from flask import render_template, redirect, url_for, current_app, flash, send_file, request 
 from flask_login import login_required, current_user
-# from werkzeug.utils import secure_filename
+
 
 from app.common.controles import get_tarea_corriendo
 from app.auth.decorators import admin_required, nocache, not_initial_status
-from app.auth.models import Users
-from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas #, Proveedores
+
+from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas 
 from . import gestiones_bp 
-from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm #, BusquedaForm 
-# from app.funciones import to_precios_dbf
+from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm  
+
 logger = logging.getLogger(__name__)
 
 def control_vencimiento (fecha):
