@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
+from decimal import Decimal
 from app import db
 
 
@@ -102,7 +102,7 @@ class Productos(Base):
     id_proveedor: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('proveedores.id'))
     id_lista_proveedor: Mapped[Optional[str]] = mapped_column(String(256))
     descripcion: Mapped[Optional[str]] = mapped_column(String(256))
-    importe: Mapped[Optional[float]] = mapped_column(Numeric(precision=15, scale=2))
+    importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     cantidad_presentacion: Mapped[Optional[float]] = mapped_column(Float, default=1)
     id_ingreso: Mapped[Optional[str]] = mapped_column(String(256))
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
@@ -250,7 +250,7 @@ class CabecerasPresupuestos(Base):
     fecha_vencimiento: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     nombre_cliente: Mapped[Optional[str]] = mapped_column(String(256))
     correo_electronico: Mapped[Optional[str]] = mapped_column(String(256))
-    importe_total: Mapped[Optional[float]] = mapped_column(Numeric(precision=15, scale=2))
+    importe_total: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     id_estado: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('estados.id'))
     id_tp_ventas: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('tiposventas.id'))
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
@@ -298,7 +298,7 @@ class ProductosPresupuestos(Base):
     id_producto: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('productos.id'))
     cantidad: Mapped[Optional[int]] = mapped_column(Integer)
     descripcion: Mapped[Optional[str]] = mapped_column(String(256))
-    importe: Mapped[Optional[float]] = mapped_column(Numeric(precision=15, scale=2))
+    importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
     usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
 
@@ -343,7 +343,7 @@ class Compras(Base):
     id_producto: Mapped[Optional[int]] = mapped_column(Integer)
     codigo_de_barras: Mapped[Optional[str]] = mapped_column(String(256))
     cantidad: Mapped[Optional[int]] = mapped_column(Integer)
-    importe: Mapped[Optional[float]] = mapped_column(Numeric(precision=15, scale=2))
+    importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     fecha_cierre: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     estado: Mapped[Optional[int]] = mapped_column(Integer)
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
@@ -528,7 +528,7 @@ class Egresos(Base):
     __tablename__ = "egresos"
 
     descripcion: Mapped[str] = mapped_column(String(100), nullable=False)
-    importe: Mapped[Optional[float]] = mapped_column(Numeric(precision=15, scale=2))
+    importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     nota: Mapped[Optional[str]] = mapped_column(String(256))
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
     usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
