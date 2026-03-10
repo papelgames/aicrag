@@ -54,7 +54,7 @@ class Users(db.Model, UserMixin):
 class Base(db.Model):
     __abstract__ = True
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, default=db.func.current_timestamp())
     modified: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, default=db.func.current_timestamp(),
                                                                    onupdate=db.func.current_timestamp())
@@ -542,3 +542,39 @@ class Egresos(Base):
     def get_by_fecha(fecha, page=1, per_page=20):
         return Egresos.query.filter(cast(Egresos.created, Date) == fecha)\
             .paginate(page=page, per_page=per_page, error_out=False)
+
+
+class Tasks(Base):
+    id_rq: Mapped[str] = mapped_column(String(36))
+    name: Mapped[str] = mapped_column(String(128), index=True)
+    description: Mapped[Optional[str]] = mapped_column(String(128))
+    complete: Mapped[bool] = mapped_column(default=False)
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
+
+    #user: Mapped[Users] = relationship(back_populates='tasks')
+
+    # def get_rq_job(self):
+    #     try:
+    #         rq_job = rq.job.Job.fetch(self.id, connection=current_app.redis)
+    #     except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError):
+    #         return None
+    #     return rq_job
+
+    def get_progress(self):
+        job = self.get_rq_job()
+        return job.meta.get('progress', 0) if job is not None else 100
+    
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
+
+    def get_tasks_in_progress(self):
+        query = self.tasks.select().where(Tasks.complete == False)
+        return db.session.scalars(query)
+
+    def get_task_in_progress(self, name):
+        query = self.tasks.select().where(Tasks.name == name,
+                                          Tasks.complete == False)
+        return db.session.scalar(query)

@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required, nocache, not_initial_status
 # from app.auth.models import Users
-from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles, TiposVentas
+from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles, TiposVentas, Tasks
 from . import abms_bp
 from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, RolesForm, PermisosForm, PermisosSelectForm, EstadosForm, DatosPersonasForm, TiposVentasForm
 #from app.common.mail import send_email
@@ -268,8 +268,13 @@ def alta_masiva():
             if control_proveedor == True:
                 email = current_user.username
                 job = current_app.task_queue.enqueue('app.tareas.in_lista_masiva', file_path = file_path, id_proveedor = id_proveedor, email= email, job_timeout = 3600)
-                job.get_id()
-                
+                #job.get_id()
+                task = Tasks(id_rq=job.get_id(), name="Alta masiva de productos", description=f"Alta via excel de {proveedor.nombre}", usuario_alta=current_user.username)
+                task.save()
+        #         rq_job = current_app.task_queue.enqueue(f'app.tasks.{name}', self.id,
+        #                                         *args, **kwargs)
+        # task = Task(id=rq_job.get_id(), name=name, description=description,
+        #             user=self)
                 flash("Ha iniciado la actualización masiva de precios de: " + proveedor.nombre , "alert-success")
                 return redirect(url_for("public.index"))
             else:
