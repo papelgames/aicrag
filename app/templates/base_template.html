@@ -104,7 +104,15 @@
                 <a class="nav-link" href="{{ url_for('gestiones.alta_venta') }}">
                     <button class="btn btn-sm btn-success">Nueva venta</button>
                 </a>
+                <a class="nav-link" href="{{ url_for('abms.mensajes') }}">
+                            Mensajes
+                            <span id="message_count" class="badge text-bg-danger" style="visibility: hidden;">
+                                0
+                            </span>
+                        </a>
+                    
             </div>
+
             {% endif %}
         </nav>
 {{ render_messages(messages) }}
@@ -113,7 +121,7 @@
 </div>
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/bootstrap/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/print.js') }}"></script>
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
 {% endblock %}
 
 </body>

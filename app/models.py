@@ -54,7 +54,7 @@ class Users(db.Model, UserMixin):
 class Base(db.Model):
     __abstract__ = True
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     created: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, default=db.func.current_timestamp())
     modified: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, default=db.func.current_timestamp(),
                                                                    onupdate=db.func.current_timestamp())
@@ -544,12 +544,16 @@ class Egresos(Base):
             .paginate(page=page, per_page=per_page, error_out=False)
 
 
-class Tasks(Base):
+class TareasSistema(Base):
+    __tablename__ = "tareassistema"
+
     id_rq: Mapped[str] = mapped_column(String(36))
     name: Mapped[str] = mapped_column(String(128), index=True)
     description: Mapped[Optional[str]] = mapped_column(String(128))
     complete: Mapped[bool] = mapped_column(default=False)
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
+    error: Mapped[bool] = mapped_column(default=False)
+    
 
     #user: Mapped[Users] = relationship(back_populates='tasks')
 
@@ -571,10 +575,40 @@ class Tasks(Base):
 
 
     def get_tasks_in_progress(self):
-        query = self.tasks.select().where(Tasks.complete == False)
+        query = self.select().where(TareasSistema.complete == False)
         return db.session.scalars(query)
 
     def get_task_in_progress(self, name):
-        query = self.tasks.select().where(Tasks.name == name,
-                                          Tasks.complete == False)
+        query = self.select().where(TareasSistema.name == name,
+                                          TareasSistema.complete == False)
         return db.session.scalar(query)
+    
+
+class MensajesSistema(Base):
+    __tablename__ = "mensajessistema"
+
+    asunto: Mapped[str] = mapped_column(String(60))
+    cuerpo: Mapped[str] = mapped_column(String(140))
+    leido: Mapped[bool] = mapped_column(default=False)
+    alerta: Mapped[bool] = mapped_column(default=False)
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.cuerpo)
+    
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+    
+    @staticmethod
+    def get_all():
+        return MensajesSistema.query.all()
+    
+    @staticmethod
+    def get_mensaje_by_id(id):
+
+        return MensajesSistema.query.get(id)
+
+    @staticmethod
+    def get_count_sin_leer():
+        return MensajesSistema.query.filter_by(leido=False).count()

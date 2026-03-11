@@ -7,7 +7,7 @@ import logging
 import os
 #from types import TracebackType
 
-from flask import render_template, redirect, url_for, request, current_app, abort, make_response
+from flask import render_template, redirect, url_for, request, current_app, abort, make_response, jsonify
 from flask.helpers import flash
 from flask_login import login_required, current_user
 
@@ -15,11 +15,13 @@ from werkzeug.utils import secure_filename
 
 from app.auth.decorators import admin_required, nocache, not_initial_status
 # from app.auth.models import Users
-from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles, TiposVentas, Tasks
+from app.models import Productos, Proveedores, Estados, Permisos, Personas, Roles, TiposVentas, TareasSistema, MensajesSistema
 from . import abms_bp
 from .forms import BusquedaForm, ProductosForm, ProveedoresForm, ProductosMasivosForm, RolesForm, PermisosForm, PermisosSelectForm, EstadosForm, DatosPersonasForm, TiposVentasForm
 #from app.common.mail import send_email
 from time import strftime, gmtime
+
+
 
 from app.common.funciones import listar_endpoints
 from rq import Worker
@@ -229,7 +231,6 @@ def alta_masiva():
     if form.validate_on_submit():
         archivo = form.archivo.data
         id_proveedor = form.id_proveedor.data
-        #falta validar que sea un proveedor que actualiza por archivo
         proveedor = Proveedores.get_by_id(id_proveedor)
         if archivo:
             archivo_name = secure_filename(proveedor.nombre +".xlsx")
@@ -237,48 +238,18 @@ def alta_masiva():
             os.makedirs(archivo_dir, exist_ok=True)
             file_path = os.path.join(archivo_dir, archivo_name )
             archivo.save(file_path)
-
-            #abro documento excel
-            import openpyxl 
-            documento = openpyxl.load_workbook(os.path.abspath(file_path), data_only= True)
-            ws = documento.active
-            
-            #traigo parametria del proveedor
-            columnas = [proveedor.nombre,
-                        proveedor.formato_id,
-                        proveedor.columna_id_lista_proveedor, 
-                        proveedor.columna_codigo_de_barras, 
-                        proveedor.columna_descripcion,
-                        proveedor.columna_importe,
-                        proveedor.columna_utilidad ]
-            
-            #indico que al excel en que columnas el proveedor carga cada dato.
-            rango_id_lista_proveedor =  ws[columnas[2]]
-
-            secuencia = 0
-            control_proveedor = False
-            # controlo que el archivo corresponda al proveedor
-            for id in rango_id_lista_proveedor:
-                if secuencia == 15:
-                        break
-                if str(id.value).upper() == str(columnas[1]).upper():
-                        control_proveedor = True
-                        break
-                secuencia +=1
-            if control_proveedor == True:
-                email = current_user.username
-                job = current_app.task_queue.enqueue('app.tareas.in_lista_masiva', file_path = file_path, id_proveedor = id_proveedor, email= email, job_timeout = 3600)
+            user = current_user.username
+            #previo a iniciar la tarea valido si el proveedor está habilitado para subir por archivo
+            if proveedor.archivo_si_no:
+                job = current_app.task_queue.enqueue('app.tareas.in_lista_masiva', file_path = file_path, id_proveedor = id_proveedor, user=user, job_timeout = 3600)
                 #job.get_id()
-                task = Tasks(id_rq=job.get_id(), name="Alta masiva de productos", description=f"Alta via excel de {proveedor.nombre}", usuario_alta=current_user.username)
+                task = TareasSistema(id_rq=job.get_id(), name="Alta masiva de productos", description=f"Alta via excel de {proveedor.nombre}", usuario_alta=current_user.username)
                 task.save()
-        #         rq_job = current_app.task_queue.enqueue(f'app.tasks.{name}', self.id,
-        #                                         *args, **kwargs)
-        # task = Task(id=rq_job.get_id(), name=name, description=description,
-        #             user=self)
                 flash("Ha iniciado la actualización masiva de precios de: " + proveedor.nombre , "alert-success")
                 return redirect(url_for("public.index"))
             else:
-                flash("El archivo seleccionado no corresponde al proveedor: " + proveedor.nombre , "alert-warning")
+                flash(f"El proveedor {proveedor.nombre} no está habilitado para subir por archivo", "alert-warning")
+ 
     return render_template("abms/alta_masiva.html", form=form)
 
 @abms_bp.route("/abms/agenda", methods = ['GET', 'POST'])
@@ -492,3 +463,24 @@ def alta_tipos_ventas():
     #falta paginar tareas
     tipos_ventas = TiposVentas.get_all()    
     return render_template("abms/alta_tipos_ventas.html", form=form, tipos_ventas=tipos_ventas)
+
+
+@abms_bp.route('/abms/mensajes')
+@login_required
+def mensajes():
+    
+    mensajes = MensajesSistema.get_all()
+    return render_template('abms/mensajes.html', mensajes=mensajes)
+
+@abms_bp.route('/mensajes/sin-leer-count')
+def sin_leer_count():
+   
+    return jsonify({'count': MensajesSistema.get_count_sin_leer()})
+
+@abms_bp.route('/mensajes/leido/')
+def leido():
+    id = request.args.get('id','')
+    mensaje = MensajesSistema.get_mensaje_by_id(id)
+    mensaje.leido = True
+    mensaje.save()
+    return redirect(url_for('abms.mensajes'))

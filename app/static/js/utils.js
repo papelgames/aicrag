@@ -37,6 +37,26 @@ function evitarCaracter(event, caracterProhibido) {
   return true;
 }
 
+
+
+//
+function set_message_count(n) {
+    const count = document.getElementById('message_count');
+    count.innerText = n;
+    count.style.visibility = n ? 'visible' : 'hidden';
+}
+
+// funcion para mostrar los mensajes en pantalla
+function update_badge() {
+    fetch('/mensajes/sin-leer-count')
+        .then(response => response.json())
+        .then(data => set_message_count(data.count));
+}
+update_badge(); // llamada inmediata al cargar
+setInterval(update_badge, 30000); // cada 30 segundos
+
+
+
 // window.addEventListener('load', () => {
 //   // Elemento HTML donde se muestra el QR
 //   const contenedorQR = document.getElementById('contenedorQR');
