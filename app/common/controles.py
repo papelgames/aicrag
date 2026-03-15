@@ -1,22 +1,19 @@
 from rq import Worker
 from flask import current_app
-from app.models import Personas
+from app.models import Personas, TareasSistema
 from wtforms.validators import DataRequired, Length, Email, ValidationError
 
-def get_tarea_corriendo(tarea_nombre):
-   todas_las_tareas = []
-   queue = current_app.task_queue
-   workers = Worker.all(queue=queue)
-   worker = workers[0]   
-   tareas_pendientes = queue.jobs
-   if worker.state == 'busy':
-      todas_las_tareas.append(worker.get_current_job().func_name)
-      if tareas_pendientes:
-         for tarea in tareas_pendientes:
-            todas_las_tareas.append(tarea.func_name)
-  
-   if tarea_nombre in todas_las_tareas:
-       return True
+def get_tarea_corriendo():
+    queue = current_app.task_queue
+    workers = Worker.all(queue=queue)
+    for worker in workers:
+        if worker.state == 'busy':
+            job = worker.get_current_job()
+            id_rq = job.id
+            tarea=TareasSistema.get_by_id_rq(id_rq)
+            if tarea.name == 'Alta masiva de productos':
+                return tarea.get_progress()
+
 
 def validar_correo(self, field ):
     correo_persona = Personas.get_by_correo(field.data)

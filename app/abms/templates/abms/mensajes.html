@@ -16,15 +16,26 @@
                 <th>LEIDO</th>
                 <th>ALERTA</th>
                 <th>MARCAR LEIDO</th>
+                <th>VER</th>
             </tr>
         </thead>
+         {% if mensajes.items %} 
         <tbody>
             {% for mensaje in mensajes %}
                 <tr>
                 <td> {{ mensaje.id }}</td>
                 <td> {{ mensaje.asunto }}</td>
-                <td> {{ mensaje.leido }}</td>
-                <td> {{ mensaje.alerta }}</td>
+                <td>
+                    {% if mensaje.leido %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    {% endif %}
+                </td>
+                
+                <td> 
+                    {% if mensaje.alerta %}
+                        <i class="bi bi-x-circle-fill text-danger"></i>                       
+                    {% endif %}
+                </td>
                 <td>
                 {% if not mensaje.leido %}
                     <a href="{{ url_for('abms.leido', id=mensaje.id) }}">
@@ -32,10 +43,51 @@
                     </a>
                 {% endif %}
                 </td>
+                <td>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cuerpo_{{ mensaje.id }}">
+                        Abrir
+                    </button>
+                    <!-- cuerpo mensaje -->
+                    <div class="modal fade" id="cuerpo_{{ mensaje.id }}" tabindex="-1" aria-labelledby="cuerpoLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cuerpoLabel">Cuerpo del mensaje</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {{ mensaje.cuerpo }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-            
+    <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                {%- for page in mensajes.iter_pages() %}
+                    {% if page %}
+                        {% if page != mensajes.page %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('abms.mensajes', page=page) }}">{{ page }}</a>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    {{ page }}
+                                </span>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                {%- endfor %}
+            </ul>
+        </nav>
 </div>
+{% endif %}
 {% endblock %}

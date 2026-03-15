@@ -5,48 +5,68 @@
 {% endblock %}
 
 {% block content %}
-    {% if tarea_actual != "inactiva" %}
-        <div >
+    <div >
             <table class="table table-striped table-hover mb-4">
                 <thead>
                     <tr>
-                        <th>TAREA INICIADA</th>
+                        <th>TAREA</th>
                         <th>NOMBRE</th>
+                        <th>SOLICITADA</th>
                         <th>INICIADA</th>
-                        <th>ESTADO</th>
+                        <th>SOLICITADA POR</th>
+                        <th>PROGRESO</th>
+                        <th>FINALIZADA</th>
+                        <th>ERROR</th>
                     </tr>
                 </thead>
+    {% if tareas.items %} 
                 <tbody>
-                    <tr class = "text-danger">
-                    <td> {{ tarea_actual.id }}</td>
-                    <td> {{ tarea_actual.func_name }}</td>
-                    <td> {{ tarea_actual.started_at.strftime('%d-%m-%Y %H:%m') }}</td>
-                    <td> {{ tarea_actual._status }}</td>
+                    <tr >
+                    {% for tarea in tareas %}
+                    <td> {{ tarea.id_rq }}</td>
+                    <td> {{ tarea.name }}</td>
+                    <td> {{ tarea.created.strftime('%d-%m-%Y %HH:%MM') }}</td>
+                    {% if tarea.fecha_inicio %}
+                        <td> {{ tarea.fecha_inicio.strftime('%d-%m-%Y %HH:%MM') }}</td>
+                    {% else %}
+                    <td> </td> 
+                    {% endif %}
+                    <td> {{ tarea.usuario_alta }}</td>
+                    <td> {{ tarea.get_progress()|round(2) }}%</td>
+                    <td>
+                        {% if tarea.complete %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                            <i class="bi bi-hourglass-split text-warning"></i>
+                        {% endif %}
+                    </td>
+                    <td> 
+                        {% if tarea.error %}
+                            <i class="bi bi-x-circle-fill text-danger"></i>                       
+                        {% endif %}
+                    </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
-            <div >
-                <table class="table table-striped table-hover mb-4">
-                    <thead>
-                        <tr>
-                            <th>TAREA PENDIENTE</th>
-                            <th>NOMBRE</th>
-                            <th>SOLICITADA</th>
-                            <th>ESTADO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr >
-                        {% for tarea_pendiente in tareas_pendientes %}
-                        <td> {{ tarea_pendiente.id }}</td>
-                        <td> {{ tarea_pendiente.func_name }}</td>
-                        <td> {{ tarea_pendiente.enqueued_at.strftime('%d-%m-%Y %H:%m') }}</td>
-                        <td> {{ tarea_pendiente._status }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-        </div>
-     
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {%- for page in tareas.iter_pages() %}
+                        {% if page %}
+                            {% if page != tareas.page %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('abms.agenda', page=page) }}">{{ page }}</a>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {{ page }}
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {%- endfor %}
+                </ul>
+            </nav>
+    </div>
     {% endif %}
+
 {% endblock %}

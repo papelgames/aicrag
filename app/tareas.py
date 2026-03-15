@@ -1,4 +1,4 @@
-from app.models import Productos, Proveedores, MensajesSistema
+from app.models import Productos, Proveedores, MensajesSistema, TareasSistema
 from flask import current_app
 from app import create_app
 import os
@@ -7,6 +7,8 @@ from time import strftime, gmtime
 import locale
 from dotenv import load_dotenv
 import openpyxl
+from rq import get_current_job
+from datetime import datetime
 
 load_dotenv()
 settings_module = os.getenv('APP_SETTINGS_MODULE')
@@ -15,6 +17,12 @@ app = create_app(settings_module)
 app.app_context().push()
 
 def sin_codigo_barras_to_excel():
+   #actualizo el inicio de la tarea
+   job = get_current_job()
+   tarea = TareasSistema.get_by_id_rq(job.id)
+   tarea.fecha_inicio = datetime.now()
+   tarea.save()
+   
    # Filtrar y preparar los datos para la inserción
    archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
    productos_incompletos = Productos.get_all_productos_sin_codigo_de_barras()
@@ -22,23 +30,44 @@ def sin_codigo_barras_to_excel():
    wb = openpyxl.Workbook()
    hoja = wb.active
    hoja.append(('Codigo_de_barras', 'Id_proveedores', 'Descripcion', 'Importe', 'Nombre_proveedor'))
-   for row in productos_incompletos:
+   total = len(productos_incompletos)
+   for i, row in enumerate(productos_incompletos):
+      if job:
+         job.meta['progress'] = 100 * i / total
+         job.save_meta()
       hoja.append((row[0],row[1],row[2],row[3],row[4]))
    wb.save(archivo_dir + '/productos_sin_codigo_barra.xlsx')
+   mensaje = MensajesSistema(asunto="Exportación prod. sin cod. barras", cuerpo=f"El archivo con los productos sin códigos de barra se exportó correctamente.")
+   mensaje.save()
+   tarea.complete = True
+   tarea.save()
+   if job:
+      job.meta['progress'] = 100
+      job.save_meta()
 
 
 def to_precios_dbf():
-   # Filtrar y preparar los datos para la inserción
+     #actualizo el inicio de la tarea
+   job = get_current_job()
+   tarea = TareasSistema.get_by_id_rq(job.id)
+   tarea.fecha_inicio = datetime.now()
+   tarea.save()
+  # Filtrar y preparar los datos para la inserción
    archivo_dir = current_app.config['ARCHIVOS_PARA_DESCARGA']
    productos_precios = Productos.get_all_precios_dbf()
    table = [(f'CODIGO,C,13\tDETALLE,C,56\tPRECIOVP,N,10,4')]
    errores = []
    locale.setlocale(locale.LC_ALL, '')
-   
+   total=len(productos_precios)
+   print (f"Total es: {total}")
    #recorro la tabla y si ha precios que no concuerdan con el tipo de precio que soporta el dbf armo un archivo txt
    #para que el usuario pueda revisar esos productos y corregirlos. 
 
-   for row in productos_precios:
+   for i, row in enumerate(productos_precios):
+      if job:
+         job.meta['progress'] = 100 * i / total
+         job.save_meta()
+                        
       if len(str(round(row[2]))) > 10:
          errores.append(f'{row[0][:13]}\t{row[1][:56]}\t{row[2]}')
       else:
@@ -52,10 +81,24 @@ def to_precios_dbf():
    with open(archivo_dir + '/Precios.dbf', 'w') as precios_file:
       precios_file.write('\n'.join(table))
    
+   mensaje = MensajesSistema(asunto="Exportación archivo .dbf", cuerpo=f"El arhivo .dbf se generó correctamente")
+   mensaje.save()
+   tarea.complete = True
+   tarea.save()
+   if job:
+      job.meta['progress'] = 100
+      job.save_meta()
+
 def in_lista_masiva(file_path, id_proveedor, user):
    proveedor = Proveedores.get_by_id(id_proveedor)
 
-#validación migrada
+   #actualizo el inicio de la tarea
+   job = get_current_job()
+   tarea = TareasSistema.get_by_id_rq(job.id)
+   tarea.fecha_inicio = datetime.now()
+   tarea.save()
+   
+   #validación migrada
    #abro documento excel
    import openpyxl 
    documento = openpyxl.load_workbook(os.path.abspath(file_path), data_only= True)
@@ -99,12 +142,20 @@ def in_lista_masiva(file_path, id_proveedor, user):
       id_ingreso = str(strftime('%d%m%y%H%m%s', gmtime()))
       #creo una matriz con los datos del excel para luego iterarla.   
       mat = list(zip(rango_id_lista_proveedor, rango_codigo_de_barras, rango_descripcion, rango_importe, rango_utilidad))
+      #calculo total para poder calcular porcentaje de la tarea.
+      total = len(mat)
       #inserto los registros que no existen
       producto_nuevo = Productos()
-      for id in mat:
+      producto_por_id=None
+      for i, id in enumerate(mat):
          if id[0].value != None and str(id[0].value).upper() != str(columnas[1]).upper():
             producto_por_id = Productos.get_by_id_lista_proveedor(id[0].value, id_proveedor ) #corregir esta consulta
             registros_total += 1
+            
+            if job:
+               job.meta['progress'] = 100 * i / total
+               job.save_meta()
+                        
             #si es un producto nuevo
             if not producto_por_id:
                if id[4].value == None:
@@ -175,10 +226,18 @@ def in_lista_masiva(file_path, id_proveedor, user):
                   
       #commiteo las tablas
       if producto_por_id:
-            producto_por_id.save()
+         producto_por_id.save()
       producto_nuevo.only_save()
-      mensaje = MensajesSistema(asunto="Importación masiva ok", cuerpo=f"La importación de {proveedor.nombre} masiva terminó correctamente con el archivo {nombre_archivo}")
+      mensaje = MensajesSistema(asunto="Importación masiva ok", cuerpo=f"La importación de {proveedor.nombre} masiva terminó correctamente con el archivo {nombre_archivo} con registros nuevos: {registros_nuevos}, registros actualizados: {registros_actualizados} y registros ignorados: {registros_ignorados} ")
       mensaje.save()
+      tarea.complete = True
+      tarea.save()
+      if job:
+        job.meta['progress'] = 100
+        job.save_meta()
    elif control_proveedor == False:
-      mensaje = MensajesSistema(asunto="Importación masiva con error", cuerpo=f"El archivo {nombre_archivo} no corresponde al proveedor {proveedor.nombre}. La importación no se realizó")
+      mensaje = MensajesSistema(asunto="Importación masiva con error", cuerpo=f"El archivo {nombre_archivo} no corresponde al proveedor {proveedor.nombre}. La importación no se realizó", alerta=True)
       mensaje.save()
+      tarea.error = True
+      tarea.complete = True
+      tarea.save()

@@ -12,7 +12,7 @@ from flask_login import login_required, current_user
 from app.common.controles import get_tarea_corriendo
 from app.auth.decorators import admin_required, nocache, not_initial_status
 
-from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas 
+from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas, TareasSistema
 from . import gestiones_bp 
 from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm  
 
@@ -51,8 +51,8 @@ def alta_presupuesto():
         tipo_venta.save()
 
         return redirect(url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id))
-    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
-        flash('Los precios se están actualizando', 'alert-warning')
+    if get_tarea_corriendo():
+        flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
     return render_template("gestiones/alta_datos_cliente.html", form = form, vencimiento_estimado = vencimiento_estimado)
 
 
@@ -150,8 +150,8 @@ def alta_venta():
             flash("Se han actualizado los datos correctamente", "alert-success")            
             return redirect(url_for("gestiones.alta_venta", id_venta = id_venta))
             
-    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
-        flash('Los precios se están actualizando', 'alert-warning')
+    if get_tarea_corriendo():
+        flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
     return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, 
                            cabecera = cabecera, 
                            vencimiento_estimado = vencimiento_estimado, 
@@ -257,8 +257,8 @@ def modificacion_productos_presupuesto():
 
             flash ("Se incorporó un nuevo producto", "alert-success")
             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
-    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
-        flash('Los precios se están actualizando', 'alert-warning')
+    if get_tarea_corriendo():
+        flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
     return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, 
                            cabecera = cabecera, 
                            lista_productos_seleccion = lista_productos_seleccion, 
@@ -312,7 +312,9 @@ def exportar_datos():
 @not_initial_status
 def exportar_precios():
     job = current_app.task_queue.enqueue("app.tareas.to_precios_dbf", job_timeout = 3600)
-    job.get_id()
+    #job.get_id()
+    task = TareasSistema(id_rq=job.get_id(), name="Exportacion de precios", description=f"Exportacion de archivo .dbf para precios", usuario_alta=current_user.username)
+    task.save()
 
     flash("Ha iniciado la generación del archivo precios.dbf", "alert-success")
     return redirect(url_for("abms.agenda"))
@@ -322,7 +324,9 @@ def exportar_precios():
 @not_initial_status
 def exportar_codigos_de_barra_faltantes():
     job = current_app.task_queue.enqueue("app.tareas.sin_codigo_barras_to_excel", job_timeout = 3600)
-    job.get_id()
+    #job.get_id()
+    task = TareasSistema(id_rq=job.get_id(), name="Exportacion de no Cod. de Barras", description=f"Exportacion de archivo de productos sin codigo de barras", usuario_alta=current_user.username)
+    task.save()
 
     flash("Ha iniciado la generación del archivo precios.dbf", "alert-success")
     return redirect(url_for("abms.agenda"))

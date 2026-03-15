@@ -252,22 +252,15 @@ def alta_masiva():
  
     return render_template("abms/alta_masiva.html", form=form)
 
-@abms_bp.route("/abms/agenda", methods = ['GET', 'POST'])
+@abms_bp.route("/abms/agenda")
 @login_required
 @not_initial_status
 def agenda():
-    queue = current_app.task_queue
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
+    tareas = TareasSistema.get_all_paginated(page, per_page)
     
-    workers = Worker.all(queue=queue)
-    worker = workers[0]
-    if worker.state == 'busy':
-        tarea_actual = worker.get_current_job()
-    else:
-        tarea_actual = 'inactiva'
-        flash("Sin tareas pendientes", "alert-success")
-    tareas_pendientes = queue.jobs
-    
-    return render_template("abms/agenda.html", tarea_actual=tarea_actual, tareas_pendientes=tareas_pendientes)
+    return render_template("abms/agenda.html", tareas=tareas )
 
 
 @abms_bp.route("/abms/altapersonas/", methods = ['GET', 'POST'])
@@ -468,8 +461,9 @@ def alta_tipos_ventas():
 @abms_bp.route('/abms/mensajes')
 @login_required
 def mensajes():
-    
-    mensajes = MensajesSistema.get_all()
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
+    mensajes = MensajesSistema.get_all_paginated(page,per_page)
     return render_template('abms/mensajes.html', mensajes=mensajes)
 
 @abms_bp.route('/mensajes/sin-leer-count')

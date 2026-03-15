@@ -1,7 +1,7 @@
 import datetime
 from typing import Text, Optional, List
 from flask_login import UserMixin
-
+from flask import current_app
 from sqlalchemy import func, or_, cast, Date, String, Integer, Boolean, Float, DateTime, Numeric, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import IntegrityError
@@ -553,16 +553,14 @@ class TareasSistema(Base):
     complete: Mapped[bool] = mapped_column(default=False)
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
     error: Mapped[bool] = mapped_column(default=False)
+    fecha_inicio: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     
 
     #user: Mapped[Users] = relationship(back_populates='tasks')
 
-    # def get_rq_job(self):
-    #     try:
-    #         rq_job = rq.job.Job.fetch(self.id, connection=current_app.redis)
-    #     except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError):
-    #         return None
-    #     return rq_job
+    def get_rq_job(self):
+        rq_job = current_app.task_queue.fetch_job(self.id_rq)
+        return rq_job
 
     def get_progress(self):
         job = self.get_rq_job()
@@ -583,12 +581,22 @@ class TareasSistema(Base):
                                           TareasSistema.complete == False)
         return db.session.scalar(query)
     
+    @staticmethod
+    def get_all_paginated(page=1, per_page=20):
+        return TareasSistema.query.order_by(TareasSistema.created.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
+   
+    
+    @staticmethod
+    def get_by_id_rq(id_rq):
+        return TareasSistema.query.filter_by(id_rq=id_rq).first()
+    
 
 class MensajesSistema(Base):
     __tablename__ = "mensajessistema"
 
     asunto: Mapped[str] = mapped_column(String(60))
-    cuerpo: Mapped[str] = mapped_column(String(140))
+    cuerpo: Mapped[str] = mapped_column(String(512))
     leido: Mapped[bool] = mapped_column(default=False)
     alerta: Mapped[bool] = mapped_column(default=False)
 
@@ -603,6 +611,11 @@ class MensajesSistema(Base):
     @staticmethod
     def get_all():
         return MensajesSistema.query.all()
+    
+    @staticmethod
+    def get_all_paginated(page=1, per_page=20):
+        return MensajesSistema.query.order_by(MensajesSistema.created.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
     
     @staticmethod
     def get_mensaje_by_id(id):

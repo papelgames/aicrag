@@ -48,8 +48,8 @@ def consulta_productos():
           
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
-    if get_tarea_corriendo('app.tareas.in_lista_masiva'):
-        flash('Los precios se están actualizando', 'alert-warning')
+    if get_tarea_corriendo():
+        flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
     return render_template("consultas/consulta_productos.html", form = form, lista_de_productos=lista_de_productos, criterio = criterio, fecha_tope = fecha_tope )
 
 @consultas_bp.route("/consultas/consultapresupuestos/", methods = ['GET', 'POST'])

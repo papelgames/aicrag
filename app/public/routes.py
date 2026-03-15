@@ -1,7 +1,7 @@
 
 import logging
 
-from flask import render_template
+from flask import render_template, redirect, url_for
 from flask_login import login_required
 from app.auth.decorators import  not_initial_status
 
@@ -17,5 +17,5 @@ logger = logging.getLogger(__name__)
 @login_required
 @not_initial_status
 def index():
-   
-    return render_template("public/index.html")
+    return redirect(url_for("consultas.consulta_productos"))
+    #return render_template("public/index.html")
