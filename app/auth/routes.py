@@ -226,6 +226,20 @@ def firstin():
         flash ("El administrador ya fue creado","alert-warning")
         
     else:
+        estado_uno=Estados(clave = 1,
+                           descripcion = "Temporal",
+                           tabla = "users",
+                           usuario_alta = "admin",
+                           usuario_modificacion = "admin")
+           
+        estado_dos=Estados(clave = 2,
+                           descripcion = "Activo",
+                           tabla = "users",
+                           usuario_alta = "admin",
+                           usuario_modificacion = "admin")
+        estado_uno.save()  
+        estado_dos.save()
+        
         # Creamos el usuario admin
         estado = Estados.get_first_by_clave_tabla(1,'users')
         user = Users(username=username, 

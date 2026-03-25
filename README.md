@@ -49,6 +49,9 @@ insert into parametros (descripcion, tabla, tipo_parametro) values ("Activo","es
 insert into parametros (descripcion, tabla, tipo_parametro) values ("Vencido","estado_presupuesto","2");
 insert into parametros (descripcion, tabla, tipo_parametro) values ("Anulado","estado_presupuesto","3");
 insert into parametros (descripcion, tabla, tipo_parametro) values ("Iniciado","estado_presupuesto","4");
+insert into estados (clave, descripcio, tabla) values (1,"Temporal","users");
+insert into estados (clave, descripcion, tabla) values (2,"Activo","users");
+insert into estados (clave, descripcion, tabla) values (3,"Inactivo","users");
 
 ## Instalación de redis server (sistema debian, ubuntu o derivados)
 sudo apt install redis-server 
