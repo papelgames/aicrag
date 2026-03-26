@@ -128,6 +128,10 @@ class Productos(Base):
             .filter(Productos.id_proveedor == Proveedores.id)\
             .all()
         return query_str
+    
+    @staticmethod
+    def redondear_a_100_superior(self, valor):
+        return ((valor + 99) // 100) * 100
 
     @staticmethod
     def get_all_productos_sin_codigo_de_barras():
@@ -142,7 +146,7 @@ class Productos(Base):
 
     @staticmethod
     def get_all_precios_dbf():
-        valor_calculado = ((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
         subquery = db.session.query(
             Productos.codigo_de_barras,
             func.max(valor_calculado).label('max_precio'))\
@@ -164,7 +168,7 @@ class Productos(Base):
 
     @staticmethod
     def get_by_codigo_de_barras_caro(codigo_barras):
-        valor_calculado = ((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
         query_str = db.session.query(Productos.id, Productos.importe)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
             .filter(valor_calculado == db.session.query(func.max(valor_calculado))
@@ -174,7 +178,7 @@ class Productos(Base):
 
     @staticmethod
     def get_by_codigo_de_barras(codigo_barras):
-        valor_calculado = ((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
@@ -183,7 +187,7 @@ class Productos(Base):
 
     @staticmethod
     def get_by_id_completo(id_producto):
-        valor_calculado = ((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.id == id_producto)\
@@ -196,7 +200,7 @@ class Productos(Base):
 
     @staticmethod
     def get_like_descripcion(descripcion_):
-        valor_calculado = ((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.descripcion.contains(descripcion_))\
@@ -206,7 +210,7 @@ class Productos(Base):
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
         descripcion_ = descripcion_.replace(' ', '%')
-        valor_calculado = ((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
         return db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.descripcion.contains(descripcion_))\
