@@ -32,7 +32,7 @@ def consulta_productos():
     per_page = current_app.config['ITEMS_PER_PAGE']
 
     #porceso la actualizacion de vencimientos, si ya lo hice en el día lo descarto
-    tarea_vencimiento = TareasSistema.get_by_fecha(datetime.strptime(str(date.today()), '%Y-%m-%d'), 'Actualizcion de presupuestos')
+    tarea_vencimiento = TareasSistema.get_by_fecha(date.today(), 'Actualizcion de presupuestos')
     if not tarea_vencimiento:
         job = current_app.task_queue.enqueue('app.tareas.actualiza_estado_presupuestos')
         task = TareasSistema(id_rq=job.get_id(), name="Actualizcion de presupuestos", 

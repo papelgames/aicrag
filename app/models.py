@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from zoneinfo import ZoneInfo
 
 from decimal import Decimal
 from app import db
@@ -550,7 +551,20 @@ class Egresos(Base):
 
     @staticmethod
     def get_by_fecha(fecha, page=1, per_page=20):
-        return Egresos.query.filter(cast(Egresos.created, Date) == fecha)\
+
+        tz = ZoneInfo("America/Argentina/Buenos_Aires")
+
+        # Inicio del día en Argentina
+        inicio_local = datetime.datetime(fecha.year, fecha.month, fecha.day, tzinfo=tz)
+        fin_local = inicio_local + datetime.timedelta(days=1)
+
+        # Convertir a UTC (clave)
+        inicio_utc = inicio_local.astimezone(ZoneInfo("UTC"))
+        fin_utc = fin_local.astimezone(ZoneInfo("UTC"))
+
+        return Egresos.query\
+            .filter(Egresos.created >= inicio_utc)\
+            .filter(Egresos.created < fin_utc)\
             .paginate(page=page, per_page=per_page, error_out=False)
 
 
@@ -598,9 +612,21 @@ class TareasSistema(Base):
     
     @staticmethod
     def get_by_fecha(fecha, tarea):
-        return TareasSistema.query.filter(cast(TareasSistema.created, Date) == fecha)\
-            .filter(TareasSistema.name == tarea).first()
-    
+        tz = ZoneInfo("America/Argentina/Buenos_Aires")
+
+        inicio_local = datetime.datetime(fecha.year, fecha.month, fecha.day, tzinfo=tz)
+        fin_local = inicio_local + datetime.timedelta(days=1)
+
+        # Convertir a UTC (CLAVE)
+        inicio_utc = inicio_local.astimezone(ZoneInfo("UTC"))
+        fin_utc = fin_local.astimezone(ZoneInfo("UTC"))
+
+        return TareasSistema.query\
+            .filter(TareasSistema.created >= inicio_utc)\
+            .filter(TareasSistema.created < fin_utc)\
+            .filter(TareasSistema.name == tarea)\
+            .first()
+        
     @staticmethod
     def get_by_id_rq(id_rq):
         return TareasSistema.query.filter_by(id_rq=id_rq).first()
