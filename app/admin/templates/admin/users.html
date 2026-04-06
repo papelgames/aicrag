@@ -26,7 +26,13 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.persona.descripcion_nombre }}</td>
                         <td>{{ user.persona.correo_electronico }}</td>
-                        <td>{{ user.is_admin}}</td>
+                        <td>
+                            {% if user.is_admin %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+						</td>
                         <td>
                             <a href="{{ url_for('admin.update_user_form', user_id=user.id) }}">
                                 <button class="btn btn-sm btn-primary">Modificar</button>

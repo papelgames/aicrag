@@ -122,7 +122,6 @@ def modificacion_producto():
     if id_producto == "":
         return redirect(url_for("abms.busqueda_productos"))
     producto = Productos.get_by_id(id_producto)
-    print(producto.es_servicio)
     form=ProductosForm(obj=producto)
     form.id_proveedor.choices = proveedores_select()
 

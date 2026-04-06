@@ -49,8 +49,20 @@
 						<td> {{ estado.clave }}</td>
 						<td> {{ estado.descripcion }}</td>
 						<td> {{ estado.tabla }}</td>
-						<td> {{ estado.inicial }}</td>
-						<td> {{ estado.final }}</td>
+						 <td>
+						{% if estado.inicial %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                            <i class="bi bi-x-circle-fill text-danger"></i>
+                        {% endif %}
+						</td>
+						<td>
+						{% if estado.final %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                            <i class="bi bi-x-circle-fill text-danger"></i>
+                        {% endif %}
+						</td>
 						<td>
 							<div class="dropdown">
 								<button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">

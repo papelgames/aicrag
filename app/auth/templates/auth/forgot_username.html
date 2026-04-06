@@ -2,7 +2,7 @@
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-    aicrag | Blanqueo de contraseña
+    aicrag | Blanqueo de nombre de usuario
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,14 @@
     <div class="mb-3">                  
         {{ render_input(form.correo_electronico,'', id= "correo_electronico" , class="form-control", placeholder="Correo electronico" ) }}
     </div>
-    <button type="submit" class="btn btn-primary w-100" >Buscar</button>
-    <div> <a href="{{ url_for('auth.forgot_password') }}">¿Olvidó su contraseña?</a></div>
+    <button type="submit" class="btn btn-primary w-100" >Buscar usuario</button>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <a href="{{ url_for('auth.forgot_password') }}">¿Olvidó su contraseña?</a>
+        </div>
+        <div class="col-md-6">
+            <a href="{{ url_for('auth.login') }}">Login</a>
+        </div>
+    </div>
 </form>
 {% endblock %}

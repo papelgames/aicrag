@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 
 from app.auth.decorators import admin_required, not_initial_status, nocache
 
-from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas #, Proveedores
+from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas, TareasSistema #, Proveedores
 from app.common.controles import get_tarea_corriendo
 
 from . import consultas_bp 
@@ -30,6 +30,16 @@ def consulta_productos():
     lista_de_productos = []
     page = int(request.args.get('page', 1))
     per_page = current_app.config['ITEMS_PER_PAGE']
+
+    #porceso la actualizacion de vencimientos, si ya lo hice en el día lo descarto
+    tarea_vencimiento = TareasSistema.get_by_fecha(datetime.strptime(str(date.today()), '%Y-%m-%d'), 'Actualizcion de presupuestos')
+    if not tarea_vencimiento:
+        job = current_app.task_queue.enqueue('app.tareas.actualiza_estado_presupuestos')
+        task = TareasSistema(id_rq=job.get_id(), name="Actualizcion de presupuestos", 
+                            description=f"Actualizacion del vencimiento de los presupuestros", 
+                            usuario_alta=current_user.username)
+        task.save()
+        
     if form.validate_on_submit():
         buscar = form.buscar.data
         return redirect(url_for("consultas.consulta_productos", criterio = buscar))
@@ -38,7 +48,6 @@ def consulta_productos():
         producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
         if producto_caro: 
             lista_de_productos = Productos.get_by_id_completo(producto_caro.id)
-            # print(lista_de_productos)
     elif criterio == "":
         pass
     else:
@@ -63,8 +72,7 @@ def consulta_presupuestos():
     form = BusquedaForm()
 
     estado_pendiente = Estados.get_first_by_clave_tabla(1,"estado_presupuesto")
-
-    cabecera = CabecerasPresupuestos.get_all_estado(estado_pendiente.id, page, per_page)
+    cabecera = CabecerasPresupuestos.get_all_estado_paginated(estado_pendiente.id, page, per_page)
     
     if len(cabecera.items) == 0:
             cabecera =[]

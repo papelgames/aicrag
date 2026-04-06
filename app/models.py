@@ -6,6 +6,7 @@ from sqlalchemy import func, or_, cast, Date, String, Integer, Boolean, Float, D
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 from decimal import Decimal
 from app import db
@@ -146,7 +147,7 @@ class Productos(Base):
 
     @staticmethod
     def get_all_precios_dbf():
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
         subquery = db.session.query(
             Productos.codigo_de_barras,
             func.max(valor_calculado).label('max_precio'))\
@@ -168,7 +169,7 @@ class Productos(Base):
 
     @staticmethod
     def get_by_codigo_de_barras_caro(codigo_barras):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
         query_str = db.session.query(Productos.id, Productos.importe)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
             .filter(valor_calculado == db.session.query(func.max(valor_calculado))
@@ -178,7 +179,7 @@ class Productos(Base):
 
     @staticmethod
     def get_by_codigo_de_barras(codigo_barras):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
@@ -187,7 +188,7 @@ class Productos(Base):
 
     @staticmethod
     def get_by_id_completo(id_producto):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.id == id_producto)\
@@ -200,20 +201,20 @@ class Productos(Base):
 
     @staticmethod
     def get_like_descripcion(descripcion_):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
-            .filter(Productos.descripcion.contains(descripcion_))\
+            .filter(func.lower(Productos.descripcion).contains(descripcion_.lower()))\
             .all()
         return query_str
 
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
         descripcion_ = descripcion_.replace(' ', '%')
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/100)*100
+        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
         return db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
-            .filter(Productos.descripcion.contains(descripcion_))\
+            .filter(func.lower(Productos.descripcion).contains(descripcion_.lower()))\
             .paginate(page=page, per_page=per_page, error_out=False)
 
     @staticmethod
@@ -275,7 +276,7 @@ class CabecerasPresupuestos(Base):
 
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
-        return CabecerasPresupuestos.query.filter(CabecerasPresupuestos.nombre_cliente.contains(descripcion_))\
+        return CabecerasPresupuestos.query.filter(func.lower(CabecerasPresupuestos.nombre_cliente).contains(descripcion_.lower()))\
             .order_by(CabecerasPresupuestos.fecha_vencimiento.desc())\
             .paginate(page=page, per_page=per_page, error_out=False)
 
@@ -290,9 +291,14 @@ class CabecerasPresupuestos(Base):
         return db.session.query(CabecerasPresupuestos).order_by(CabecerasPresupuestos.fecha_vencimiento.desc()).all()
 
     @staticmethod
-    def get_all_estado(id_estado, page=1, per_page=20):
+    def get_all_estado_paginated(id_estado, page=1, per_page=20):
         return CabecerasPresupuestos.query.filter_by(id_estado=id_estado)\
             .paginate(page=page, per_page=per_page, error_out=False)
+    
+    @staticmethod
+    def get_all_estado(id_estado):
+        return CabecerasPresupuestos.query.filter_by(id_estado=id_estado).all()
+
 
 
 class ProductosPresupuestos(Base):
@@ -403,9 +409,9 @@ class Personas(Base):
 
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
-        descripcion_ = f"%{descripcion_}%"
+        descripcion_ = descripcion_.replace(' ', '%')
         return db.session.query(Personas)\
-            .filter(Personas.descripcion_nombre.contains(descripcion_))\
+            .filter(func.lower(Personas.descripcion_nombre).contains(descripcion_.lower()))\
             .paginate(page=page, per_page=per_page, error_out=False)
 
 
@@ -589,7 +595,11 @@ class TareasSistema(Base):
     def get_all_paginated(page=1, per_page=20):
         return TareasSistema.query.order_by(TareasSistema.created.desc())\
             .paginate(page=page, per_page=per_page, error_out=False)
-   
+    
+    @staticmethod
+    def get_by_fecha(fecha, tarea):
+        return TareasSistema.query.filter(cast(TareasSistema.created, Date) == fecha)\
+            .filter(TareasSistema.name == tarea).first()
     
     @staticmethod
     def get_by_id_rq(id_rq):

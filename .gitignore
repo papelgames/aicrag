@@ -137,3 +137,4 @@ database.db
 cosas_viejas.txt
 CHANGELOG.md
 .env
+/migrations_mysql
