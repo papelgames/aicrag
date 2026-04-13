@@ -53,7 +53,7 @@ class ProveedoresConsultaForm(FlaskForm):
     id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None)
 
 class ProductosForm(FlaskForm):
-    codigo_de_barras = IntegerField('Código de barras')
+    codigo_de_barras = StringField('Código de barras')
     id_proveedor = SelectField('Código del proveedor', choices =[], coerce = str, default = None, validators=[DataRequired('Debe seleccionar un proveedor')])
     id_lista_proveedor = StringField('Id del producto del proveedor')
     descripcion = StringField('Descripcion del producto',validators=[DataRequired('Complete la descripcion del producto' )])
