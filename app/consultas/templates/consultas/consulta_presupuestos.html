@@ -51,7 +51,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = presupuesto.id) }}">Modificar datos del cliente</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = presupuesto.id) }}">Modificar productos del presupuesto</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('gestiones.alta_venta', id_venta = presupuesto.id) }}">Modificar productos del presupuesto</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = presupuesto.id) }}">Anular presupuesto</li>
                         </ul>
                     </div>
@@ -120,7 +120,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto = cabecera.id) }}">Consultar presupuesto</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">Modificar datos del cliente</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id) }}">Modificar productos del presupuesto</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('gestiones.alta_venta', id_venta = cabecera.id) }}">Modificar productos del presupuesto</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = cabecera.id) }}">Anular presupuesto</li>
                         </ul>
                     </div>

@@ -2,114 +2,295 @@
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-	aicrag | Diario
+    aicrag | Diario
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-10 d-flex justify-content-between align-items-center">
-            <h3 class="m-0">Diario de {{ dia.strftime('%d-%m-%Y') }}</h3>
-            <form action="" method="post" class="d-flex align-items-center gap-2" enctype="multipart/form-data" novalidate>
+<div class="container-fluid mt-3 px-4">
+
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-calendar3 me-2 text-primary"></i>
+                Diario del {{ dia.strftime('%d-%m-%Y') }}
+            </h3>
+        </div>
+        <div class="col-md-6">
+            <form action="" method="post" class="d-flex justify-content-md-end align-items-center gap-2" enctype="multipart/form-data" novalidate>
                 {{ form.hidden_tag() }}
-                {{ render_input(form.dia,'', id= "dia", class="form-control" ) }}
-                <button type="submit" class="btn btn-primary">Ir</button>
+                {{ render_input(form.dia, '', id="dia", class="form-control") }}
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> Ir
+                </button>
             </form>
         </div>
     </div>
-</div>
 
-<div class="container-fluid mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            {% if egresos.items %}
-                <table class="table table-striped table-hover mb-4">
-                    <thead>
-                        <tr>
-                            <th>DESCRIPCION</th>
-                            <th>IMPORTE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for egreso in egresos %}
-                            <tr>
-                                <td>{{ egreso.descripcion }}</td>
-                                <td>{{ egreso.importe }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center">
-                        {%- for page in egresos.iter_pages() %}
-                            {% if page %}
-                                {% if page != egresos.page %}
-                                    <li class="page-item">
-                                        {% if page_v %}
-                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=page, page_v=page_v) }}">{{ page }}</a>
-                                        {% else %}
-                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=page) }}">{{ page }}</a>
-                                        {% endif %}
-                                    </li>
-                                {% else %}
-                                    <li class="page-item active">
-                                        <span class="page-link">
-                                            {{ page }}
-                                        </span>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                        {%- endfor %}
-                    </ul>
-                </nav>
-            {% endif %}
+    <!-- Fila 1: Totales -->
+    <div class="row mb-3 g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                        <i class="bi bi-arrow-down-circle-fill text-danger fs-4"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Total Egresos</p>
+                        <h4 class="fw-bold mb-0">$ {{ total_egresos if total_egresos else '0.00' }}</h4>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="col-md-5">
-            {% if ventas.items %}
-                <table class="table table-striped table-hover mb-4">
-                    <thead>
-                        <tr>
-                            <th>DESCRIPCION</th>
-                            <th>IMPORTE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for venta in ventas %}
-                            <tr>
-                                <td>{{ venta.nombre_cliente }}</td>
-                                <td>{{ venta.importe_total }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center">
-                        {%- for page in ventas.iter_pages() %}
-                            {% if page %}
-                                {% if page != ventas.page %}
-                                    <li class="page-item">
-                                        {% if page_e %}
-                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=page, page_e=page_e) }}">{{ page }}</a>
-                                        {% else %}
-                                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=page) }}">{{ page }}</a>
-                                        {% endif %}
-                                    </li>
-                                {% else %}
-                                    <li class="page-item active">
-                                        <span class="page-link">
-                                            {{ page }}
-                                        </span>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                        {%- endfor %}
-                    </ul>
-                </nav>
-            {% endif %}
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                        <i class="bi bi-arrow-up-circle-fill text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Total Ventas</p>
+                        <h4 class="fw-bold mb-0">$ {{ total_ventas if total_ventas else '0.00' }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd !important;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                        <i class="bi bi-graph-up-arrow text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Resultado</p>
+                        {% set resultado = (total_ventas if total_ventas else 0) - (total_egresos if total_egresos else 0) %}
+                        <h4 class="fw-bold mb-0 {{ 'text-success' if resultado >= 0 else 'text-danger' }}">
+                            $ {{ resultado }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Fila 2: Desgloses -->
+    <div class="row mb-4 g-3">
+
+        <!-- Desglose Egresos -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+                <div class="card-body">
+                    <h6 class="fw-semibold text-danger mb-2">
+                        <i class="bi bi-arrow-down-circle me-1"></i> Desglose Egresos
+                    </h6>
+                    {% if total_egresos_abiertos %}
+                        <ul class="list-unstyled mb-0">
+                            {% for tipo_modalidad, importe in total_egresos_abiertos.items() %}
+                                <li class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted small">{{ modalidades[tipo_modalidad] if tipo_modalidad in modalidades else tipo_modalidad }}</span>
+                                    <span class="fw-semibold small text-danger">$ {{ importe }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-0">Sin egresos para este día</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Desglose Ventas -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
+                <div class="card-body">
+                    <h6 class="fw-semibold text-success mb-2">
+                        <i class="bi bi-arrow-up-circle me-1"></i> Desglose Ventas
+                    </h6>
+                    {% if total_ventas_abiertos %}
+                        <ul class="list-unstyled mb-0">
+                            {% for tipo_modalidad, importe in total_ventas_abiertos.items() %}
+                                <li class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted small">{{ modalidades[tipo_modalidad] if tipo_modalidad in modalidades else tipo_modalidad }}</span>
+                                    <span class="fw-semibold small text-success">$ {{ importe }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-0">Sin ventas para este día</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Desglose Resultado -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd !important;">
+                <div class="card-body">
+                    <h6 class="fw-semibold text-primary mb-2">
+                        <i class="bi bi-graph-up-arrow me-1"></i> Desglose Resultado
+                    </h6>
+
+                    {% if total_resultado_abiertos %}
+                        <ul class="list-unstyled mb-0">
+                            {% for tipo_modalidad, importe in total_resultado_abiertos.items() %}
+                                <li class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted small">{{ modalidades[tipo_modalidad] if tipo_modalidad in modalidades else tipo_modalidad }}</span>
+                                    <span class="fw-semibold small text-success">$ {{ importe }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-0">Sin ventas para este día</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-0" id="diarioTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold" id="egresos-tab" data-bs-toggle="tab" 
+                    data-bs-target="#egresos" type="button" role="tab">
+                <i class="bi bi-arrow-down-circle me-1 text-danger"></i>
+                Egresos
+                {% if egresos.items %}
+                    <span class="badge bg-danger ms-1">{{ egresos.total }}</span>
+                {% endif %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="ventas-tab" data-bs-toggle="tab" 
+                    data-bs-target="#ventas" type="button" role="tab">
+                <i class="bi bi-arrow-up-circle me-1 text-success"></i>
+                Ventas
+                {% if ventas.items %}
+                    <span class="badge bg-success ms-1">{{ ventas.total }}</span>
+                {% endif %}
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content border border-top-0 rounded-bottom shadow-sm bg-white p-3 mb-4" id="diarioTabContent">
+
+        <!-- Egresos -->
+        <div class="tab-pane fade show active" id="egresos" role="tabpanel">
+            {% if egresos.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-3">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Modalidad de pago</th>
+                                <th class="text-end">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for egreso in egresos %}
+                                <tr>
+                                    <td>{{ egreso.descripcion }}</td>
+                                    <td>{{ modalidades[egreso.modalidad_pago] if egreso.modalidad_pago in modalidades else egreso.modalidad_pago }}</td>
+                                    <td class="text-end fw-semibold text-danger">$ {{ egreso.importe }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if egresos.pages > 1 %}
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item {{ 'disabled' if not egresos.has_prev }}">
+                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=egresos.prev_num, page_v=page_v) if egresos.has_prev else '#' }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% for page in egresos.iter_pages() %}
+                            {% if page %}
+                                <li class="page-item {{ 'active' if page == egresos.page }}">
+                                    <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=page, page_v=page_v) }}">{{ page }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {{ 'disabled' if not egresos.has_next }}">
+                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_e=egresos.next_num, page_v=page_v) if egresos.has_next else '#' }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">Sin egresos para este día</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Ventas -->
+        <div class="tab-pane fade" id="ventas" role="tabpanel">
+            {% if ventas.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-3">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Modalidad de pago</th>
+                                <th class="text-end">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in ventas %}
+                                <tr>
+                                    <td>{{ venta.nombre_cliente }}</td>
+                                    <td>{{ modalidades[venta.modalidad_pago] if venta.modalidad_pago in modalidades else venta.modalidad_pago }}</td>
+                                    <td class="text-end fw-semibold text-success">$ {{ venta.importe_total }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if ventas.pages > 1 %}
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item {{ 'disabled' if not ventas.has_prev }}">
+                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=ventas.prev_num, page_e=page_e) if ventas.has_prev else '#' }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% for page in ventas.iter_pages() %}
+                            {% if page %}
+                                <li class="page-item {{ 'active' if page == ventas.page }}">
+                                    <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=page, page_e=page_e) }}">{{ page }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {{ 'disabled' if not ventas.has_next }}">
+                            <a class="page-link" href="{{ url_for('contable.diario', dia=dia.strftime('%Y-%m-%d'), page_v=ventas.next_num, page_e=page_e) if ventas.has_next else '#' }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-2">Sin ventas para este día</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
 </div>
-
-
 {% endblock %}

@@ -148,7 +148,14 @@ class Productos(Base):
 
     @staticmethod
     def get_all_precios_dbf():
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
+        redondeo = int(os.getenv('REDONDEO'))
+        valor_calculado1 = func.round(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion) / redondeo) * redondeo
+        valor_calculado2 =(((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion
+        valor_calculado = func.if_(
+        valor_calculado1 == 0,
+        valor_calculado2,
+        valor_calculado1
+        )
         subquery = db.session.query(
             Productos.codigo_de_barras,
             func.max(valor_calculado).label('max_precio'))\
@@ -170,7 +177,14 @@ class Productos(Base):
 
     @staticmethod
     def get_by_codigo_de_barras_caro(codigo_barras):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
+        redondeo = int(os.getenv('REDONDEO'))
+        valor_calculado1 = func.round(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion) / redondeo) * redondeo
+        valor_calculado2 =(((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion
+        valor_calculado = func.if_(
+        valor_calculado1 == 0,
+        valor_calculado2,
+        valor_calculado1
+        )
         query_str = db.session.query(Productos.id, Productos.importe)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
             .filter(valor_calculado == db.session.query(func.max(valor_calculado))
@@ -180,7 +194,14 @@ class Productos(Base):
 
     @staticmethod
     def get_by_codigo_de_barras(codigo_barras):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
+        redondeo = int(os.getenv('REDONDEO'))
+        valor_calculado1 = func.round(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion) / redondeo) * redondeo
+        valor_calculado2 =(((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion
+        valor_calculado = func.if_(
+        valor_calculado1 == 0,
+        valor_calculado2,
+        valor_calculado1
+        )
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.codigo_de_barras == codigo_barras)\
@@ -189,7 +210,14 @@ class Productos(Base):
 
     @staticmethod
     def get_by_id_completo(id_producto):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
+        redondeo = int(os.getenv('REDONDEO'))
+        valor_calculado1 = func.round(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion) / redondeo) * redondeo
+        valor_calculado2 =(((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion
+        valor_calculado = func.if_(
+        valor_calculado1 == 0,
+        valor_calculado2,
+        valor_calculado1
+        )
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(Productos.id == id_producto)\
@@ -202,7 +230,14 @@ class Productos(Base):
 
     @staticmethod
     def get_like_descripcion(descripcion_):
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
+        redondeo = int(os.getenv('REDONDEO'))
+        valor_calculado1 = func.round(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion) / redondeo) * redondeo
+        valor_calculado2 =(((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion
+        valor_calculado = func.if_(
+        valor_calculado1 == 0,
+        valor_calculado2,
+        valor_calculado1
+        )
         query_str = db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(func.lower(Productos.descripcion).contains(descripcion_.lower()))\
@@ -212,7 +247,14 @@ class Productos(Base):
     @staticmethod
     def get_like_descripcion_all_paginated(descripcion_, page=1, per_page=20):
         descripcion_ = descripcion_.replace(' ', '%')
-        valor_calculado = func.ceil(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion)/os.getenv('REDONDEO'))*os.getenv('REDONDEO')
+        redondeo = int(os.getenv('REDONDEO'))
+        valor_calculado1 = func.round(((((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion) / redondeo) * redondeo
+        valor_calculado2 =(((Productos.importe * Productos.utilidad) / 100) + Productos.importe) / Productos.cantidad_presentacion
+        valor_calculado = func.if_(
+        valor_calculado1 == 0,
+        valor_calculado2,
+        valor_calculado1
+        )
         return db.session.query(Productos, Proveedores, valor_calculado.label('importe_calculado'))\
             .filter(Productos.id_proveedor == Proveedores.id)\
             .filter(func.lower(Productos.descripcion).contains(descripcion_.lower()))\
@@ -259,6 +301,7 @@ class CabecerasPresupuestos(Base):
     importe_total: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     id_estado: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('estados.id'))
     id_tp_ventas: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('tiposventas.id'))
+    modalidad_cobro: Mapped[Optional[str]] = mapped_column(String(20))
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
     usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
     producto_presupuesto: Mapped[List["ProductosPresupuestos"]] = relationship('ProductosPresupuestos', backref='productos_presupuestos', uselist=True)
@@ -541,6 +584,7 @@ class Egresos(Base):
     descripcion: Mapped[str] = mapped_column(String(100), nullable=False)
     importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     nota: Mapped[Optional[str]] = mapped_column(String(256))
+    modalidad_pago: Mapped[Optional[str]] = mapped_column(String(20))
     usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
     usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
 
@@ -567,6 +611,23 @@ class Egresos(Base):
             .filter(Egresos.created < fin_utc)\
             .paginate(page=page, per_page=per_page, error_out=False)
 
+    @staticmethod
+    def get_all_by_fecha(fecha):
+
+        tz = ZoneInfo("America/Argentina/Buenos_Aires")
+
+        # Inicio del día en Argentina
+        inicio_local = datetime.datetime(fecha.year, fecha.month, fecha.day, tzinfo=tz)
+        fin_local = inicio_local + datetime.timedelta(days=1)
+
+        # Convertir a UTC (clave)
+        inicio_utc = inicio_local.astimezone(ZoneInfo("UTC"))
+        fin_utc = fin_local.astimezone(ZoneInfo("UTC"))
+
+        return Egresos.query\
+            .filter(Egresos.created >= inicio_utc)\
+            .filter(Egresos.created < fin_utc)\
+            .all()
 
 class TareasSistema(Base):
     __tablename__ = "tareassistema"

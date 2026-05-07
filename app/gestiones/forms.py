@@ -24,3 +24,6 @@ class ProductosPresupuestoForm(FlaskForm):
     importe = FloatField()
     condicion = StringField()
     registro = StringField()
+
+class CobroForm(FlaskForm):
+    modalidad_cobro =SelectField('Modalidad de pago', choices =[( '','Seleccionar permiso'),('eft','Efectivo'),('qr','QR'),('tarj','Tarjeta'),('transf','Transferencia bancaria')], coerce = str, default = None)

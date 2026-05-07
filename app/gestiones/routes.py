@@ -50,19 +50,20 @@ def alta_presupuesto():
         estado_iniciado.save()
         tipo_venta.save()
 
-        return redirect(url_for('gestiones.modificacion_productos_presupuesto', id_presupuesto = cabecera.id))
+        return redirect(url_for('gestiones.alta_venta', id_venta=cabecera.id))
     if get_tarea_corriendo():
         flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
     return render_template("gestiones/alta_datos_cliente.html", form = form, vencimiento_estimado = vencimiento_estimado)
 
 
-@gestiones_bp.route("/gestiones/altaventa/", methods = ['GET', 'POST'])
+@gestiones_bp.route("/gestiones/altaventa/",defaults={"id_venta": 0},methods=['GET', 'POST'])
+@gestiones_bp.route("/gestiones/altaventa/<int:id_venta>", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
 @nocache
-def alta_venta():
-    id_venta = request.args.get('id_venta','')
-    criterio = request.args.get('criterio','')
+def alta_venta(id_venta):
+    
+    buscar = request.args.get('buscar','')
 
     form = ProductosPresupuestoForm()
     vencimiento_estimado = datetime.now()
@@ -74,70 +75,26 @@ def alta_venta():
     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
-    if criterio.isdigit() == True:
-        producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
+    if buscar.isdigit() == True:
+        producto_caro = Productos.get_by_codigo_de_barras_caro(buscar)
         if producto_caro: 
             lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
         else:
             lista_productos_seleccion = []
-    elif criterio == "":
+    elif buscar == "":
         lista_productos_seleccion = []
     else:
-        lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(criterio, page, per_page)
+        lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(buscar, page, per_page)
         if len(lista_productos_seleccion.items) == 0:
             lista_productos_seleccion =[]
+    
     if not id_venta: #sino tiene id_venta le creo uno diccionario con los valores basicos del objeto cabecera para pasarselo al template
         cabecera = {'nombre_cliente': 'Consumidor final', 'fecha_vencimiento': vencimiento_estimado, 'created': vencimiento_estimado, 'importe_total' : 0.00}
     else:
         cabecera = CabecerasPresupuestos.get_by_id(id_venta)   
-        if cabecera.cabeceras_presupuestos.clave == 1:
-            return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_venta))
 
     if form.validate_on_submit(): 
-        if not id_venta and form.condicion.data == "agregarproducto": #si no tiene cabecera se la creo.
-            estado_iniciado = Estados.get_first_by_clave_tabla(1,'estado_presupuesto') #inicia como activo 
-            tipo_venta = TiposVentas.get_first_by_clave_tabla(2) #2 es venta
-            #creo el objeto cabecera nueva para insertar en la tabla cabeceraspresupuestos
-            cabecera_nueva_venta = CabecerasPresupuestos(fecha_vencimiento = cabecera['fecha_vencimiento'],
-                                                nombre_cliente = cabecera['nombre_cliente'],
-                                                importe_total = 0.00,
-                                                id_tp_ventas = 1,
-                                                usuario_alta = current_user.username,
-                                                usuario_modificacion = current_user.username
-                                                )           
-            #creo el objeto nuevo producto para insertar en la tabla productospresupuestos
-            nuevo_producto = ProductosPresupuestos(id_producto = form.id.data, 
-                                          cantidad = form.cantidad.data,
-                                          descripcion = form.descripcion.data, 
-                                          importe = form.importe.data,
-                                          usuario_alta = current_user.username,
-                                          usuario_modificacion = current_user.username)
-            cabecera_nueva_venta.producto_presupuesto.append(nuevo_producto)
-            estado_iniciado.cabecera_presupuesto.append(cabecera_nueva_venta)
-            tipo_venta.cabecera_presupuesto.append(cabecera_nueva_venta)
-            #sumo el importe de todos los productos y actualizo el valor en la tabla cabeceraspresupuestos
-            total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(cabecera_nueva_venta.id)
-            cabecera_nueva_venta.importe_total = total_presupuesto[1]
-            estado_iniciado.save()
-            tipo_venta.save()
-            return redirect(url_for('gestiones.alta_venta', id_venta = cabecera_nueva_venta.id))
-        elif form.condicion.data == "agregarproducto": #agrego productos a una cabecera ya existente con el objeto nuevo producto
-            nuevo_producto = ProductosPresupuestos(id_producto = form.id.data, 
-                                          cantidad = form.cantidad.data,
-                                          descripcion = form.descripcion.data, 
-                                          importe = form.importe.data,
-                                          usuario_alta = current_user.username,
-                                          usuario_modificacion = current_user.username) 
-            cabecera.producto_presupuesto.append(nuevo_producto)
-            total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_venta)
-            cabecera.importe_total = total_presupuesto[1]
-            cabecera.save()    
-            return redirect(url_for('gestiones.alta_venta', id_venta = cabecera.id))
-        elif form.condicion.data == "buscarproductos":
-            buscar = form.buscar.data
-            if buscar:
-                return redirect(url_for("gestiones.alta_venta", id_venta = id_venta, criterio =  buscar)) 
-        elif form.condicion.data == "modificarproducto":
+        if request.method == "POST":
             productos_presupuesto = ProductosPresupuestos.get_by_id_producto(form.id.data)
             productos_presupuesto.cantidad = form.cantidad.data
             productos_presupuesto.importe = form.importe.data
@@ -146,17 +103,70 @@ def alta_venta():
             cabecera.importe_total = total_presupuesto[1]
             cabecera.producto_presupuesto.append(productos_presupuesto)
             cabecera.save()
-             
-            flash("Se han actualizado los datos correctamente", "alert-success")            
-            return redirect(url_for("gestiones.alta_venta", id_venta = id_venta))
-            
+        
+        flash("Se han actualizado los datos correctamente", "alert-success")            
+        return redirect(url_for("gestiones.alta_venta", id_venta = id_venta))
+
     if get_tarea_corriendo():
         flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
     return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, 
                            cabecera = cabecera, 
                            vencimiento_estimado = vencimiento_estimado, 
                            lista_productos_seleccion = lista_productos_seleccion, 
-                           fecha_tope= fecha_tope)
+                           fecha_tope= fecha_tope, 
+                           id_venta=id_venta,
+                           buscar=buscar)
+
+@gestiones_bp.route("/gestiones/agregarproducto/", methods = ['GET', 'POST'])
+@login_required
+@not_initial_status
+@nocache
+def agregar_producto():
+   
+    id_venta = request.args.get('id_venta','')
+
+    id_producto = request.args.get('id_producto','')
+    descripcion = request.args.get('descripcion','')
+    importe = request.args.get('importe','')
+    vencimiento_estimado = datetime.now()
+    cabecera = CabecerasPresupuestos.get_by_id(id_venta)   
+       
+    #creo el objeto nuevo producto para insertar en la tabla productospresupuestos
+    nuevo_producto = ProductosPresupuestos(id_producto = id_producto, 
+                                    cantidad = 1,
+                                    descripcion = descripcion, 
+                                    importe = importe,
+                                    usuario_alta = current_user.username,
+                                    usuario_modificacion = current_user.username)
+    if not cabecera: #si no tiene cabecera se la creo.
+        cabecera = {'nombre_cliente': 'Consumidor final', 'fecha_vencimiento': vencimiento_estimado, 'created': vencimiento_estimado, 'importe_total' : 0.00}
+        estado_iniciado = Estados.get_first_by_clave_tabla(1,'estado_presupuesto') #inicia como activo 
+        tipo_venta = TiposVentas.get_first_by_clave_tabla(2) #2 es venta
+        #creo el objeto cabecera nueva para insertar en la tabla cabeceraspresupuestos
+        cabecera_nueva_venta = CabecerasPresupuestos(fecha_vencimiento = cabecera['fecha_vencimiento'],
+                                            nombre_cliente = cabecera['nombre_cliente'],
+                                            importe_total = 0.00,
+                                            id_tp_ventas = 1,
+                                            usuario_alta = current_user.username,
+                                            usuario_modificacion = current_user.username
+                                            )           
+        
+        cabecera_nueva_venta.producto_presupuesto.append(nuevo_producto)
+        estado_iniciado.cabecera_presupuesto.append(cabecera_nueva_venta)
+        tipo_venta.cabecera_presupuesto.append(cabecera_nueva_venta)
+        #sumo el importe de todos los productos y actualizo el valor en la tabla cabeceraspresupuestos
+        total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(cabecera_nueva_venta.id)
+        cabecera_nueva_venta.importe_total = total_presupuesto[1]
+        estado_iniciado.save()
+        tipo_venta.save()
+        return redirect(url_for('gestiones.alta_venta', id_venta = cabecera_nueva_venta.id))
+    else: 
+        cabecera.producto_presupuesto.append(nuevo_producto)
+        total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_venta)
+        cabecera.importe_total = total_presupuesto[1]
+        cabecera.save()    
+        return redirect(url_for('gestiones.alta_venta', id_venta = cabecera.id))
+
 
 @gestiones_bp.route("/gestiones/modificaciondatoscliente/", methods = ['GET', 'POST'])
 @login_required
@@ -185,102 +195,85 @@ def modificacion_datos_cliente():
         flash("Se han actualizado los datos correctamente", "alert-success")            
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
     return render_template("gestiones/modificacion_datos_cliente.html", form = form, cabecera = cabecera)
-  
-@gestiones_bp.route("/gestiones/modificacionproductospresupuesto/", methods = ['GET', 'POST'])
-@login_required
-@not_initial_status
-@nocache
-def modificacion_productos_presupuesto():
-    id_presupuesto = request.args.get('id_presupuesto','')
-    cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
-    criterio = request.args.get('criterio','')
+
+
+# @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/",defaults={"id_venta": 0}, methods = ['GET', 'POST'])
+# @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/<int:id_venta>", methods = ['GET', 'POST'])
+# @login_required
+# @not_initial_status
+# @nocache
+# def modificacion_productos_presupuesto(id_venta):
+#     cabecera = CabecerasPresupuestos.get_by_id(id_venta)
+#     buscar = request.args.get('buscar','')
     
-    form = ProductosPresupuestoForm()
-    page = int(request.args.get('page', 1))
-    per_page = current_app.config['ITEMS_PER_PAGE']
+#     form = ProductosPresupuestoForm()
+#     page = int(request.args.get('page', 1))
+#     per_page = current_app.config['ITEMS_PER_PAGE']
      
-    cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
-    fecha_tope = datetime.now() - cantidad_dias_actualizacion
+#     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
+#     fecha_tope = datetime.now() - cantidad_dias_actualizacion
     
-    if criterio.isdigit() == True:
-        producto_caro = Productos.get_by_codigo_de_barras_caro(criterio)
-        if producto_caro: 
-            lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
-        else:
-            lista_productos_seleccion = []
-    elif criterio == "":
-        lista_productos_seleccion = []
-    else:
-        lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(criterio, page, per_page)
-        if len(lista_productos_seleccion.items) == 0:
-            lista_productos_seleccion =[]
+#     if buscar.isdigit() == True:
+#         producto_caro = Productos.get_by_codigo_de_barras_caro(buscar)
+#         if producto_caro: 
+#             lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
+#         else:
+#             lista_productos_seleccion = []
+#     elif buscar == "":
+#         lista_productos_seleccion = []
+#     else:
+#         lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(buscar, page, per_page)
+#         if len(lista_productos_seleccion.items) == 0:
+#             lista_productos_seleccion =[]
 
-    if cabecera.cabeceras_presupuestos.clave == 2:
-        return redirect(url_for("gestiones.alta_venta", id_venta=id_presupuesto ))        
+#     if cabecera.cabeceras_presupuestos.clave == 2:
+#         return redirect(url_for("gestiones.alta_venta", id_venta=id_venta ))        
     
-    if cabecera.estado_presupuestos.clave != 1 and cabecera.estado_presupuestos.clave != 4:
-        flash ("El presupuesto no se puede modificar", "alert-warning" )
-        return redirect(url_for("consultas.presupuesto", id_presupuesto=id_presupuesto))  
+#     if cabecera.estado_presupuestos.clave != 1 and cabecera.estado_presupuestos.clave != 4:
+#         flash ("El presupuesto no se puede modificar", "alert-warning" )
+#         return redirect(url_for("consultas.presupuesto", id_presupuesto=id_venta))  
     
-    if form.validate_on_submit():
-        if form.condicion.data == "modificarproducto":
-            productos_presupuesto = ProductosPresupuestos.get_by_id_producto(form.id.data)
-            productos_presupuesto.cantidad = form.cantidad.data
-            productos_presupuesto.importe = form.importe.data
-            productos_presupuesto.usuario_modificacion = current_user.username        
-            total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
-            cabecera.importe_total = total_presupuesto[1]
-            cabecera.producto_presupuesto.append(productos_presupuesto)
-            cabecera.save()
+#     if form.validate_on_submit():
+#         if request.method == "POST":
+#             productos_presupuesto = ProductosPresupuestos.get_by_id_producto(form.id.data)
+#             productos_presupuesto.cantidad = form.cantidad.data
+#             productos_presupuesto.importe = form.importe.data
+#             productos_presupuesto.usuario_modificacion = current_user.username        
+#             total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_venta)
+#             cabecera.importe_total = total_presupuesto[1]
+#             cabecera.producto_presupuesto.append(productos_presupuesto)
+#             cabecera.save()
              
-            flash("Se han actualizado los datos correctamente", "alert-success")            
-            return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))  
-        
-        elif form.condicion.data == "buscarproductos":
-            buscar = form.buscar.data
-            if buscar:
-                return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto, criterio =  buscar)) 
-               
-        elif form.condicion.data == "agregarproducto":
-            estado_pendiente = Estados.get_first_by_clave_tabla(1,"estado_presupuesto")
-            nuevo_producto = ProductosPresupuestos(id_producto = form.id.data, 
-                                          cantidad = form.cantidad.data,
-                                          descripcion = form.descripcion.data, 
-                                          importe = form.importe.data,
-                                          usuario_alta = current_user.username,
-                                          usuario_modificacion = current_user.username) 
-            cabecera.producto_presupuesto.append(nuevo_producto)
-            total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
-            cabecera.importe_total = total_presupuesto[1]
-            estado_pendiente.cabecera_presupuesto.append(cabecera) #actualizo el estado.
-            estado_pendiente.save()
-
-            flash ("Se incorporó un nuevo producto", "alert-success")
-            return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
-    if get_tarea_corriendo():
-        flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
-    return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, 
-                           cabecera = cabecera, 
-                           lista_productos_seleccion = lista_productos_seleccion, 
-                           fecha_tope = fecha_tope, 
-                           criterio = criterio)
+#             flash("Se han actualizado los datos correctamente", "alert-success")            
+#             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_venta = id_venta))  
+#     if get_tarea_corriendo():
+#         flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
+#     return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, 
+#                            cabecera=cabecera, 
+#                            lista_productos_seleccion=lista_productos_seleccion, 
+#                            fecha_tope=fecha_tope, 
+#                            buscar=buscar,
+#                            id_venta=id_venta)
 
 @gestiones_bp.route("/gestiones/eliminaprooductospresupuesto/<int:id_producto>", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
 def elimina_productos_presupuesto(id_producto):
+    print(id_producto)
     producto = ProductosPresupuestos.get_by_id_producto(id_producto)
-    id_presupuesto = producto.id_cabecera_presupuesto
-    q_producto = ProductosPresupuestos.get_q_by_id_presupuesto(id_presupuesto)
-    cabecera = CabecerasPresupuestos.get_by_id(id_presupuesto)
+    id_venta = producto.id_cabecera_presupuesto
+    print(id_venta)
+    q_producto = ProductosPresupuestos.get_q_by_id_presupuesto_q(id_venta)
+    cabecera = CabecerasPresupuestos.get_by_id(id_venta)
+    print(q_producto)
     if q_producto == 1:
         flash ("El presupuesto no puede quedar sin productos", "alert-danger") 
-        return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))
+        return redirect(url_for("gestiones.alta_venta", id_venta = id_venta))
     cabecera.producto_presupuesto.remove(producto)
-    total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_presupuesto)
+    total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_venta)
     cabecera.importe_total = total_presupuesto[1]
     cabecera.save()
-    return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_presupuesto = id_presupuesto))  
+    return redirect(url_for("gestiones.alta_venta", id_venta = id_venta))  
 
 @gestiones_bp.route("/gestiones/anulapresupuesto/", methods = ['GET', 'POST'])
 @login_required

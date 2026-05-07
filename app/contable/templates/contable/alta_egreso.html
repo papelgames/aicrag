@@ -6,25 +6,56 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-	<div class="offset-md-3 col-md-6">
-		<h1 class="display-5">Nuevo egreso</h1>
-	</div>
-	<div class="offset-md-3 col-md-6">	
-		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
-            {{ form.hidden_tag() }}
-			<div class="row mb-3">
-				<div class="col-md-6">
-					{{ render_input(form.descripcion,'', id= "descripcion", class="form-control", placeholder="Ingrese una descripción del egreso" ) }}
-				</div>
-				<div class="col-md-6">
-					{{ render_input(form.importe, id= "importe" , class="form-control", placeholder="$ 0.00"  ) }}
-				</div>
-				{{ render_input(form.nota,'', id= "nota", class="form-control", placeholder="Ingrese una aclaración si le resulta necesario" ) }}
-				<button type="submit" class="btn btn-primary" >Guardar</button>
-			</div>	
-		</form>
-	</div>
-</div>
+<div class="container-fluid mt-3 px-4">
 
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-arrow-down-circle text-danger me-2"></i>
+                Nuevo Egreso
+            </h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form action="" method="post" enctype="multipart/form-data" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ render_input(form.descripcion, '', id="descripcion", class="form-control", placeholder="Ingrese una descripción del egreso") }}
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                {{ render_input(form.importe, id="importe", class="form-control", placeholder="$ 0.00") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_input(form.modalidad_pago, id="modalidad_pago", class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ render_input(form.nota, '', id="nota", class="form-control", placeholder="Ingrese una aclaración si le resulta necesario") }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('contable.diario') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-save me-1"></i> Guardar
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
