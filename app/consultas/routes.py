@@ -85,7 +85,7 @@ def consulta_presupuestos():
     if criterio.isdigit() == True:
         cabecera = CabecerasPresupuestos.get_by_id(criterio)
     elif criterio == "":
-        pass
+        cabecera = CabecerasPresupuestos.get_all_paginated(page, per_page)
     else:
         cabecera = CabecerasPresupuestos.get_like_descripcion_all_paginated(criterio, page, per_page)
         if len(cabecera.items) == 0:
@@ -107,6 +107,9 @@ def presupuesto():
     if vencimiento_si_no == 'VENCIDO'and cabecera.id_estado == estado_pendiente.id:
         cabecera.id_estado = estado_vencido.id
         cabecera.save()
+    if cabecera.id_estado == estado_pendiente.id:
+        vencimiento_si_no = "MODIFICABLE"
+
     return render_template("consultas/presupuesto.html", cabecera = cabecera, productos = productos, vencimiento_si_no = vencimiento_si_no)
 
 @consultas_bp.route("/consultas/consultapersonas/", methods = ['GET', 'POST'])

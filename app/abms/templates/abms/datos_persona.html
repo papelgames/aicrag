@@ -2,39 +2,61 @@
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-	aicrag | Alta de personas
+    aicrag | Alta de personas
 {% endblock %}
 
 {% block content %}
-<div class="row">
-	<div class="offset-md-3 col-md-6">
-		<h1 class="display-4">Datos de persona</h1> 
-	</div>
-	<div class="offset-md-3 col-md-6">    
-		<form action="" method="post" class = "mx-auto mt-4" enctype="multipart/form-data" novalidate>	
-			{{ form.hidden_tag() }}
-			<div class="row mb-3">
-				<div class="col-md-6">
-					{{ render_input(form.descripcion_nombre,'', id= "descripcion_nombre", class="form-control", placeholder="Ingrese el nombre/razón social" ) }}
-				</div>
-				<div class="col-md-6">	
-					{{ render_input(form.correo_electronico,'', id= "correo_electronico", class="form-control", placeholder="Ingrese correo electronico del cliente" ) }}
-				</div>
-				<div class="col-md-6">	
-					{{ render_input(form.telefono,'', id= "telefono", class="form-control", placeholder = "Telefono" ) }}
-				</div>
-				<div class="col-md-6">	
-					{{ render_input(form.cuit,'', id= "cuit" , class="form-control", placeholder="CUIT" ) }}
-				</div>
-					{{ render_input(form.tipo_persona, id= "tipo_persona", class="form-control" ) }}
-				<div class="col-md-12">	
-					{{ render_input(form.nota, id= "nota", class="form-control" ) }}
-				</div>
-				<div class="col-md-12">
-					<button type="submit" class="btn btn-primary">Guardar</button>
-				</div>
-			</div>
-		</form>
+<div class="container-fluid mt-3 px-4">
+
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-person-plus me-2 text-primary"></i>
+                Datos de persona
+            </h3>
+        </div>
     </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form action="" method="post" enctype="multipart/form-data" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                {{ render_input(form.descripcion_nombre, '', id="descripcion_nombre", class="form-control", placeholder="Ingrese el nombre/razón social") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_input(form.correo_electronico, '', id="correo_electronico", class="form-control", placeholder="Ingrese correo electrónico") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_input(form.telefono, '', id="telefono", class="form-control", placeholder="Teléfono") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_input(form.cuit, '', id="cuit", class="form-control", placeholder="CUIT") }}
+                            </div>
+                            <div class="col-md-12">
+                                {{ render_input(form.tipo_persona, id="tipo_persona", class="form-control") }}
+                            </div>
+                            <div class="col-md-12">
+                                {{ render_input(form.nota, id="nota", class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Guardar
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

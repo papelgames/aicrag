@@ -6,140 +6,150 @@
 {% endblock %}
 
 {% block content %}
+<div class="container-fluid mt-3 px-4">
 
-<div class="row">
-	<div class="offset-md-3 col-md-6">
-        <h1>Consulta de presupuestos</h1>
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                Consulta de presupuestos
+            </h3>
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end gap-2 mt-2 mt-md-0">
+            <a href="{{ url_for('gestiones.alta_presupuesto') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo presupuesto
+            </a>
+        </div>
     </div>
-    <div class="offset-md-3 col-md-6">
-        <form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
-            {{ form.hidden_tag() }}
-            {{ render_input(form.buscar,'', id= "buscar" , class="form-control", placeholder="Ingrese el número de presupuesto o nombre cliente" ) }}
-            <button type="submit" class="btn btn-primary">Buscar</button>
-        </form>
+
+    <!-- Buscador -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="" method="post" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="d-flex gap-2">
+                    {{ render_input(form.buscar, '', id="buscar", class="form-control", placeholder="Ingrese el número de presupuesto o nombre de cliente") }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Tabla de resultados -->
+    {% set items = cabecera.items if cabecera.items is defined else ([cabecera] if cabecera else []) %}
+
+    {% if items %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nro.</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th class="text-end">Importe</th>
+                            <th>Estado</th>
+                            <th>Vencimiento</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for presupuesto in items %}
+                            {% set vigente = now < presupuesto.fecha_vencimiento %}
+                            <tr>
+                                <td class="fw-semibold">{{ presupuesto.id }}</td>
+                                <td class="small">{{ presupuesto.created.strftime('%d-%m-%Y') }}</td>
+                                <td>{{ presupuesto.nombre_cliente }}</td>
+                                <td class="text-end">$ {{ presupuesto.importe_total|round(2) }}</td>
+                                <td>
+                                    <span class="badge {{ 'bg-success' if vigente else 'bg-danger' }}">
+                                        {{ presupuesto.estado_presupuestos.descripcion }}
+                                    </span>
+                                </td>
+                                <td class="{{ 'text-danger fw-semibold' if not vigente }}">
+                                    {% if not vigente %}
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                    {% endif %}
+                                    {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport">
+                                            Acción
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto=presupuesto.id) }}">
+                                                    <i class="bi bi-eye me-1"></i> Consultar
+                                                </a>
+                                            </li>
+                                            {% if vigente %}
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto=presupuesto.id) }}">
+                                                        <i class="bi bi-person me-1"></i> Modificar cliente
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('gestiones.alta_venta', id_venta=presupuesto.id) }}">
+                                                        <i class="bi bi-pencil me-1"></i> Modificar productos
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto=presupuesto.id) }}">
+                                                        <i class="bi bi-trash me-1"></i> Anular
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        {% if cabecera.pages is defined and cabecera.pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                <li class="page-item {{ 'disabled' if not cabecera.has_prev }}">
+                    <a class="page-link" href="{{ url_for('consultas.consulta_presupuestos', criterio=criterio, page=cabecera.prev_num) if cabecera.has_prev else '#' }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for page in cabecera.iter_pages() %}
+                    {% if page %}
+                        <li class="page-item {{ 'active' if page == cabecera.page }}">
+                            <a class="page-link" href="{{ url_for('consultas.consulta_presupuestos', criterio=criterio, page=page) }}">{{ page }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not cabecera.has_next }}">
+                    <a class="page-link" href="{{ url_for('consultas.consulta_presupuestos', criterio=criterio, page=cabecera.next_num) if cabecera.has_next else '#' }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">No se encontraron presupuestos</p>
+        </div>
+    {% endif %}
+
 </div>
-<a  href="{{ url_for('gestiones.alta_presupuesto') }}">Nuevo Presupuesto</a> 
-{% if cabecera.items %}  
-<table class="table table-striped table-hover mb-4">
-    <thead>
-        <tr>
-            <th>NRO</th>
-            <th>FECHA</th>
-            <th>CLIENTE</th>
-            <th>IMPORTE</th>
-            <th>ESTADO</th>
-            <th>VENCIMIENTO</th>
-            <th>ACCIÓN</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for presupuesto in cabecera.items %}
-            <tr>
-                <th>{{ presupuesto.id }}</th>
-                <td> {{ presupuesto.created.strftime('%d-%m-%Y') }}</td>
-                <td> {{ presupuesto.nombre_cliente }} </td>
-                <td> {{ presupuesto.importe_total|round(2) }}</td>
-                <td> {{ presupuesto.estado_presupuestos.descripcion }}</td>
-                {% if now < presupuesto.fecha_vencimiento %}
-                <td> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                            Acción
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = presupuesto.id) }}">Modificar datos del cliente</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.alta_venta', id_venta = presupuesto.id) }}">Modificar productos del presupuesto</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = presupuesto.id) }}">Anular presupuesto</li>
-                        </ul>
-                    </div>
-                </td>
-                {% else %}
-                <td class="text-danger"> {{ presupuesto.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
-                <td >
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                            Acción
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto = presupuesto.id) }}">Consultar presupuesto</a></li>
-                        </ul>
-                    </div>
-                </td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<nav aria-label="Page navigation example">
-	<ul class="pagination justify-content-center">
-        {%- for page in cabecera.iter_pages() %}
-			{% if page %}
-				{% if page != cabecera.page %}
-					<li class="page-item"><a class="page-link" href="{{ url_for('consultas.consulta_presupuestos', criterio= criterio, page=page) }}">{{ page }}</a>
-				{% else %}
-					<li class="page-item active">
-						<span class="page-link">
-							{{ page }}
-						</span>
-					</li>
-                {% endif %}
-			{% endif %}
-		{%- endfor %}
-	</ul>
-</nav>
-{% elif cabecera %}
-<table class="table table-striped table-hover mb-4">
-    <thead>
-        <tr>
-            <th>NRO</th>
-            <th>FECHA</th>
-            <th>CLIENTE</th>
-            <th>IMPORTE</th>
-            <th>ESTADO</th>
-            <th>VENCIMIENTO</th>
-            <th>ACCIÓN</th>
-        </tr>
-    </thead>
-    <tbody>
-            <tr>
-                <th scope="row">{{ cabecera.id }}</th>
-                <td> {{ cabecera.created.strftime('%d-%m-%Y') }}</td>
-                <td> {{ cabecera.nombre_cliente }} </td>
-                <td> {{ cabecera.importe_total|round(2) }}</td>
-                <td> {{ cabecera.estado_presupuestos.descripcion }}</td>
-                {% if now < cabecera.fecha_vencimiento %}
-                <td> {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
-                <td>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                            Acción
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto = cabecera.id) }}">Consultar presupuesto</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.modificacion_datos_cliente', id_presupuesto = cabecera.id) }}">Modificar datos del cliente</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.alta_venta', id_venta = cabecera.id) }}">Modificar productos del presupuesto</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('gestiones.anula_presupuesto', id_presupuesto = cabecera.id) }}">Anular presupuesto</li>
-                        </ul>
-                    </div>
-                </td>
-                {% else %}
-                <td class="text-danger"> {{ cabecera.fecha_vencimiento.strftime('%d-%m-%Y') }}</td>
-                <td >
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                            Acción
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('consultas.presupuesto', id_presupuesto = cabecera.id) }}">Consultar presupuesto</a></li>
-                        </ul>
-                    </div>
-                </td>
-                {% endif %}
-            </tr>
-    </tbody>
-</table>
-{% endif %}
 {% endblock %}

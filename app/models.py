@@ -296,6 +296,7 @@ class CabecerasPresupuestos(Base):
     __tablename__ = "cabeceraspresupuestos"
 
     fecha_vencimiento: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    fecha_cobro: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
     nombre_cliente: Mapped[Optional[str]] = mapped_column(String(256))
     correo_electronico: Mapped[Optional[str]] = mapped_column(String(256))
     importe_total: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
@@ -325,10 +326,18 @@ class CabecerasPresupuestos(Base):
             .paginate(page=page, per_page=per_page, error_out=False)
 
     @staticmethod
-    def get_by_fecha(fecha, id_tp_ventas, page=1, per_page=20):
-        return CabecerasPresupuestos.query.filter(cast(CabecerasPresupuestos.created, Date) == fecha)\
-            .filter(CabecerasPresupuestos.id_tp_ventas == id_tp_ventas)\
+    def get_by_fecha(fecha, page=1, per_page=20):
+        return CabecerasPresupuestos.query.filter(cast(CabecerasPresupuestos.fecha_cobro, Date) == fecha)\
             .paginate(page=page, per_page=per_page, error_out=False)
+    
+    @staticmethod
+    def get_all_paginated(page=1, per_page=20):
+        return CabecerasPresupuestos.query.paginate(page=page, per_page=per_page, error_out=False)
+
+    @staticmethod
+    def get_all_by_fecha(fecha):
+        return CabecerasPresupuestos.query.filter(cast(CabecerasPresupuestos.fecha_cobro, Date) == fecha)\
+            .all()
 
     @staticmethod
     def get_all():

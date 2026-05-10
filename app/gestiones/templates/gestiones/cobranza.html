@@ -2,7 +2,7 @@
 {% from "_render_elements.html" import render_input %}
 
 {% block title %}
-    aicrag | Modificación de datos del cliente
+    aicrag | Cobranza
 {% endblock %}
 
 {% block content %}
@@ -12,18 +12,18 @@
     <div class="row align-items-center mb-4">
         <div class="col-md-6">
             <h3 class="fw-bold mb-0">
-                <i class="bi bi-person-gear me-2 text-primary"></i>
-                Modificación de datos del cliente
+                <i class="bi bi-cash-coin me-2 text-success"></i>
+                Cobranza
             </h3>
         </div>
     </div>
 
-    <!-- Datos actuales del presupuesto -->
+    <!-- Datos del presupuesto -->
     <div class="row mb-4 g-3">
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <p class="text-muted small mb-1">Presupuesto para</p>
+                    <p class="text-muted small mb-1">Cliente</p>
                     <p class="fw-semibold mb-2">{{ cabecera.nombre_cliente }}</p>
                     <p class="text-muted small mb-1">Enviar a</p>
                     <p class="fw-semibold mb-0">{{ cabecera.correo_electronico }}</p>
@@ -50,35 +50,36 @@
         </div>
     </div>
 
-    <!-- Form de modificación -->
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h6 class="fw-semibold mb-3">
-                        <i class="bi bi-pencil me-1 text-primary"></i> Modificar datos
-                    </h6>
-                    <form action="" method="post" enctype="multipart/form-data" novalidate>
-                        {{ form.hidden_tag() }}
-                        {{ form.nombre_cliente(type="hidden", value=cabecera.nombre_cliente) }}
+    <!-- Total a cobrar -->
+    <div class="d-flex justify-content-end mb-4">
+        <div class="card border-0 shadow-sm px-4 py-3" style="border-left: 4px solid #198754 !important;">
+            <p class="text-muted small mb-0">Total a cobrar</p>
+            <h3 class="fw-bold text-success mb-0">$ {{ cabecera.importe_total|round(2) }}</h3>
+        </div>
+    </div>
 
-                        <div class="mb-3">
-                            {{ render_input(form.correo_electronico, '', id="correo_electronico", value=cabecera.correo_electronico, class="form-control", placeholder="Ingrese correo electrónico") }}
-                        </div>
-
-                        <div class="mb-4">
-                            {{ render_input(form.fecha_vencimiento, '', id="fecha_vencimiento", value=cabecera.fecha_vencimiento.strftime('%Y-%m-%d'), class="form-control", type="date") }}
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i> Guardar
-                            </button>
-                        </div>
-
-                    </form>
+    <!-- Form de cobro -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-semibold mb-3">
+                <i class="bi bi-credit-card me-1 text-success"></i> Modalidad de cobro
+            </h6>
+            <form action="" method="post" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="row align-items-end g-3">
+                    <div class="col-md-6">
+                        {{ render_input(form.modalidad_cobro, '', id="modalidad_cobro", class="form-control") }}
+                    </div>
+                    <div class="col-md-6 d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-cash me-1"></i> Cobrar
+                        </button>
+                        <a href="{{ url_for('gestiones.alta_venta', id_venta=cabecera.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Volver
+                        </a>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 

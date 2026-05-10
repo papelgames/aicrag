@@ -241,7 +241,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Cliente</th>
-                                <th>Modalidad de pago</th>
+                                <th>Modalidad de cobro</th>
                                 <th class="text-end">Importe</th>
                             </tr>
                         </thead>
@@ -249,7 +249,7 @@
                             {% for venta in ventas %}
                                 <tr>
                                     <td>{{ venta.nombre_cliente }}</td>
-                                    <td>{{ modalidades[venta.modalidad_pago] if venta.modalidad_pago in modalidades else venta.modalidad_pago }}</td>
+                                    <td>{{ modalidades[venta.modalidad_cobro] if venta.modalidad_cobro in modalidades else venta.modalidad_cobro }}</td>
                                     <td class="text-end fw-semibold text-success">$ {{ venta.importe_total }}</td>
                                 </tr>
                             {% endfor %}

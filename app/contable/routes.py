@@ -52,9 +52,11 @@ def diario():
     page_v=int(request.args.get('page_v', 1))
     per_page=current_app.config['ITEMS_PER_PAGE']
 
-    tipo_venta=TiposVentas.get_first_by_clave_tabla(2)
+    # tipo_venta=TiposVentas.get_first_by_clave_tabla(2)
     egresos=Egresos.get_by_fecha(dia, page_e, per_page)
-    ventas=CabecerasPresupuestos.get_by_fecha(dia, tipo_venta.id, page_v, per_page)
+    # ventas=CabecerasPresupuestos.get_by_fecha(dia, tipo_venta.id, page_v, per_page)
+    ventas=CabecerasPresupuestos.get_by_fecha(dia, page_v, per_page) 
+
     egresos_totales = Egresos.get_all_by_fecha(dia)
     modalidades=dict(EgresosForm.modalidad_pago.kwargs['choices'])
     
@@ -65,7 +67,13 @@ def diario():
         modalidad = egreso.modalidad_pago
         importe = egreso.importe or 0
         total_egresos_abiertos[modalidad] = total_egresos_abiertos.get(modalidad, 0) + importe
+    
+    ingresos_totales = CabecerasPresupuestos.get_all_by_fecha(dia)
     total_ventas_abiertos = {}
+    for ingreso in ingresos_totales:
+        modalidad = ingreso.modalidad_cobro
+        importe = ingreso.importe_total or 0
+        total_ventas_abiertos[modalidad] = total_ventas_abiertos.get(modalidad, 0) + importe
     total_ventas = sum(suma.importe_total for suma in ventas)
     
     todas_modalidades = set(total_ventas_abiertos.keys()) | set(total_egresos_abiertos.keys())

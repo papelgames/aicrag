@@ -6,106 +6,107 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-	<div class="offset-md-3 col-md-6">
-		<h1 class="display-4">Consulta de precios</h1>
+<div class="container-fluid mt-3 px-4">
+
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-tag me-2 text-primary"></i>
+                Consulta de precios
+            </h3>
+        </div>
     </div>
-    <div class="offset-md-3 col-md-6">
-		<form action="" method="post" class="mx-auto mt-4" enctype="multipart/form-data" novalidate>	
-            {{ form.hidden_tag() }}
-			{{ render_input(form.buscar,'', id= "buscar" , class="form-control", placeholder="Ingrese un código de barras o la descripción de un producto" ) }}
-			<button type="submit" class="btn btn-primary" >Buscar</button>
-		</form>
-	</div>
-</div>
-{% if lista_de_productos.items %}
-    <table class="table table-striped table-hover mb-4">
-        <thead>
-            <tr>
-                <th>CODIGO DE BARRAS</th>
-                <th>PRODUCTO</th>
-                <th>IMPORTE</th>
-                <th>CANTIDAD POR PRESENTACION</th>
-                <th>PROVEEDOR</th>
-                <th>ULTIMA ACTUALIZACION</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for producto in lista_de_productos.items %}
-                {% if producto.Productos.modified< fecha_tope %}
-                    <tr >
-                        <th class="text-danger">{{ producto.Productos.codigo_de_barras }}</th>
-                        <td class="text-danger">{{ producto.Productos.descripcion }}</td>
-                        <td class="text-danger"> ${{ producto.importe_calculado|round(2)  }}</td>
-                        <td class="text-danger"> {{ producto.Productos.cantidad_presentacion }}</td>
-                        <td class="text-danger"> {{ producto.Proveedores.nombre }}</td>
-                        <td class="text-danger"> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <th>{{ producto.Productos.codigo_de_barras }}</th>
-                        <td> {{ producto.Productos.descripcion }}</td>
-                        <td> ${{ producto.importe_calculado|round(2)  }} </td>
-                        <td> {{ producto.Productos.cantidad_presentacion }}</td>
-                        <td> {{ producto.Proveedores.nombre }}</td>
-                        <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
-    <nav aria-label="Page navigation example">
-        <ul class="pagination justify-content-center">
-            {%- for page in lista_de_productos.iter_pages() %}
-                {% if page %}
-                    {% if page != lista_de_productos.page %}
-                        <li class="page-item"><a class="page-link" href="{{ url_for('consultas.consulta_productos', criterio= criterio, page=page) }}">{{ page }}</a>
-                    {% else %}
-                        <li class="page-item active">
-                            <span class="page-link">
-                                {{ page }}
-                            </span>
+
+    <!-- Buscador -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form action="" method="post" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="d-flex gap-2">
+                    {{ render_input(form.buscar, '', id="buscar", class="form-control", placeholder="Ingrese un código de barras o la descripción de un producto") }}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    {% set items = lista_de_productos.items if lista_de_productos.items is defined else (lista_de_productos if lista_de_productos else []) %}
+
+    {% if items %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código de barras</th>
+                                <th>Producto</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-center">Cant. presentación</th>
+                                <th>Proveedor</th>
+                                <th>Últ. actualización</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in items %}
+                                {% set desactualizado = producto.Productos.modified < fecha_tope %}
+                                <tr class="{{ 'table-danger' if desactualizado }}">
+                                    <td class="fw-semibold">{{ producto.Productos.codigo_de_barras }}</td>
+                                    <td>{{ producto.Productos.descripcion }}</td>
+                                    <td class="text-end">$ {{ producto.importe_calculado|round(2) }}</td>
+                                    <td class="text-center">{{ producto.Productos.cantidad_presentacion }}</td>
+                                    <td>{{ producto.Proveedores.nombre }}</td>
+                                    <td class="{{ 'text-danger fw-semibold' if desactualizado }} small">
+                                        {% if desactualizado %}
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                        {% endif %}
+                                        {{ producto.Productos.modified.strftime('%d-%m-%Y') }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        {% if lista_de_productos.pages is defined and lista_de_productos.pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                <li class="page-item {{ 'disabled' if not lista_de_productos.has_prev }}">
+                    <a class="page-link" href="{{ url_for('consultas.consulta_productos', criterio=criterio, page=lista_de_productos.prev_num) if lista_de_productos.has_prev else '#' }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for page in lista_de_productos.iter_pages() %}
+                    {% if page %}
+                        <li class="page-item {{ 'active' if page == lista_de_productos.page }}">
+                            <a class="page-link" href="{{ url_for('consultas.consulta_productos', criterio=criterio, page=page) }}">{{ page }}</a>
                         </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
                     {% endif %}
-                {% endif %}
-            {%- endfor %}
-        </ul>
-    </nav>
-{% elif lista_de_productos %}
-    <table class="table table-striped table-hover mb-4">
-        <thead>
-            <tr>
-                <th>CODIGO DE BARRAS</th>
-                <th>PRODUCTO</th>
-                <th>IMPORTE</th>
-                <th>CANTIDAD POR PRESENTACION</th>
-                <th>PROVEEDOR</th>
-                <th>ULTIMA ACTUALIZACION</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for producto in lista_de_productos  %}
-                {% if producto.Productos.modified< fecha_tope %}
-                    <tr>
-                        <th class="text-danger">{{ producto.Productos.codigo_de_barras }}</th>
-                        <td class="text-danger"> {{ producto.Productos.descripcion }}</td>
-                        <td class="text-danger"> ${{ producto.importe_calculado|round(2)  }}</td>
-                        <td class="text-danger"> {{ producto.Productos.cantidad_presentacion }}</td>
-                        <td class="text-danger"> {{ producto.Proveedores.nombre }}</td>
-                        <td class="text-danger"> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <th>{{ producto.Productos.codigo_de_barras }}</th>
-                        <td> {{ producto.Productos.descripcion }}</td>
-                        <td> ${{ producto.importe_calculado|round(2)  }} </td>
-                        <td> {{ producto.Productos.cantidad_presentacion }}</td>
-                        <td> {{ producto.Proveedores.nombre }}</td>
-                        <td> {{ producto.Productos.modified.strftime('%d-%m-%Y') }}</td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not lista_de_productos.has_next }}">
+                    <a class="page-link" href="{{ url_for('consultas.consulta_productos', criterio=criterio, page=lista_de_productos.next_num) if lista_de_productos.has_next else '#' }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% elif criterio %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">No se encontraron productos para "<strong>{{ criterio }}</strong>"</p>
+        </div>
+    {% endif %}
+
+</div>
 {% endblock %}

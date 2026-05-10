@@ -14,7 +14,7 @@ from app.auth.decorators import admin_required, nocache, not_initial_status
 
 from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas, TareasSistema
 from . import gestiones_bp 
-from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm  
+from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm , CobroForm
 
 logger = logging.getLogger(__name__)
 
@@ -122,15 +122,14 @@ def alta_venta(id_venta):
 @not_initial_status
 @nocache
 def agregar_producto():
-   
     id_venta = request.args.get('id_venta','')
-
     id_producto = request.args.get('id_producto','')
     descripcion = request.args.get('descripcion','')
     importe = request.args.get('importe','')
+    
     vencimiento_estimado = datetime.now()
     cabecera = CabecerasPresupuestos.get_by_id(id_venta)   
-       
+    estado_activo = Estados.get_first_by_clave_tabla(1,'estado_presupuesto') #inicia como activo 
     #creo el objeto nuevo producto para insertar en la tabla productospresupuestos
     nuevo_producto = ProductosPresupuestos(id_producto = id_producto, 
                                     cantidad = 1,
@@ -138,9 +137,9 @@ def agregar_producto():
                                     importe = importe,
                                     usuario_alta = current_user.username,
                                     usuario_modificacion = current_user.username)
+    
     if not cabecera: #si no tiene cabecera se la creo.
         cabecera = {'nombre_cliente': 'Consumidor final', 'fecha_vencimiento': vencimiento_estimado, 'created': vencimiento_estimado, 'importe_total' : 0.00}
-        estado_iniciado = Estados.get_first_by_clave_tabla(1,'estado_presupuesto') #inicia como activo 
         tipo_venta = TiposVentas.get_first_by_clave_tabla(2) #2 es venta
         #creo el objeto cabecera nueva para insertar en la tabla cabeceraspresupuestos
         cabecera_nueva_venta = CabecerasPresupuestos(fecha_vencimiento = cabecera['fecha_vencimiento'],
@@ -152,17 +151,18 @@ def agregar_producto():
                                             )           
         
         cabecera_nueva_venta.producto_presupuesto.append(nuevo_producto)
-        estado_iniciado.cabecera_presupuesto.append(cabecera_nueva_venta)
+        estado_activo.cabecera_presupuesto.append(cabecera_nueva_venta)
         tipo_venta.cabecera_presupuesto.append(cabecera_nueva_venta)
         #sumo el importe de todos los productos y actualizo el valor en la tabla cabeceraspresupuestos
         total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(cabecera_nueva_venta.id)
         cabecera_nueva_venta.importe_total = total_presupuesto[1]
-        estado_iniciado.save()
+        estado_activo.save()
         tipo_venta.save()
         return redirect(url_for('gestiones.alta_venta', id_venta = cabecera_nueva_venta.id))
     else: 
         cabecera.producto_presupuesto.append(nuevo_producto)
         total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_venta)
+        cabecera.id_estado = estado_activo.id
         cabecera.importe_total = total_presupuesto[1]
         cabecera.save()    
         return redirect(url_for('gestiones.alta_venta', id_venta = cabecera.id))
@@ -196,76 +196,14 @@ def modificacion_datos_cliente():
         return redirect(url_for("consultas.presupuesto", id_presupuesto = id_presupuesto))  
     return render_template("gestiones/modificacion_datos_cliente.html", form = form, cabecera = cabecera)
 
-
-# @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/",defaults={"id_venta": 0}, methods = ['GET', 'POST'])
-# @gestiones_bp.route("/gestiones/modificacionproductospresupuesto/<int:id_venta>", methods = ['GET', 'POST'])
-# @login_required
-# @not_initial_status
-# @nocache
-# def modificacion_productos_presupuesto(id_venta):
-#     cabecera = CabecerasPresupuestos.get_by_id(id_venta)
-#     buscar = request.args.get('buscar','')
-    
-#     form = ProductosPresupuestoForm()
-#     page = int(request.args.get('page', 1))
-#     per_page = current_app.config['ITEMS_PER_PAGE']
-     
-#     cantidad_dias_actualizacion = timedelta(days = int(Parametros.get_by_tabla("dias_actualizacion").tipo_parametro)) 
-#     fecha_tope = datetime.now() - cantidad_dias_actualizacion
-    
-#     if buscar.isdigit() == True:
-#         producto_caro = Productos.get_by_codigo_de_barras_caro(buscar)
-#         if producto_caro: 
-#             lista_productos_seleccion = Productos.get_by_id_completo(producto_caro.id)
-#         else:
-#             lista_productos_seleccion = []
-#     elif buscar == "":
-#         lista_productos_seleccion = []
-#     else:
-#         lista_productos_seleccion = Productos.get_like_descripcion_all_paginated(buscar, page, per_page)
-#         if len(lista_productos_seleccion.items) == 0:
-#             lista_productos_seleccion =[]
-
-#     if cabecera.cabeceras_presupuestos.clave == 2:
-#         return redirect(url_for("gestiones.alta_venta", id_venta=id_venta ))        
-    
-#     if cabecera.estado_presupuestos.clave != 1 and cabecera.estado_presupuestos.clave != 4:
-#         flash ("El presupuesto no se puede modificar", "alert-warning" )
-#         return redirect(url_for("consultas.presupuesto", id_presupuesto=id_venta))  
-    
-#     if form.validate_on_submit():
-#         if request.method == "POST":
-#             productos_presupuesto = ProductosPresupuestos.get_by_id_producto(form.id.data)
-#             productos_presupuesto.cantidad = form.cantidad.data
-#             productos_presupuesto.importe = form.importe.data
-#             productos_presupuesto.usuario_modificacion = current_user.username        
-#             total_presupuesto = ProductosPresupuestos.get_importe_total_by_id_presupuesto(id_venta)
-#             cabecera.importe_total = total_presupuesto[1]
-#             cabecera.producto_presupuesto.append(productos_presupuesto)
-#             cabecera.save()
-             
-#             flash("Se han actualizado los datos correctamente", "alert-success")            
-#             return redirect(url_for("gestiones.modificacion_productos_presupuesto", id_venta = id_venta))  
-#     if get_tarea_corriendo():
-#         flash(f'Los precios se están actualizando. Progreso {round(get_tarea_corriendo())}%', 'alert-warning')
-#     return render_template("gestiones/modificacion_productos_presupuesto.html", form = form, 
-#                            cabecera=cabecera, 
-#                            lista_productos_seleccion=lista_productos_seleccion, 
-#                            fecha_tope=fecha_tope, 
-#                            buscar=buscar,
-#                            id_venta=id_venta)
-
 @gestiones_bp.route("/gestiones/eliminaprooductospresupuesto/<int:id_producto>", methods = ['GET', 'POST'])
 @login_required
 @not_initial_status
 def elimina_productos_presupuesto(id_producto):
-    print(id_producto)
     producto = ProductosPresupuestos.get_by_id_producto(id_producto)
     id_venta = producto.id_cabecera_presupuesto
-    print(id_venta)
     q_producto = ProductosPresupuestos.get_q_by_id_presupuesto_q(id_venta)
     cabecera = CabecerasPresupuestos.get_by_id(id_venta)
-    print(q_producto)
     if q_producto == 1:
         flash ("El presupuesto no puede quedar sin productos", "alert-danger") 
         return redirect(url_for("gestiones.alta_venta", id_venta = id_venta))
@@ -334,3 +272,30 @@ def descarga_archivo(archivo):
         flash('El archivo no existe', 'alert-warning')
         return redirect(url_for("gestiones.exportar_datos"))
     return send_file(archivo_dir + '/' + archivo, as_attachment=True)
+
+@gestiones_bp.route("/gestiones/cobrar/", methods = ['GET', 'POST'])
+@login_required
+@not_initial_status
+@nocache
+def cobrar():
+    id_venta = request.args.get('id_venta','')
+    form = CobroForm()
+    cabecera = CabecerasPresupuestos.get_by_id(id_venta)
+    estado_cobrado = Estados.get_first_by_clave_tabla(5,'estado_presupuesto')
+    print(estado_cobrado.id)
+    print(cabecera.id_estado)
+    if cabecera.id_estado == estado_cobrado.id:
+        flash('La venta ya fue cobrada.','alert-warning')
+        return redirect(url_for("consultas.consulta_productos"))
+
+    if form.validate_on_submit():
+        
+        cabecera.modalidad_cobro = form.modalidad_cobro.data
+        cabecera.id_estado = estado_cobrado.id
+        cabecera.fecha_cobro = datetime.now()
+        cabecera.save()
+        return redirect(url_for("gestiones.alta_venta"))  
+
+    return render_template("gestiones/cobranza.html", 
+                           form = form,
+                           cabecera=cabecera)
