@@ -106,7 +106,7 @@
                                     <td class="small">{{ producto.Productos.id }}</td>
                                     <td>{{ producto.Proveedores.nombre }}</td>
                                     <td>{{ producto.Productos.descripcion }}</td>
-                                    <td class="text-end">$ {{ producto.Productos.importe }}</td>
+                                    <td class="text-end">$ {{ producto.importe_calculado|round(2) }}</td>
                                     <td class="small {{ 'text-danger' if producto.Productos.modified < fecha_tope }}">
                                         {% if producto.Productos.modified < fecha_tope %}
                                             <i class="bi bi-exclamation-triangle me-1"></i>
@@ -118,7 +118,7 @@
                                             id_venta=id_venta,
                                             id_producto=producto.Productos.id,
                                             descripcion=producto.Productos.descripcion,
-                                            importe=producto.Productos.importe) }}"
+                                            importe=producto.importe_calculado) }}"
                                             class="btn btn-primary btn-sm">
                                             <i class="bi bi-plus-lg"></i> Agregar
                                         </a>

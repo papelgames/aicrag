@@ -15,6 +15,29 @@ settings_module = os.getenv('APP_SETTINGS_MODULE')
 app = create_app(settings_module)
 
 app.app_context().push()
+def limpiar_importe(valor):
+    if valor is None:
+        return 0
+
+    # si ya viene numérico
+    if isinstance(valor, (int, float)):
+        return float(valor)
+
+    valor = str(valor).strip()
+
+    # saco $
+    valor = valor.replace("$", "")
+
+    # saco espacios
+    valor = valor.replace(" ", "")
+
+    # saco separador de miles
+    valor = valor.replace(".", "")
+
+    # convierto decimal coma a punto
+    valor = valor.replace(",", ".")
+
+    return float(valor)
 
 def sin_codigo_barras_to_excel():
    #actualizo el inicio de la tarea
@@ -182,7 +205,7 @@ def in_lista_masiva(file_path, id_proveedor, user):
                                                 id_proveedor = id_proveedor,
                                                 id_lista_proveedor = id[0].value,
                                                 descripcion = id[2].value,
-                                                importe = round(id[3].value,2),
+                                                importe = round(limpiar_importe(id[3].value), 2),
                                                 utilidad = utilidad_,
                                                 cantidad_presentacion = 1,
                                                 id_ingreso = id_ingreso,
@@ -196,7 +219,7 @@ def in_lista_masiva(file_path, id_proveedor, user):
                                                    id_proveedor = id_proveedor,
                                                    id_lista_proveedor = id[0].value,
                                                    descripcion = id[2].value,
-                                                   importe = round(id[3].value * 1.21 ,2),
+                                                   importe = round(limpiar_importe(id[3].value) * 1.21 ,2),
                                                    utilidad = utilidad_,
                                                    cantidad_presentacion = 1,
                                                    id_ingreso = id_ingreso,
@@ -219,8 +242,8 @@ def in_lista_masiva(file_path, id_proveedor, user):
                      producto_por_id.id_ingreso = id_ingreso
                      producto_por_id.only_add()
                   if proveedor.incluye_iva == True:
-                     if float(producto_por_id.importe) != round(id[3].value,2):    
-                        producto_por_id.importe = round(id[3].value,2)
+                     if float(producto_por_id.importe) != round(limpiar_importe(id[3].value),2):    
+                        producto_por_id.importe = round(limpiar_importe(id[3].value),2)
                         producto_por_id.usuario_modificacion = user
                         producto_por_id.id_ingreso = id_ingreso
                         registros_actualizados += 1   
@@ -229,8 +252,8 @@ def in_lista_masiva(file_path, id_proveedor, user):
                         registros_ignorados += 1 
                   #si el proveedor pasa la lista sin iva
                   else:
-                     if float(producto_por_id.importe) != round(id[3].value * 1.21 ,2):
-                        producto_por_id.importe = round(id[3].value * 1.21 ,2)
+                     if float(producto_por_id.importe) != round(limpiar_importe(id[3].value) * 1.21 ,2):
+                        producto_por_id.importe = round(limpiar_importe(id[3].value) * 1.21 ,2)
                         producto_por_id.usuario_modificacion = user
                         producto_por_id.id_ingreso = id_ingreso
                         registros_actualizados += 1
@@ -238,8 +261,14 @@ def in_lista_masiva(file_path, id_proveedor, user):
                      else:
                         registros_ignorados += 1
          except Exception as e:
+            
             registros_error += 1
-            print (f"error de registro {i} id {id[0].value}: {e} ")
+            print(
+                     f"error fila {i} "
+                     f"id={id[0].value} "
+                     f"importe={id[3].value} "
+                     f"error={e}"
+                  )
                   
       #commiteo las tablas
       if producto_por_id:
