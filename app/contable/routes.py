@@ -74,7 +74,7 @@ def diario():
         modalidad = ingreso.modalidad_cobro
         importe = ingreso.importe_total or 0
         total_ventas_abiertos[modalidad] = total_ventas_abiertos.get(modalidad, 0) + importe
-    total_ventas = sum(suma.importe_total for suma in ventas)
+    total_ventas = sum(suma.importe_total for suma in ingresos_totales)
     
     todas_modalidades = set(total_ventas_abiertos.keys()) | set(total_egresos_abiertos.keys())
     total_resultado_abiertos = {
