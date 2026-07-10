@@ -27,6 +27,43 @@
         </div>
     </div>
 
+    <!-- Fila 0: Saldos -->
+    <div class="row mb-3 g-3">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #6c757d !important;">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-secondary bg-opacity-10 p-3">
+                        <i class="bi bi-wallet2 text-secondary fs-4"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Saldo inicial</p>
+                        <h4 class="fw-bold mb-0">$ {{ saldo_inicial }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #0d6efd !important;">
+                <div class="card-body d-flex align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-cash-stack text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Saldo en caja</p>
+                            <h4 class="fw-bold mb-0">$ {{ saldo_inicial + total_resultado_abiertos['eft'] if total_resultado_abiertos['eft'] else 0 }}</h4>
+                        </div>
+                    </div>
+                    {% if estado_caja[1] %}
+                        <a href="{{ url_for('contable.cerrar_caja_diaria') }}" class="btn btn-outline-danger">
+                            <i class="bi bi-lock me-1"></i> Cerrar caja
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Fila 1: Totales -->
     <div class="row mb-3 g-3">
         <div class="col-md-4">
@@ -129,18 +166,17 @@
                     <h6 class="fw-semibold text-primary mb-2">
                         <i class="bi bi-graph-up-arrow me-1"></i> Desglose Resultado
                     </h6>
-
                     {% if total_resultado_abiertos %}
                         <ul class="list-unstyled mb-0">
                             {% for tipo_modalidad, importe in total_resultado_abiertos.items() %}
                                 <li class="d-flex justify-content-between align-items-center py-1">
                                     <span class="text-muted small">{{ modalidades[tipo_modalidad] if tipo_modalidad in modalidades else tipo_modalidad }}</span>
-                                    <span class="fw-semibold small text-success">$ {{ importe }}</span>
+                                    <span class="fw-semibold small {{ 'text-success' if importe >= 0 else 'text-danger' }}">$ {{ importe }}</span>
                                 </li>
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p class="text-muted small mb-0">Sin ventas para este día</p>
+                        <p class="text-muted small mb-0">Sin movimientos para este día</p>
                     {% endif %}
                 </div>
             </div>
@@ -151,7 +187,7 @@
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-0" id="diarioTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-semibold" id="egresos-tab" data-bs-toggle="tab" 
+            <button class="nav-link active fw-semibold" id="egresos-tab" data-bs-toggle="tab"
                     data-bs-target="#egresos" type="button" role="tab">
                 <i class="bi bi-arrow-down-circle me-1 text-danger"></i>
                 Egresos
@@ -161,7 +197,7 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold" id="ventas-tab" data-bs-toggle="tab" 
+            <button class="nav-link fw-semibold" id="ventas-tab" data-bs-toggle="tab"
                     data-bs-target="#ventas" type="button" role="tab">
                 <i class="bi bi-arrow-up-circle me-1 text-success"></i>
                 Ventas
@@ -292,5 +328,6 @@
         </div>
 
     </div>
+
 </div>
 {% endblock %}

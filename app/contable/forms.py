@@ -15,3 +15,7 @@ class EgresosForm(FlaskForm):
 
 class DiarioForm(FlaskForm):
     dia = DateField('Elije un día: ', validators=[DataRequired('Debe seleccionar un día')])
+
+class AbrirCajaDiariaForm(FlaskForm):
+    fecha_caja = DateField('Fecha de la caja: ', validators=[DataRequired('Debe seleccionar un día')])
+    saldo_inicial = FloatField('Saldo inicial de caja: ')

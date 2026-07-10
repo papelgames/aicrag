@@ -481,6 +481,8 @@ class Estados(Base):
     cabecera_presupuesto: Mapped[List["CabecerasPresupuestos"]] = relationship('CabecerasPresupuestos', backref='estado_presupuestos', uselist=True)
     persona: Mapped[List["Personas"]] = relationship('Personas', backref='estado_personas', uselist=True)
     user: Mapped[List["Users"]] = relationship('Users', backref='estado_users', uselist=True)
+    cajas_diarias: Mapped[List["CajasDiarias"]] = relationship('CajasDiarias', backref='estado_cajas_diarias', uselist=True)
+
 
     def save(self):
         if not self.id:
@@ -637,6 +639,42 @@ class Egresos(Base):
             .filter(Egresos.created >= inicio_utc)\
             .filter(Egresos.created < fin_utc)\
             .all()
+
+class CajasDiarias(Base):
+    __tablename__ = "cajasdiarias"
+
+    saldo_inicial: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
+    saldo_real: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
+    id_estado: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('estados.id'))
+    fecha_caja: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    fecha_cierre: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    nota: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+    
+    @staticmethod
+    def get_by_id_estado(id_estado):
+        return CajasDiarias.query.filter_by(id_estado=id_estado).first()
+    
+    @staticmethod
+    def get_by_fecha(fecha):
+
+        tz = ZoneInfo("America/Argentina/Buenos_Aires")
+
+        # Inicio del día en Argentina
+        inicio = datetime.datetime(fecha.year, fecha.month, fecha.day, tzinfo=tz)
+        fin = inicio + datetime.timedelta(days=1)
+
+        return CajasDiarias.query\
+            .filter(CajasDiarias.fecha_caja >= inicio)\
+            .filter(CajasDiarias.fecha_caja < fin)\
+            .first()
+    
 
 class TareasSistema(Base):
     __tablename__ = "tareassistema"
