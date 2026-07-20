@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 
 from app.auth.decorators import admin_required, not_initial_status, nocache
 
-from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas, TareasSistema #, Proveedores
+from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, Personas, TareasSistema, CajasDiarias #, Proveedores
 from app.common.controles import get_tarea_corriendo
 
 from . import consultas_bp 
@@ -135,3 +135,15 @@ def consulta_personas():
             lista_de_personas =[]
 
     return render_template("consultas/consulta_personas.html", form = form, criterio = criterio, lista_de_personas= lista_de_personas )
+
+@consultas_bp.route("/consultas/cajas/", methods = ['GET', 'POST'])
+@login_required
+@not_initial_status
+@nocache
+def consulta_cajas():
+    page = int(request.args.get('page', 1))
+    per_page = current_app.config['ITEMS_PER_PAGE']
+    cajas = CajasDiarias.get_all_paginated(page, per_page)
+
+    return render_template("consultas/consulta_cajas.html",
+                           cajas=cajas )

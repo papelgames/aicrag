@@ -1,0 +1,108 @@
+{% extends "base_template.html" %}
+{% from "_render_elements.html" import render_input %}
+
+{% block title %}
+    aicrag | Cajas diarias
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3 px-4">
+
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                Cajas diarias
+            </h3>
+        </div>
+    </div>
+
+   
+    <!-- Tabla de resultados -->
+    {% set items = cajas.items if cajas.items is defined else ([cajas] if cajas else []) %}
+
+    {% if items %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nro.</th>
+                            <th>Fecha de caja</th>
+                            <th>Fecha de cierre</th>
+                            <th class="text-end">Saldo inicial</th>
+                            <th class="text-end">Saldo real</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for caja in items %}
+                            <tr>
+                                <td class="fw-semibold">{{ caja.id }}</td>
+                                <td class="small">{{ caja.fecha_caja.strftime('%d-%m-%Y') }}</td>
+                                <td class="small">{{ caja.fecha_cierre.strftime('%d-%m-%Y') }}</td>
+                                <td class="text-end">$ {{ caja.saldo_inicial|round(2) if caja.saldo_inicial else 0 }}</td>
+                                <td class="text-end">$ {{ caja.saldo_real|round(2) if caja.saldo_real else 0}}</td>
+                                <td >{{ caja.estado_cajas_diarias.descripcion }}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport">
+                                            Acción
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ url_for('contable.diario', dia=caja.fecha_caja.strftime('%Y-%m-%d')) }}">
+                                                    <i class="bi bi-eye me-1"></i> Consultar
+                                                </a>
+                                            </li>
+                                            
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        {% if cajas.pages is defined and cajas.pages > 1 %}
+        <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                <li class="page-item {{ 'disabled' if not cajas.has_prev }}">
+                    <a class="page-link" href="{{ url_for('consultas.consulta_cajas', page=cajas.prev_num) if cajas.has_prev else '#' }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for page in cajas.iter_pages() %}
+                    {% if page %}
+                        <li class="page-item {{ 'active' if page == cajas.page }}">
+                            <a class="page-link" href="{{ url_for('consultas.consulta_presupuestos', page=page) }}">{{ page }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not cajas.has_next }}">
+                    <a class="page-link" href="{{ url_for('consultas.consulta_cajas', page=cajas.next_num) if cajas.has_next else '#' }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+    {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">No se encontraron cajas</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

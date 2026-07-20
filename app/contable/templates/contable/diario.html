@@ -51,11 +51,12 @@
                         </div>
                         <div>
                             <p class="text-muted small mb-0">Saldo en caja</p>
-                            <h4 class="fw-bold mb-0">$ {{ saldo_inicial + total_resultado_abiertos['eft'] if total_resultado_abiertos['eft'] else 0 }}</h4>
+                            {% set saldo = saldo_inicial + total_resultado_abiertos['eft'] if total_resultado_abiertos['eft'] else 0 %}
+                            <h4 class="fw-bold mb-0">$ {{ saldo }}</h4>
                         </div>
                     </div>
                     {% if estado_caja[1] %}
-                        <a href="{{ url_for('contable.cerrar_caja_diaria') }}" class="btn btn-outline-danger">
+                        <a href="{{ url_for('contable.cerrar_caja_diaria', saldo_real=saldo) }}" class="btn btn-outline-danger">
                             <i class="bi bi-lock me-1"></i> Cerrar caja
                         </a>
                     {% endif %}

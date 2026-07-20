@@ -675,6 +675,17 @@ class CajasDiarias(Base):
             .filter(CajasDiarias.fecha_caja < fin)\
             .first()
     
+    @staticmethod
+    def get_ultima_caja():
+        return (
+            CajasDiarias.query
+            .order_by(CajasDiarias.fecha_caja.desc())
+            .first()
+            )
+    
+    @staticmethod
+    def get_all_paginated(page=1, per_page=20):
+        return CajasDiarias.query.paginate(page=page, per_page=per_page, error_out=False)
 
 class TareasSistema(Base):
     __tablename__ = "tareassistema"
