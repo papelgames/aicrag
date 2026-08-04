@@ -19,6 +19,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-editor==1.0.4
 redis==5.1.1
+requests==2.34.2
 rq==2.0.0
 six==1.16.0
 SQLAlchemy==2.0.36

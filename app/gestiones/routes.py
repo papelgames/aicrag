@@ -12,6 +12,8 @@ from flask_login import login_required, current_user
 from app.common.controles import get_tarea_corriendo
 from app.auth.decorators import admin_required, nocache, not_initial_status
 
+from app.pagos_electronicos.service import PagoElectronicoService
+
 from app.models import Productos, CabecerasPresupuestos, ProductosPresupuestos, Parametros, Estados, TiposVentas, TareasSistema
 from . import gestiones_bp 
 from .forms import CabeceraPresupuestoForm, ProductosPresupuestoForm , CobroForm
@@ -282,20 +284,35 @@ def cobrar():
     form = CobroForm()
     cabecera = CabecerasPresupuestos.get_by_id(id_venta)
     estado_cobrado = Estados.get_first_by_clave_tabla(5,'estado_presupuesto')
-    print(estado_cobrado.id)
-    print(cabecera.id_estado)
+
     if cabecera.id_estado == estado_cobrado.id:
         flash('La venta ya fue cobrada.','alert-warning')
         return redirect(url_for("consultas.consulta_productos"))
 
     if form.validate_on_submit():
-        
         cabecera.modalidad_cobro = form.modalidad_cobro.data
         cabecera.id_estado = estado_cobrado.id
         cabecera.fecha_cobro = datetime.now()
         cabecera.save()
+        
+        if cabecera.modalidad_cobro == 'qr':
+            pago = PagoElectronicoService.crear_pago(cabecera.id)
+            return redirect(url_for("gestiones.esperar_pago", order_id=pago.order_id))
         return redirect(url_for("gestiones.alta_venta"))  
 
     return render_template("gestiones/cobranza.html", 
                            form = form,
                            cabecera=cabecera)
+
+@gestiones_bp.route("/gestiones/esperar_pago/", methods = ['GET', 'POST'])
+@login_required
+@not_initial_status
+@nocache
+def esperar_pago():
+    order_id = request.args.get('order_id','')
+    pago =PagoElectronicoService.sincronizar_order(order_id)
+    if pago["data"]["status"] == "processed": 
+        return redirect(url_for("gestiones.alta_venta")) 
+    #falta rederibar a pantalla de confirmacion o cancelacion, analizar los estados, rehacer un pago, cancelarlo, etc.
+    
+    return render_template("gestiones/esperar_pago.html")

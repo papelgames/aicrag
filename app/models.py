@@ -2,7 +2,7 @@ import datetime
 from typing import Text, Optional, List
 from flask_login import UserMixin
 from flask import current_app
-from sqlalchemy import func, or_, cast, Date, String, Integer, Boolean, Float, DateTime, Numeric, ForeignKey
+from sqlalchemy import func, or_, cast, Date, String, Integer, Boolean, Float, DateTime, Numeric, ForeignKey,Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -75,8 +75,8 @@ class Proveedores(Base):
     columna_importe: Mapped[Optional[str]] = mapped_column(String(1))
     columna_utilidad: Mapped[Optional[str]] = mapped_column(String(1))
     incluye_iva: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
     producto: Mapped[List["Productos"]] = relationship('Productos', backref='productos', uselist=True)
 
     def save(self):
@@ -107,8 +107,8 @@ class Productos(Base):
     importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     cantidad_presentacion: Mapped[Optional[float]] = mapped_column(Float, default=1)
     id_ingreso: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
     es_servicio: Mapped[Optional[bool]] = mapped_column(Boolean)
     utilidad: Mapped[Optional[float]] = mapped_column(Float)
     producto_presupuesto: Mapped[List["ProductosPresupuestos"]] = relationship('ProductosPresupuestos', backref='productos_en_presupuestos', uselist=True)
@@ -275,8 +275,8 @@ class TiposVentas(Base):
     clave: Mapped[Optional[int]] = mapped_column(Integer)
     descripcion: Mapped[Optional[str]] = mapped_column(String(25))
     cabecera_presupuesto: Mapped[List["CabecerasPresupuestos"]] = relationship('CabecerasPresupuestos', backref='cabeceras_presupuestos', uselist=True)
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
 
     def save(self):
         if not self.id:
@@ -303,9 +303,10 @@ class CabecerasPresupuestos(Base):
     id_estado: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('estados.id'))
     id_tp_ventas: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('tiposventas.id'))
     modalidad_cobro: Mapped[Optional[str]] = mapped_column(String(20))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
-    producto_presupuesto: Mapped[List["ProductosPresupuestos"]] = relationship('ProductosPresupuestos', backref='productos_presupuestos', uselist=True)
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
+    producto_presupuesto: Mapped[List["ProductosPresupuestos"]] = relationship('ProductosPresupuestos', backref='cabeceras_presupuestos', uselist=True) #productos_presupuestos
+    pagos_electronicos: Mapped[List["PagosElectronicos"]] = relationship('PagosElectronicos', backref='cabeceras_presupuestos')
 
     def only_add(self):
         db.session.add(self)
@@ -362,8 +363,8 @@ class ProductosPresupuestos(Base):
     cantidad: Mapped[Optional[int]] = mapped_column(Integer)
     descripcion: Mapped[Optional[str]] = mapped_column(String(256))
     importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
 
     def only_add(self):
         db.session.add(self)
@@ -409,8 +410,8 @@ class Compras(Base):
     importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     fecha_cierre: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     estado: Mapped[Optional[int]] = mapped_column(Integer)
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
 
 
 class Parametros(Base):
@@ -435,8 +436,8 @@ class Personas(Base):
     tipo_persona: Mapped[Optional[str]] = mapped_column(String(50))
     id_estado: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('estados.id'))
     nota: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
     id_usuario: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('users.id'))
 
     def save(self):
@@ -476,8 +477,8 @@ class Estados(Base):
     tabla: Mapped[Optional[str]] = mapped_column(String(50))
     inicial: Mapped[Optional[bool]] = mapped_column(Boolean)
     final: Mapped[Optional[bool]] = mapped_column(Boolean)
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
     cabecera_presupuesto: Mapped[List["CabecerasPresupuestos"]] = relationship('CabecerasPresupuestos', backref='estado_presupuestos', uselist=True)
     persona: Mapped[List["Personas"]] = relationship('Personas', backref='estado_personas', uselist=True)
     user: Mapped[List["Users"]] = relationship('Users', backref='estado_users', uselist=True)
@@ -509,8 +510,8 @@ class Roles(Base):
     __tablename__ = "roles"
 
     descripcion: Mapped[Optional[str]] = mapped_column(String(50))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
     permisos: Mapped[List["Permisos"]] = relationship('Permisos', secondary='permisosenroles', back_populates='roles')
 
     def save(self):
@@ -552,8 +553,8 @@ class Permisos(Base):
     descripcion: Mapped[Optional[str]] = mapped_column(String(50))
     roles: Mapped[List["Roles"]] = relationship('Roles', secondary='permisosenroles', back_populates='permisos')
     users: Mapped[List["Users"]] = relationship('Users', secondary='permisosporusuarios', back_populates='permisos')
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
 
     def save(self):
         if not self.id:
@@ -596,8 +597,8 @@ class Egresos(Base):
     importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2))
     nota: Mapped[Optional[str]] = mapped_column(String(256))
     modalidad_pago: Mapped[Optional[str]] = mapped_column(String(20))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
 
     def save(self):
         if not self.id:
@@ -649,8 +650,8 @@ class CajasDiarias(Base):
     fecha_caja: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     fecha_cierre: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     nota: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
-    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
 
     def save(self):
         if not self.id:
@@ -694,7 +695,7 @@ class TareasSistema(Base):
     name: Mapped[str] = mapped_column(String(128), index=True)
     description: Mapped[Optional[str]] = mapped_column(String(128))
     complete: Mapped[bool] = mapped_column(default=False)
-    usuario_alta: Mapped[Optional[str]] = mapped_column(String(256))
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
     error: Mapped[bool] = mapped_column(default=False)
     fecha_inicio: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
     
@@ -784,3 +785,40 @@ class MensajesSistema(Base):
     @staticmethod
     def get_count_sin_leer():
         return MensajesSistema.query.filter_by(leido=False).count()
+    
+class PagosElectronicos(Base):
+    __tablename__ = "pagoselectronicos"
+    
+    id_cabecera_presupuesto: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('cabeceraspresupuestos.id'))
+    order_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    payment_id: Mapped[Optional[str]] = mapped_column(String(64), index=True)
+    estado: Mapped[str] = mapped_column(String(30), index=True)
+    estado_detalle: Mapped[str] = mapped_column(String(30), index=True)
+    importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2)) 
+    payer_id: Mapped[Optional[str]] = mapped_column(String(64))
+    payer_email: Mapped[Optional[str]] = mapped_column(String(254))
+    firt_name: Mapped[Optional[str]] = mapped_column(String(50))
+    last_name: Mapped[Optional[str]] = mapped_column(String(50))
+    medio_pago: Mapped[Optional[str]] = mapped_column(String(50))
+    tipo_medio_pago: Mapped[Optional[str]] = mapped_column(String(50))
+    external_reference: Mapped[str] = mapped_column(String(50))
+    reference_id: Mapped[Optional[str]] = mapped_column(String(64), index=True)
+    fecha_aprobacion: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    fecha_creacion_api: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    respuesta_api: Mapped[Optional[str]] = mapped_column(Text)
+    respuesta_payment_api: Mapped[Optional[str]] = mapped_column(Text)
+    usuario_alta: Mapped[Optional[str]] = mapped_column(String(50))
+    usuario_modificacion: Mapped[Optional[str]] = mapped_column(String(50))
+
+    def add(self):
+        if not self.id:
+            db.session.add(self)
+    
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_by_order_id(order_id):
+        return PagosElectronicos.query.filter_by(order_id=order_id).first()
