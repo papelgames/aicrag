@@ -328,8 +328,10 @@ class CabecerasPresupuestos(Base):
 
     @staticmethod
     def get_by_fecha(fecha, page=1, per_page=20):
+        
         return CabecerasPresupuestos.query.filter(cast(CabecerasPresupuestos.fecha_cobro, Date) == fecha)\
-            .paginate(page=page, per_page=per_page, error_out=False)
+            .filter(CabecerasPresupuestos.estado_presupuestos.has(clave = 5))\
+            .paginate(page=page, per_page=per_page, error_out=False) 
     
     @staticmethod
     def get_all_paginated(page=1, per_page=20):
@@ -338,6 +340,7 @@ class CabecerasPresupuestos(Base):
     @staticmethod
     def get_all_by_fecha(fecha):
         return CabecerasPresupuestos.query.filter(cast(CabecerasPresupuestos.fecha_cobro, Date) == fecha)\
+            .filter(CabecerasPresupuestos.estado_presupuestos.has(clave = 5))\
             .all()
 
     @staticmethod
@@ -792,8 +795,10 @@ class PagosElectronicos(Base):
     id_cabecera_presupuesto: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('cabeceraspresupuestos.id'))
     order_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     payment_id: Mapped[Optional[str]] = mapped_column(String(64), index=True)
-    estado: Mapped[str] = mapped_column(String(30), index=True)
-    estado_detalle: Mapped[str] = mapped_column(String(30), index=True)
+    status_order: Mapped[str] = mapped_column(String(30), index=True)
+    status_detail_order: Mapped[str] = mapped_column(String(30), index=True)
+    status_payment: Mapped[Optional[str]] = mapped_column(String(30), index=True)
+    status_detail_payment: Mapped[Optional[str]] = mapped_column(String(30), index=True)
     importe: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=15, scale=2)) 
     payer_id: Mapped[Optional[str]] = mapped_column(String(64))
     payer_email: Mapped[Optional[str]] = mapped_column(String(254))

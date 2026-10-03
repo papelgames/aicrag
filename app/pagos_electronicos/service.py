@@ -29,7 +29,7 @@ class PagoElectronicoService:
         pago.id_cabecera_presupuesto = cabecera.id
         pago.external_reference = str(cabecera.id)
         pago.importe = cabecera.importe_total
-        pago.estado = "CREANDO"
+        pago.status_order = "CREANDO"
 
         try:
 
@@ -56,11 +56,14 @@ class PagoElectronicoService:
                 payments = data.get("transactions", {}).get("payments", [])
 
                 if payments:
-                    pago.payment_id = payments[0]["id"]
+                    payment = payments[0]
+                    pago.payment_id = payment.get("id")
+                    pago.status_payment = payment.get("status")
+                    pago.status_detail_payment = payment.get("status_detail")
                    
 
-                pago.estado = data.get("status", "DESCONOCIDO")
-                pago.estado_detalle = data.get("status", "DESCONOCIDO")
+                pago.status_order = data.get("status", "DESCONOCIDO")
+                pago.status_detail_order = data.get("status_detail", "DESCONOCIDO")
 
                 created_date = data.get("created_date")
                 if created_date:
@@ -70,7 +73,7 @@ class PagoElectronicoService:
 
             else:
 
-                pago.estado = "ERROR"
+                pago.status_order = "ERROR"
 
             db.session.commit()
 
@@ -101,7 +104,7 @@ class PagoElectronicoService:
         )
         #valido que conecte y me devuelva un json
         if not order.get("ok"):
-            pago.estado = "ERROR_CONSULTA_ORDER"
+            pago.status_order = "ERROR_CONSULTA_ORDER"
             pago.save()
 
             return order
@@ -111,8 +114,8 @@ class PagoElectronicoService:
         
         #valido que exista un payment
         if not payments:
-            pago.estado = order_data.get("status")
-            pago.estado_detalle = order_data.get("status_detail")
+            pago.status_order = order_data.get("status")
+            pago.status_detail_order = order_data.get("status_detail")
             pago.save()
             return order
         
@@ -128,8 +131,8 @@ class PagoElectronicoService:
                 )
         
         if not payment.get("ok"):
-            pago.estado = order_data.get("status")
-            pago.estado_detalle = order_data.get("status_detail")
+            pago.status_order = order_data.get("status")
+            pago.status_detail_order = order_data.get("status_detail")
             pago.save()
             return order
 
@@ -144,8 +147,10 @@ class PagoElectronicoService:
                 fecha.replace("Z", "+00:00")
             )
 
-        pago.estado=order_data.get('status')
-        pago.estado_detalle = order_data.get("status_detail")
+        pago.status_order=order_data.get('status')
+        pago.status_datail_order = order_data.get("status_detail")
+        pago.status_payment = payments[0].get('status')
+        pago.status_detail_payment = payments[0].get('status_detail')
         pago.payer_email=payer.get('email')
         pago.first_name=payer.get('first_name')
         pago.last_name=payer.get('last_name')
@@ -184,3 +189,60 @@ class PagoElectronicoService:
         #
 
         return respuesta
+    
+    @staticmethod
+    def cancelar_order(order_id):
+        pago = PagosElectronicos.get_by_order_id(order_id)
+
+        if not pago:
+            return {
+                "ok": False,
+                "error": "Pago electrónico inexistente."
+            }
+
+        # Cancelamos la order
+        respuesta_cancelacion = PagoElectronicoService._cliente().cancelar_order(
+            order_id
+        )
+
+        if not respuesta_cancelacion["ok"]:
+            return respuesta_cancelacion
+
+        # La respuesta de cancelación ya contiene la order actualizada
+        order = respuesta_cancelacion
+
+        order_data = order.get("data", {})
+
+        payments = order_data.get("transactions", {}).get("payments", [])
+
+        pago.status_order = order_data.get("status")
+        pago.status_detail_order = order_data.get("status_detail")
+
+        if payments:
+            payment = payments[0]
+
+            pago.status_payment = payment.get("status")
+            pago.status_detail_payment = payment.get("status_detail")
+
+            reference_id = payment.get("reference_id")
+
+            if reference_id:
+                respuesta_payment = PagoElectronicoService.consultar_payment(
+                    reference_id
+                )
+
+                pago.respuesta_payment_api = json.dumps(
+                    respuesta_payment,
+                    ensure_ascii=False,
+                    indent=2
+                )
+
+        pago.respuesta_api = json.dumps(
+            order,
+            ensure_ascii=False,
+            indent=2
+        )
+
+        pago.save()
+
+        return order

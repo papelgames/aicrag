@@ -125,7 +125,7 @@ class ClienteMercadoPago:
 
                 "external_reference": external_reference,
 
-                "expiration_time": "PT15M",
+                "expiration_time": "PT1M",
 
                 "config": {
                     "qr": {
@@ -186,8 +186,11 @@ class ClienteMercadoPago:
     # ------------------------------------------------------------------
 
     def cancelar_order(self, order_id):
-
+        headers = self.headers.copy()
+        
+        headers["X-Idempotency-Key"] = str(uuid.uuid4())
         return self._request(
-            "DELETE",
-            f"/merchant_orders/{order_id}"
-        )
+        "POST",
+        f"/v1/orders/{order_id}/cancel",
+        headers=headers
+    )

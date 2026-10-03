@@ -26,4 +26,4 @@ class ProductosPresupuestoForm(FlaskForm):
     registro = StringField()
 
 class CobroForm(FlaskForm):
-    modalidad_cobro =SelectField('Modalidad de pago', choices =[( '','Seleccionar modalidad de pago'),('eft','Efectivo'),('qr','QR'),('tarj','Tarjeta'),('transf','Transferencia bancaria')], coerce = str, default = None,validators=[DataRequired('Debes seleccionar una modalidad de pago')])
+    modalidad_cobro =SelectField('Modalidad de pago', choices =[( '','Seleccionar modalidad de pago'),('eft','Efectivo'),('qr','QR'),('ml','Mercado Pago'),('tarj','Tarjeta'),('transf','Transferencia bancaria')], coerce = str, default = None,validators=[DataRequired('Debes seleccionar una modalidad de pago')])
