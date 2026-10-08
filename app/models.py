@@ -793,7 +793,7 @@ class PagosElectronicos(Base):
     __tablename__ = "pagoselectronicos"
     
     id_cabecera_presupuesto: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('cabeceraspresupuestos.id'))
-    order_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    order_id: Mapped[Optional[str]] = mapped_column(String(64), unique=True, index=True)
     payment_id: Mapped[Optional[str]] = mapped_column(String(64), index=True)
     status_order: Mapped[str] = mapped_column(String(30), index=True)
     status_detail_order: Mapped[str] = mapped_column(String(30), index=True)

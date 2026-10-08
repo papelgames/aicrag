@@ -283,6 +283,7 @@ def cobrar():
     id_venta = request.args.get('id_venta','')
     form = CobroForm()
     cabecera = CabecerasPresupuestos.get_by_id(id_venta)
+    estado_activo = Estados.get_first_by_clave_tabla(1,'estado_presupuesto')
     estado_cobrado = Estados.get_first_by_clave_tabla(5,'estado_presupuesto')
 
     if cabecera.id_estado == estado_cobrado.id:
@@ -293,11 +294,14 @@ def cobrar():
         cabecera.modalidad_cobro = form.modalidad_cobro.data
         cabecera.id_estado = estado_cobrado.id
         cabecera.fecha_cobro = datetime.now()
-        cabecera.save()
 
-        if cabecera.modalidad_cobro == 'ml':
+        if cabecera.modalidad_cobro == 'mp':
             pago = PagoElectronicoService.crear_pago(cabecera.id)
+            cabecera.id_estado = estado_activo.id
+            cabecera.save()
+
             return redirect(url_for("gestiones.esperar_pago", order_id=pago.order_id, id_venta=id_venta))
+        cabecera.save()
         return redirect(url_for("gestiones.alta_venta"))  
 
     return render_template("gestiones/cobranza.html", 
@@ -316,26 +320,32 @@ def esperar_pago():
     estado_activo = Estados.get_first_by_clave_tabla(1,'estado_presupuesto')
 
     pago =PagoElectronicoService.sincronizar_order(order_id)
-    if pago["data"]["status"] == "processed": 
-        cabecera.id_estado = estado_cobrado.id
-        cabecera.fecha_cobro = datetime.now()
-        return redirect(url_for("gestiones.alta_venta")) 
-    
-    elif pago["data"]["status"] == "expired":
-        cabecera.id_estado = estado_activo.id
-        cabecera.fecha_cobro = datetime.now()   
-        cabecera.save()
-        flash('El cobro expiró vuelva a seleccionar un metodo de pago.','alert-warning') 
+    if not pago.get("ok"):
+        flash('Error de conexión con Mercado pago contactese con el administrador del sistema.','alert-danger')
         return redirect(url_for("gestiones.cobrar", id_venta=id_venta))
+    else:
+        order_data=pago.get('data',{})    
+        if order_data.get('status','') == "processed": 
+            cabecera.id_estado = estado_cobrado.id
+            cabecera.fecha_cobro = datetime.now()
+            flash('Cobro realizado exitosamente','alert-success')
+            return redirect(url_for("gestiones.alta_venta")) 
+        
+        elif order_data.get('status','') == "expired":
+            cabecera.id_estado = estado_activo.id
+            cabecera.fecha_cobro = datetime.now()   
+            cabecera.save()
+            flash('El cobro expiró vuelva a seleccionar un metodo de pago.','alert-warning') 
+            return redirect(url_for("gestiones.cobrar", id_venta=id_venta))
 
-    elif pago["data"]["status"] == "canceled":
-        cabecera.id_estado = estado_activo.id
-        cabecera.fecha_cobro = datetime.now()
-        cabecera.save()    
-        flash('El cobro fue cancelado vuelva a seleccionar un metodo de pago.','alert-warning')
-        return redirect(url_for("gestiones.cobrar", id_venta=id_venta))
+        elif order_data.get('status','') == "canceled":
+            cabecera.id_estado = estado_activo.id
+            cabecera.fecha_cobro = datetime.now()
+            cabecera.save()    
+            flash('El cobro fue cancelado vuelva a seleccionar un metodo de pago.','alert-warning')
+            return redirect(url_for("gestiones.cobrar", id_venta=id_venta))
 
-    return render_template("gestiones/esperar_pago.html", order_id=order_id, id_venta=id_venta)
+        return render_template("gestiones/esperar_pago.html", order_id=order_id, id_venta=id_venta)
 
 @gestiones_bp.route("/gestiones/cancelar_pago/", methods = ['GET', 'POST'])
 @login_required

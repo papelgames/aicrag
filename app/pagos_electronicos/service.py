@@ -74,6 +74,7 @@ class PagoElectronicoService:
             else:
 
                 pago.status_order = "ERROR"
+                pago.status_detail_order = "ERROR"
 
             db.session.commit()
 
